@@ -203,6 +203,11 @@ html.land #hubSheet.min{top:auto;height:auto}
 #hud.chase #chaseStat{display:block}
 #cbGauge{display:none;width:64px;height:9px;margin-top:3px;border-radius:6px;border:2px solid var(--fjord);background:#fff;overflow:hidden}
 #hud.chase #cbGauge{display:block}
+#corrVig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px 26px rgba(226,69,107,.6);opacity:0;transition:opacity .25s}
+#corrWarn{display:none;position:absolute;left:50%;top:42%;transform:translateX(-50%);background:rgba(226,69,107,.93);color:#fff;font-weight:800;padding:6px 14px;border-radius:14px;font-size:clamp(.85rem,calc(var(--vw)*3),1.1rem);text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.35);white-space:nowrap}
+#corrWarn i{display:inline-block;font-style:normal;font-size:1.5em;vertical-align:middle;margin-left:6px}
+#corrWarn.on{display:block;animation:corrP .6s ease-in-out infinite alternate}
+@keyframes corrP{to{transform:translateX(-50%) scale(1.08)}}
 #cbFill{display:block;height:100%;width:0;background:#4aa8ff;transition:width .2s}
 
 /* ---- ekran yönü: uygulama kabı (gerekirse 90° döner) ---- */
@@ -323,6 +328,7 @@ html.land.short #dist{font-size:.9rem}
   <div id="dpad"><button id="padU" class="pb">▲</button><button id="padL" class="pb">◀</button><button id="padR" class="pb">▶</button><button id="padD" class="pb">▼</button></div>
   <div id="swipeZone"><div id="swipeHint"><b>⬆</b> kaydır / dokun: zıpla<br><b>⬇</b> kaydır: kay</div></div>
   <div id="actWrap"><div id="stam"><i id="stamFill"></i></div><button id="spBtn"></button><div id="btnRow"><button id="brakeBtn">🛑<br>Yavaşla</button><button id="actBtn">🚀<br>Hızlan</button></div></div>
+  <div id="corrVig"></div><div id="corrWarn"></div>
   <div id="toast"></div>
 </div>
 
@@ -352,7 +358,7 @@ const RIDERS=[
  {id:'hero',name:'Ben',desc:'Kendi kahramanın! Adını yaz.',perk:'Ağları iki kat hızlı keser',shirt:0x8a5cd6,pants:0x2f3b52,cap:0x22a6a0,hair:0x3b2a1a,skin:0xf2c9a0,custom:true}
 ];
 const MISSIONS=[
- {id:'chase',icon:'🦅',name:'Amansız Takip',desc:'Kartal yumurtanı kaptı! Tünellerden, köprü altından, ormandan ve kaya sütunlarının arasından peşine düş. Her 100 metrede bir havada asılı kalan altın tüyleri (+2 enerji) topla; balon slalomunda, sıcak hava akımlarında ve rüzgâr halkalarında hızlan, mıknatısla tüyleri çek. 200 m geride kalma!'},
+ {id:'chase',icon:'🦅',name:'Amansız Takip',desc:'Kartal yumurtanı kaptı! Tünellerden, köprü altından, ormandan ve kaya sütunlarının arasından peşine düş. Her 100 metrede bir havada asılı kalan altın tüyleri (+2 enerji) topla; balon slalomunda, sıcak hava akımlarında ve rüzgâr halkalarında hızlan, mıknatısla tüyleri çek. 200 m geride kalma! Başta otopilot seni kartala doğru götürür. Kartalın yeşil izinin 21 m çevresindeki koridorda kal: dışına çıkarsan (kestirme yapınca) enerjin her saniye 3 azalır.'},
  {id:'grand',icon:'🏆',name:'Büyük kaz yarışı',desc:'9 kazla yarış: zemin kapısı, şelale, fırtına geçidi, yıldırım tarlası, dağ mağarası ve kanyon. İlk üçe gir!'},
  {id:'gr',icon:'🏃',name:'Yer yarışı',desc:'Uçmadan, yerde koşarak 9 kazla yarış! Önce maden tüneli, sonra otomatik hızlanan buz kaydırağı; ardından çitli parkurda zıpla, kay, çamur, kütük, kaya, dere ve tren. İlk üçe giren kupa kaldırır.'},
  {id:'deliver',icon:'🧺',name:'Hassas teslimat',desc:'Çiftlikten ya da kasabadan yumurta, sıcak turta veya parlayan tılsım al; düşürmeden, sarsmadan götür.'},
@@ -497,11 +503,13 @@ function raceAt(s){const P=RACE.pts;s=Math.max(RACE.s0,Math.min(RACE.len-.01,s))
   return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t,tx:tx/l,tz:tz/l}}
 
 const racePlain=(x,z)=>x>-340&&x<275&&z>-475&&z<-20;
-var FARM_FLAT=[];var WCOLS=[];
+var FARM_FLAT=[];var WCOLS=[];var MACH=[];
 function height(x,z){let h=baseHeight(x,z);if(h>-.5){const r=railNear(x,z);if(r&&r.d<15&&!r.v&&!r.tun){const w=1-sm(4.5,14,r.d),b0=h;h+=(r.e-.35-h)*w;{const lift=Math.max(0,Math.min(1,1-(b0-(r.e-.35))/2.2));h+=.95*sm(4.3,6.8,r.d)*(1-sm(7.6,14,r.d))*lift}}}
+  if(h>-.5){const r=railNear(x,z);if(r&&r.d<15&&r.v&&!r.tun){const w=1-sm(4,14,r.d),lim=r.e-1.3;if(h>lim)h+=(lim-h)*w}}
   {const mh=mtnH(x,z);if(mh>h){h=mh;const rc=railNear(x,z);if(rc&&rc.cut&&rc.d<13){const w=1-sm(3.2,12,rc.d);h+=(rc.e-.35-h)*w}}}
   {const q=raceNear(x,z);if(q&&q.d<RACE_HW+16&&!q.tun){const w=1-sm(RACE_HW+1.5,RACE_HW+16,q.d);h+=(q.e-h)*w}}
   for(let i=0;i<FARM_FLAT.length;i++){const q=FARM_FLAT[i],f=q.f,dx=x-f.x,dz=z-f.z,cl=q.cl||(q.cl=Math.hypot(Math.abs(q.lx)+q.hx,Math.abs(q.lz)+q.hz)+(q.bl||9)+1);if(Math.abs(dx)>cl||Math.abs(dz)>cl)continue;const c=Math.cos(f.rot),sn=Math.sin(f.rot),lx=dx*c-dz*sn-q.lx,lz=dx*sn+dz*c-q.lz,d=Math.hypot(Math.max(0,Math.abs(lx)-q.hx),Math.max(0,Math.abs(lz)-q.hz));const bl=q.bl||9;if(d<bl){const w=1-sm(0,bl,d);h+=(q.y-h)*w}}
+  if(MSHELF&&MSHELF.length)for(const q of MSHELF){const dx=x-q.x,dz=z-q.z;if(Math.abs(dx)>q.rr||Math.abs(dz)>q.rr)continue;{const rq=raceNear(x,z);if(rq&&rq.d<RACE_HW+18)continue}const d=dx*q.ox+dz*q.oz,l=-dx*q.oz+dz*q.ox,e=Math.hypot(Math.max(0,-d-3,d-q.len),Math.max(0,Math.abs(l)-q.wid)),w=1-sm(0,q.fall,e);if(w>0)h+=(q.y-h)*w*(h>q.y?(q.gate?sm(0,4,d):sm(-3,5,d)):1)}
   return h}
 function slope(x,z){const a=height(x+2,z)-height(x-2,z),b=height(x,z+2)-height(x,z-2);return Math.hypot(a,b)/4}
 function ground(x,z){return Math.max(height(x,z),0)}
@@ -543,7 +551,7 @@ function buildViaductBuf(){
 function findRailTunnel(){const P=RAIL.pts;let a=-1,b=-1;for(let i=0;i<P.length;i++){if(mtnH(P[i].x,P[i].z)>P[i].y+7.5){if(a<0)a=i;b=i}}if(a<0||b-a<12)return null;a=Math.max(1,a);b=Math.min(P.length-2,b);return{a,b,sa:RAIL.S[a],sb:RAIL.S[b]}}
 function markRailTunnel(T){const P=RAIL.pts,C=RAIL.C,G=RAIL.G;for(let i=T.a;i<=T.b;i++){const cx=Math.round((P[i].x+SIZE/2)/C),cz=Math.round((P[i].z+SIZE/2)/C);const M0=Math.min(i-T.a,T.b-i);if(M0<5)continue;const R=Math.min(7,(M0-4)>>1);for(let dz=-R;dz<=R;dz++)for(let dx=-R;dx<=R;dx++){const gx=cx+dx,gz=cz+dz;if(gx<0||gz<0||gx>=G||gz>=G)continue;RAIL.gt[gz*G+gx]=1}}}
 function buildRailTunnelBuf(T){
-  const B={p:[],c:[]},R=lrng(909),Wt=4.3,Hw=2.6,Hr=4.3,ring=[[Wt,0],[Wt,Hw]];for(let k=1;k<=12;k++){const a=k/12*Math.PI;ring.push([Wt*Math.cos(a),Hw+Hr*Math.sin(a)])}ring.push([-Wt,0]);
+  const B={p:[],c:[]},R=lrng(909),Wt=4.3,Hw=2.6,Hr=4.3,ring=[[Wt+.15,-3],[Wt,0],[Wt,Hw]];for(let k=1;k<=12;k++){const a=k/12*Math.PI;ring.push([Wt*Math.cos(a),Hw+Hr*Math.sin(a)])}ring.push([-Wt,0]);ring.push([-Wt-.15,-3]);
   const P=RAIL.pts,idx=[];for(let i=T.a;i<=T.b;i+=1)idx.push(i);
   const frame=i=>{const a=P[Math.max(0,i-1)],b=P[Math.min(P.length-1,i+1)];let tx=b.x-a.x,tz=b.z-a.z;const l=Math.hypot(tx,tz)||1;tx/=l;tz/=l;return{x:P[i].x,y:P[i].y,z:P[i].z,sx:tz,sz:-tx}};
   for(let q=0;q<idx.length-1;q++){const f0=frame(idx[q]),f1=frame(idx[q+1]);
@@ -557,6 +565,7 @@ const RTUN=findRailTunnel();if(RTUN){markRailTunnel(RTUN);
    cutRun(RTUN.a+5,-1);cutRun(RTUN.b-5,1)}}
 
 /* ---------------- tunnels: cave mountain + tunnels through ridges ---------------- */
+var MSHELF=[];
 const CONE={x:200,z:-400,ax:1,az:0,R:75,H:95,half:62,cone:true};
 {let hm=-99;for(let al=-62;al<=62;al+=4)for(let lat=-12;lat<=12;lat+=6)hm=Math.max(hm,height(CONE.x+al,CONE.z+lat));CONE.tY=hm+12.5;CONE.base=CONE.tY-16;CONE.Rb=CONE.R*(1+20/CONE.H)}
 const TUNNELS=[CONE];
@@ -571,17 +580,28 @@ function tunnelInfo(T,p){const dx=p.x-T.x,dz=p.z-T.z,al=dx*T.ax+dz*T.az,lat=-dx*
     let mn=1e9;for(let t=-.8;t<=.81;t+=.1)mn=Math.min(mn,height(cx+ax*half*t,cz+az*half*t));if(mn<tY+12)continue;
     cands.push({x:cx,z:cz,ax,az,half,tY,score:mn-tY+half*.3})}}}
  cands.sort((p,q)=>q.score-p.score);
- for(const c of cands){if(TUNNELS.length>=5)break;if(TUNNELS.some(T=>Math.hypot(T.x-c.x,T.z-c.z)<230))continue;if(Math.hypot(c.x+790,c.z-riverZ(-790))<160)continue;TUNNELS.push(c)}}
+ const raceOK=c=>{for(const sd of[-1,1])for(let d=-20;d<=110;d+=22){const al=sd*(c.half+d),x=c.x+c.ax*al,z=c.z+c.az*al,q=raceNear(x,z);if(q&&q.d<70)return false}return true};
+ const landOK=c=>{const fl=c.tY-8;for(const sd of[-1,1]){const h=d=>height(c.x+sd*c.ax*(c.half+d),c.z+sd*c.az*(c.half+d));if(h(30)<fl-26||h(60)<fl-46||h(15)<fl-12)return false}for(const sd of[-1,1])for(const d of[30,70,110]){const x=c.x+sd*c.ax*(c.half+d),z=c.z+sd*c.az*(c.half+d);if(Math.abs(x)>745||Math.abs(z)>745||height(x,z)<6)return false}return true};
+ for(const c of cands){if(TUNNELS.length>=5)break;if(TUNNELS.length>=3&&!landOK(c))continue;if(!raceOK(c))continue;if(TUNNELS.some(T=>Math.hypot(T.x-c.x,T.z-c.z)<230))continue;if(Math.hypot(c.x+790,c.z-riverZ(-790))<160)continue;TUNNELS.push(c)}}
 if(RTUN){const P=RAIL.pts,n=Math.max(2,Math.ceil((RTUN.sb-RTUN.sa)/16)),step=(RTUN.b-RTUN.a)/n;   // eğri tünel: kısa düz parçalar
   for(let k=0;k<n;k++){const i0=Math.round(RTUN.a+k*step),i1=Math.round(RTUN.a+(k+1)*step),A=P[i0],B=P[i1];let ax=B.x-A.x,az=B.z-A.z;const L=Math.hypot(ax,az)||1;ax/=L;az/=L;
    TUNNELS.push({x:(A.x+B.x)/2,z:(A.z+B.z)/2,ax,az,half:L/2+1.5,tY:(A.y+B.y)/2+3.5,sl:(B.y-A.y)/L,rail:true,rad:4.6})}}
+/* sırt mağaraları: ağızlar, tüpün tamamen toprakla örtüldüğü noktaya çekilir (açıkta tüp kalmaz) */
+const CAVE_RM=11.5,CAVE_EXT=6.3;
+for(let ti=TUNNELS.length-1;ti>=0;ti--){const T=TUNNELS[ti];if(T.cone||T.rail)continue;
+  const cov=al=>{let mn=1e9;const R=CAVE_RM+3;for(let lat=-R;lat<=R;lat+=1.5){const x=T.x+T.ax*al-T.az*lat,z=T.z+T.az*al+T.ax*lat,top=T.tY+Math.sqrt(Math.max(0,R*R-lat*lat));mn=Math.min(mn,height(x,z)-top)}return mn};
+  let a0=-T.half,a1=T.half;while(a0<-12&&cov(a0)<2)a0+=1;while(a1>12&&cov(a1)<2)a1-=1;
+  let ok=a1-a0>=50;for(let al=a0;al<=a1&&ok;al+=2)if(cov(al)<1)ok=false;
+  if(!ok){TUNNELS.splice(ti,1);continue}
+  const mid=(a0+a1)/2;T.x+=T.ax*mid;T.z+=T.az*mid;T.half=(a1-a0)/2}
+for(const T of TUNNELS){if(T.cone||T.rail)continue;for(const s of[-1,1])MSHELF.push({x:T.x+s*T.ax*T.half,z:T.z+s*T.az*T.half,ox:s*T.ax,oz:s*T.az,y:T.tY-CAVE_RM+.7,len:22,wid:CAVE_RM+2,fall:18,rr:60,gate:1})}
 function coneTop(x,z){const r=Math.hypot(x-CONE.x,z-CONE.z);if(r>CONE.Rb)return -1e9;return CONE.base+CONE.H*(1-r/CONE.R)}
 function solidTop(x,z,y,np){let g=ground(x,z);const c=coneTop(x,z);if(c>g)g=c;
   for(const T of TUNNELS){const t=tunnelInfo(T,{x,y,z}),rd=T.rad||9.5;if(Math.abs(t.al)<T.half+(T.rail?0:15)&&t.r<rd)return Math.min(g,T.tY+(T.sl||0)*t.al-rd)}
   if(!np)for(const p of PROPS){if(p.air)continue;if(Math.abs(p.x-x)<p.r&&Math.abs(p.z-z)<p.r&&p.top>g)g=p.top}
   return g}
 function tunnelHold(p,cur,maxR){const list=cur>=0?[cur]:TUNNELS.map((_,i)=>i);
-  for(const i of list){const T=TUNNELS[i],t=tunnelInfo(T,p);if(Math.abs(t.al)>=T.half)continue;const rd=T.rad||9.5;if(cur<0&&t.r>=rd)continue;maxR=Math.min(maxR,rd);
+  for(const i of list){const T=TUNNELS[i],t=tunnelInfo(T,p);if(Math.abs(t.al)>=T.half+(cur>=0&&!T.cone&&!T.rail?CAVE_EXT-.3:0))continue;const rd=T.rad||9.5;if(cur<0&&t.r>=rd)continue;maxR=Math.min(maxR,rd);
     if(t.r>maxR){const k=maxR/t.r,nl=t.lat*k,ny=t.dy*k;p.x=T.x+t.al*T.ax-nl*T.az;p.z=T.z+t.al*T.az+nl*T.ax;p.y=T.tY+(T.sl||0)*t.al+ny}return i}return -1}
 const mouths=TUNNELS.flatMap(T=>[[T.x+T.ax*T.half,T.z+T.az*T.half],[T.x-T.ax*T.half,T.z-T.az*T.half]]);
 const nearMouth=(x,z,r)=>mouths.some(m=>Math.hypot(m[0]-x,m[1]-z)<r);
@@ -593,6 +613,19 @@ for(let i=0;i<6000&&FARMS.length<6;i++){const x=(rnd()*2-1)*640,z=(rnd()*2-1)*64
   const r=railNear(x,z);if(r&&r.d<55)continue;if(Math.abs(z-riverZ(x))<75)continue;if(Math.hypot(x-HILL.x,z-HILL.z)<HILL.R+40)continue;if(Math.hypot(x-CONE.x,z-CONE.z)<CONE.Rb+70)continue;
   if(x>-250&&x<-50&&z>0&&z<370)continue;if(nearMouth(x,z,120))continue;if(FARMS.some(f=>Math.hypot(f.x-x,f.z-z)<200))continue;
   FARMS.push({x,z,h,rot:rnd()*Math.PI*2,crop:FARMS.length%3})}
+const farmClear=(x,z,rot)=>{const c=Math.cos(rot),sn=Math.sin(rot);for(let lx=-48;lx<=48;lx+=6)for(let lz=-36;lz<=96;lz+=6){const wx=x+lx*c+lz*sn,wz=z-lx*sn+lz*c;if(height(wx,wz)<1.0)return false;if(railNear(wx,wz))return false}return true};
+{const R2=lrng(7707);let pool=null;
+ const spots=()=>{if(pool)return pool;pool=[];for(let x=-640;x<=330;x+=12)for(let z=-640;z<=640;z+=12)pool.push([x+R2()*8,z+R2()*8]);for(let i=pool.length-1;i>0;i--){const j=Math.floor(R2()*(i+1)),t=pool[i];pool[i]=pool[j];pool[j]=t}return pool};
+ for(let fi=0;fi<FARMS.length;fi++){const f=FARMS[fi];if(farmClear(f.x,f.z,f.rot))continue;let ok=false;
+  for(let k=1;k<24&&!ok;k++){const rot=f.rot+k*Math.PI/12;if(farmClear(f.x,f.z,rot)){f.rot=rot;ok=true}}
+  if(!ok)for(const[x,z]of spots()){const h=height(x,z);if(h<2.5||h>30||x>330||racePlain(x,z))continue;
+   let g2=true;for(const[dx,dz]of[[30,0],[-30,0],[0,30],[0,-30],[45,45],[-45,-45],[45,-45],[-45,45]])if(Math.abs(height(x+dx,z+dz)-h)>8)g2=false;if(!g2)continue;
+   if(Math.abs(z-riverZ(x))<75||Math.hypot(x-HILL.x,z-HILL.z)<HILL.R+40||Math.hypot(x-CONE.x,z-CONE.z)<CONE.Rb+70||(x>-250&&x<-50&&z>0&&z<370)||nearMouth(x,z,120))continue;
+   if(FARMS.some((o,oi)=>oi!==fi&&Math.hypot(o.x-x,o.z-z)<200))continue;
+   for(let k=0;k<16&&!ok;k++){const rot=k*Math.PI/8+R2()*.3;if(farmClear(x,z,rot)){f.x=x;f.z=z;f.h=h;f.rot=rot;ok=true}}
+   if(ok)break}
+  if(!ok)f.drop=1}
+ for(let i=FARMS.length-1;i>=0;i--)if(FARMS[i].drop)FARMS.splice(i,1)}
 function farmLocal(f,x,z){const dx=x-f.x,dz=z-f.z,c=Math.cos(f.rot),s=Math.sin(f.rot);return[dx*c-dz*s,dx*s+dz*c]}
 const STF=(()=>{let bi=0,bd=1e9;RAIL.pts.forEach((p,i)=>{const dd=Math.hypot(p.x,p.z-600);if(dd<bd){bd=dd;bi=i}});const s0=RAIL.S[bi],p=railAt(s0),q=railAt(s0+3);const yaw=Math.atan2(q.x-p.x,q.z-p.z);return{x:p.x+Math.cos(yaw)*8,z:p.z-Math.sin(yaw)*8,yaw}})();
 function nearStation(x,z,pad){const dx=x-STF.x,dz=z-STF.z,c=Math.cos(STF.yaw),s=Math.sin(STF.yaw),lx=dx*c-dz*s,lz=dx*s+dz*c;return lx>-10-pad&&lx<19+pad&&lz>-22-pad&&lz<22+pad}
@@ -657,16 +690,37 @@ const TSEG=432;let tGeo=new THREE.PlaneGeometry(SIZE,SIZE,TSEG,TSEG);tGeo.rotate
   if(!(c.r+c.g+c.b>=0))c.setRGB(.45,.7,.3);
   cols[i*3]=c.r;cols[i*3+1]=c.g;cols[i*3+2]=c.b}
  tGeo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ var CUTX=(window.__CUTX!==undefined?window.__CUTX:4),CUTR=(window.__CUTR!==undefined?window.__CUTR:10);
+ 
+/* tren tüneli ağızları: tünel kesitinden geçen arazi yüzeyini oy (içi dışarıdan görünsün) */
+const RT_W=4.3,RT_HW=2.6,RT_HR=4.3;
+function rtInTube(x,y,z,ex){const P=RAIL.pts;for(const[i0,i1]of[[RTUN.a-2,RTUN.a+12],[RTUN.b-12,RTUN.b+2]]){const c=P[Math.max(0,Math.min(P.length-1,Math.round((i0+i1)/2)))];if(Math.hypot(x-c.x,z-c.z)>34)continue;
+  for(let i=Math.max(0,i0);i<Math.min(P.length-1,i1);i++){const A=P[i],B=P[i+1],dx=B.x-A.x,dz=B.z-A.z,L=Math.hypot(dx,dz)||1,t=((x-A.x)*dx+(z-A.z)*dz)/(L*L);if(t<0||t>1)continue;
+   const qx=A.x+dx*t,qz=A.z+dz*t,l=((x-qx)*dz-(z-qz)*dx)/L,dy=y-(A.y+(B.y-A.y)*t),w=RT_W+ex,k=Math.abs(l)/w;if(k>=1)continue;
+   if(dy>1.3&&dy<RT_HW+RT_HR*Math.sqrt(1-k*k)+ex)return true}}return false}
+function rtPortalCut(){return false}
+ const CRf=(T,al)=>11.5-Math.max(0,Math.abs(al)-T.half)*.4;
  // open holes at the mouths of the ridge tunnels (indexed: no memory blow-up)
  {const pa=tGeo.attributes.position,ia=tGeo.index.array,ni=[];
   for(let i=0;i<ia.length;i+=3){const a=ia[i],b=ia[i+1],c2=ia[i+2],cx=(pa.getX(a)+pa.getX(b)+pa.getX(c2))/3,cy=(pa.getY(a)+pa.getY(b)+pa.getY(c2))/3,cz=(pa.getZ(a)+pa.getZ(b)+pa.getZ(c2))/3;let cut=false;
-   for(const T of TUNNELS){if(T.cone||T.rail)continue;const t=tunnelInfo(T,{x:cx,y:cy,z:cz});if(Math.abs(t.al)<T.half+25&&t.r<12.5){cut=true;break}}
+   for(const T of TUNNELS){if(T.cone||T.rail)continue;const t=tunnelInfo(T,{x:cx,y:cy,z:cz});if(Math.abs(t.al)>T.half+30||Math.abs(t.lat)>40)continue;
+    if(false){cut=true;break}
+    for(const v of[a,b,c2]){const vy=pa.getY(v);if(vy<=T.tY-8.5)continue;const tv=tunnelInfo(T,{x:pa.getX(v),y:vy,z:pa.getZ(v)});if(false){cut=true;break}}
+    if(cut)break}
+   if(!cut&&RTUN)cut=rtPortalCut(cx,cy,cz,pa.getX(a),pa.getY(a),pa.getZ(a),pa.getX(b),pa.getY(b),pa.getZ(b),pa.getX(c2),pa.getY(c2),pa.getZ(c2));
    if(!cut)ni.push(a,b,c2)}
   tGeo.setIndex(ni);tGeo.computeVertexNormals()}}
+const CVU_A=[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0)),CVU_B=[0,1,2,3].map(()=>new THREE.Vector4(-1,0,0,0));
+{let k=0;for(const T of TUNNELS){if(T.cone||T.rail||k>3)continue;CVU_A[k].set(T.x,T.z,T.ax,T.az);CVU_B[k].set(T.half+CAVE_EXT-.1,T.tY,CAVE_RM+.25,0);k++}}
+const RTU_A=[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0)),RTU_B=[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0));
+if(RTUN){const P=RAIL.pts;const seg=(k,i0,i1)=>{const A=P[Math.max(0,i0)],B=P[Math.min(P.length-1,i1)],dx=B.x-A.x,dz=B.z-A.z,L=Math.hypot(dx,dz)||1;RTU_A[k].set(A.x,A.z,dx/L,dz/L);RTU_B[k].set(L,A.y,B.y,0)};
+  seg(0,RTUN.a,RTUN.a+6);seg(1,RTUN.a+6,RTUN.a+12);seg(2,RTUN.b,RTUN.b-6);seg(3,RTUN.b-6,RTUN.b-12)}
 const terrainMat=withDetail(new THREE.MeshLambertMaterial({vertexColors:true}),.85);
 {const prev=terrainMat.onBeforeCompile;terrainMat.onBeforeCompile=sh=>{prev(sh);
   const hdr='float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1.,0.)),f.x),mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),f.x),f.y);}\n';
   const code=`#include <color_fragment>
+for(int i=0;i<4;i++){vec4 A=uCVa[i],B=uCVb[i];if(B.x>0.){vec2 d=vWP.xz-A.xy;float al=dot(d,A.zw);if(abs(al)<B.x){float lat=d.x*A.w-d.y*A.z,dy=vWP.y-B.y;if(lat*lat+dy*dy<B.z*B.z)discard;}}}
+for(int i=0;i<4;i++){vec4 A=uRTa[i],B=uRTb[i];vec2 d=vWP.xz-A.xy;float t=dot(d,A.zw);if(t>0.&&t<B.x){float l=d.x*A.w-d.y*A.z;float ry=mix(B.y,B.z,clamp(t/B.x,0.,1.));float dy=vWP.y-ry;float k=abs(l)/4.6;if(k<1.&&dy>-.6&&dy<2.7+4.5*sqrt(1.-k*k))discard;}}
 {float gr=smoothstep(.0,.06,diffuseColor.g-diffuseColor.r*.98)*smoothstep(.72,.95,normalize(vWN).y);
  if(gr>0.){vec2 p=vWP.xz;float d=length(vWP-cameraPosition),fade=1.-smoothstep(60.,240.,d);
   float n1=vn(p*.035),n2=vn(p*.16+7.),n3=vn(p*.9+3.);
@@ -677,7 +731,7 @@ const terrainMat=withDetail(new THREE.MeshLambertMaterial({vertexColors:true}),.
   col=mix(col,vec3(1.,.96,.88),step(.93,n3)*step(.5,vn(p*2.3))*fade*.85);
   col=mix(col,vec3(1.,.82,.25),step(.955,vn(p*1.1+20.))*fade*.85);
   diffuseColor.rgb=mix(diffuseColor.rgb,col,gr);}}`;
-  sh.fragmentShader=hdr+sh.fragmentShader.replace('#include <color_fragment>',code)}}
+  sh.uniforms.uRTa={value:RTU_A};sh.uniforms.uRTb={value:RTU_B};sh.uniforms.uCVa={value:CVU_A};sh.uniforms.uCVb={value:CVU_B};sh.fragmentShader='uniform vec4 uRTa[4];uniform vec4 uRTb[4];uniform vec4 uCVa[4];uniform vec4 uCVb[4];\n'+hdr+sh.fragmentShader.replace('#include <color_fragment>',code)}}
 const terrainMesh=new THREE.Mesh(tGeo,terrainMat);scene.add(terrainMesh);
 
 // water: normal-mapped, rippling, glinting
@@ -734,7 +788,7 @@ for(let i=0;i<90000&&trees.length<2300;i++){
   if(Math.hypot(x-CONE.x,z-CONE.z)<CONE.Rb+6)continue;
   if(Math.hypot(x-NSITE.x,z-NSITE.z)<NSITE.B+12)continue;
   if(raceD(x,z)<RACE_HW+12)continue;
-  const rn=railNear(x,z);if(rn&&rn.d<10)continue;if(nearFarm(x,z,4))continue;if(Math.hypot(x-LH.x,z-LH.z)<25)continue;if(nearMouth(x,z,28))continue;
+  const rn=railNear(x,z);if(rn&&rn.d<10)continue;if(nearFarm(x,z,4))continue;if(Math.hypot(x-LH.x,z-LH.z)<25)continue;if(nearMouth(x,z,48))continue;
   addTree({x,z,h,type:(h>40||rnd()<.42)?0:(rnd()<.3?2:1),s:.7+rnd()*.8,r:1.2});
 }
 // yer yarışı parkurunun kenarında ağaç sıraları (çitin dışında)
@@ -1070,33 +1124,99 @@ const flock=[];for(let i=0;i<6;i++){const gm=makeGoose(GEESE[i%4]);gm.scale.setS
  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),dx=x-CONE.x,dz=z-CONE.z;const n=1+(fbm(x/22+y/35,z/22-y/35)-.5)*.22;p.setX(i,CONE.x+dx*n);p.setZ(i,CONE.z+dz*n)}
  const keep=[],col=[],c=new THREE.Color();
  for(let i=0;i<p.count;i+=3){let cx=0,cy=0,cz=0;for(let k=0;k<3;k++){cx+=p.getX(i+k);cy+=p.getY(i+k);cz+=p.getZ(i+k)}cx/=3;cy/=3;cz/=3;
-   const t=tunnelInfo(CONE,{x:cx,y:cy,z:cz});if(t.r<11.5)continue;
-   for(let k=0;k<3;k++){const y=p.getY(i+k);keep.push(p.getX(i+k),y,p.getZ(i+k));const u=(y-CONE.base)/CONE.H;
+      for(let k=0;k<3;k++){const y=p.getY(i+k);keep.push(p.getX(i+k),y,p.getZ(i+k));const u=(y-CONE.base)/CONE.H;
      if(u>.72)c.setRGB(.95,.96,.98);else if(u<.12)c.setRGB(.36,.5,.28);else{const g=.45+fbm(p.getX(i+k)/9,y/9)*.15;c.setRGB(g,g*.94,g*.88)}col.push(c.r,c.g,c.b)}}
  const g2=new THREE.BufferGeometry();g2.setAttribute('position',new THREE.Float32BufferAttribute(keep,3));g2.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g2.computeVertexNormals();
- scene.add(new THREE.Mesh(g2,withDetail(new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true}),.9)));
- // tunnel tubes (cave mountain + ridge tunnels)
- const cm=new THREE.MeshBasicMaterial({color:0x7ff0ff});
- for(const T of TUNNELS){if(T.rail)continue;
-  const tube=new THREE.CylinderGeometry(10,10,T.half*2,22,10,true);tube.rotateZ(Math.PI/2);
-  {const tp=tube.attributes.position,tc=[];for(let i=0;i<tp.count;i++){const v=.28+fbm(tp.getX(i)/6,tp.getY(i)/6+tp.getZ(i)/6)*.18;tc.push(v,v*.9,v*.82)}tube.setAttribute('color',new THREE.Float32BufferAttribute(tc,3))}
-  const tm=new THREE.Mesh(tube,withDetail(new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,flatShading:true}),.9));tm.position.set(T.x,T.tY,T.z);tm.rotation.y=Math.atan2(-T.az,T.ax);scene.add(tm);
-  if(!T.cone)for(const s of[-1,1])for(let k=0;k<10;k++){const a=k/10*Math.PI*2,rr=14.5+rnd()*2;const bo=new THREE.Mesh(new THREE.DodecahedronGeometry(3.5+rnd()*2,0),M(0x77706a));
-    bo.position.set(T.x+s*T.ax*(T.half+1)-T.az*Math.cos(a)*rr,T.tY+Math.sin(a)*rr,T.z+s*T.az*(T.half+1)+T.ax*Math.cos(a)*rr);bo.rotation.set(rnd()*3,rnd()*3,0);scene.add(bo)}
-  for(const s of[-1,1]){const lip=new THREE.Mesh(new THREE.TorusGeometry(11.5,4,8,22),M(0x6d665e));lip.rotation.y=Math.atan2(T.ax,T.az);lip.position.set(T.x+s*T.ax*T.half,T.tY,T.z+s*T.az*T.half);scene.add(lip)}
-  const n=Math.floor(T.half/4);for(let i=0;i<n;i++){const al=-T.half+6+i*(T.half*2-12)/n,a=rnd()*6.28;const cr=new THREE.Mesh(new THREE.OctahedronGeometry(.9+rnd()*.8,0),cm);
-    cr.position.set(T.x+T.ax*al-T.az*Math.cos(a)*9.2,T.tY+Math.sin(a)*9.2,T.z+T.az*al+T.ax*Math.cos(a)*9.2);cr.rotation.set(rnd()*3,rnd()*3,0);scene.add(cr)}
+ const shellMat=withDetail(new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true}),.9);
+ {const prev=shellMat.onBeforeCompile;shellMat.onBeforeCompile=sh=>{if(prev)prev(sh);
+  sh.vertexShader='varying vec3 vWc;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvWc=(modelMatrix*vec4(position,1.0)).xyz;');
+  sh.fragmentShader='varying vec3 vWc;\n'+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n{vec2 d=vWc.xz-vec2('+CONE.x.toFixed(2)+','+CONE.z.toFixed(2)+');float dy=vWc.y-'+CONE.tY.toFixed(2)+';if(abs(d.x)>28.&&d.y*d.y+dy*dy<'+((CAVE_RM+.25)*(CAVE_RM+.25)).toFixed(2)+')discard;}')}}
+ scene.add(new THREE.Mesh(g2,shellMat));
+ const coneSurfAl=(lat,y,sg)=>{const rs=CONE.R*(CONE.base+CONE.H-y)/CONE.H;let r=rs;for(let k=0;k<5;k++){const al=Math.sqrt(Math.max(1,r*r-lat*lat)),x=CONE.x+(sg||1)*al;r=rs*(1+(fbm(x/22+y/35,(CONE.z+lat)/22-y/35)-.5)*.22)}return Math.sqrt(Math.max(1,r*r-lat*lat))};
+ // ===== tüneller ve mağaralar: organik tüp, kristaller, sarkıt/dikitler (çarpınca enerji düşer), dağa oturan ağızlar =====
+ const GLOWTEX=(()=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d'),g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.28,'rgba(255,255,255,.5)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(cv)})();
+ const TPAL=[
+  {rock:[.50,.55,.66],cr:[0x6ff2ff,0xb28cff,0x8ffbe0]},      // kristal mağara
+  {rock:[.62,.50,.38],cr:[0xffb347,0xffd36b,0xff7a45]},      // kehribar tüneli
+  {rock:[.42,.54,.46],cr:[0x58ff9c,0xa8ff6a,0x4dffd0]},      // zümrüt tüneli
+  {rock:[.56,.44,.60],cr:[0xff6bd6,0xc86bff,0xff9be6]},      // mor tünel
+  {rock:[.54,.64,.76],cr:[0xcfefff,0x8fd0ff,0xffffff]}];     // buz tüneli
+ const RB=10,NSEG=28;
+ const tubeR=(T,al,th)=>{let r=RB;
+  for(const c of T.ch){const q=(al-c.a)/c.w;r+=c.h*Math.exp(-q*q)*(.6+.4*Math.cos(th*2+c.p))}
+  r+=Math.max(0,(fbm(al/8+T.x*.013,th*1.3+T.z*.011)-.36)*9)+Math.max(0,(fbm(al/2.8+7,th*2.9+T.x*.02)-.46)*3);
+  const dEnd=T.half-Math.abs(al);{const k=1-sm(4,16,dEnd);r=r*(1-k)+CAVE_RM*k}
+  return r};
+ const wallP=(T,al,th,r)=>{const lat=Math.cos(th)*r;return[T.x+T.ax*al-T.az*lat,T.tY+Math.sin(th)*r,T.z+T.az*al+T.ax*lat]};
+ const mkSurf=(rings,cols)=>{const n=rings.length,m=rings[0].length,pos=new Float32Array(n*m*3),col=new Float32Array(n*m*3),idx=[];
+  for(let i=0;i<n;i++)for(let j=0;j<m;j++){const k=(i*m+j)*3,p=rings[i][j],c=cols[i][j];pos[k]=p[0];pos[k+1]=p[1];pos[k+2]=p[2];col[k]=c[0];col[k+1]=c[1];col[k+2]=c[2]}
+  for(let i=0;i<n-1;i++)for(let j=0;j<m;j++){const a=i*m+j,b=i*m+(j+1)%m,c=(i+1)*m+j,d=(i+1)*m+(j+1)%m;idx.push(a,b,c,b,d,c)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();return g};
+ const caveMat=withDetail(new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,flatShading:true}),.9);
+ const hoodMat=withDetail(new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,flatShading:true}),.9);
+ const cones=[],crys=[],glow=[],pills=[],boul=[];
+ for(let ti=0;ti<TUNNELS.length;ti++){const T=TUNNELS[ti];if(T.rail)continue;
+  const pal=TPAL[ti%TPAL.length],R=lrng(4100+ti*17),h=T.half,rk=pal.rock;
+  T.ch=[{a:-h*.38,w:11,h:4.8,p:0},{a:h*.42,w:9,h:4,p:2.1}];T.obs=[];T.rAt=(al,th)=>tubeR(T,al,th);
+  // --- iç yüzey: odalar, çıkıntılar, tabakalı kaya, uçlarda genişleyen ağız
+  {const ext=T.cone?1.5:CAVE_EXT,a0=-h-ext,a1=h+ext,n=Math.ceil((a1-a0)/3.4),rings=[],cols=[];
+   for(let i=0;i<=n;i++){const al=a0+(a1-a0)*i/n,ring=[],cr=[];
+    for(let j=0;j<NSEG;j++){const th=j/NSEG*Math.PI*2,r=tubeR(T,al,th);let ale=al;if(T.cone){const s_=al<0?-1:1,a_=Math.abs(al),E=coneSurfAl(Math.cos(th)*r*(s_*0+1),T.tY+Math.sin(th)*r,s_);ale=s_*(a_+(E-(h+ext))*sm(h-18,h+ext,a_))}const p=wallP(T,ale,th,r),bump=r-RB;
+     const band=.5+.5*Math.sin(p[1]*.55+fbm(al/6,th*2)*5),k0=(.66+.4*band)*(Math.sin(th)<-.55?.74:1)*(1-.38*Math.min(1,bump/8))*(.9+.2*fbm(al/3+5,th*4))*(1-.26*sm(5,30,h-Math.abs(al)));
+     ring.push(p);cr.push([rk[0]*k0,rk[1]*k0,rk[2]*k0])}
+    rings.push(ring);cols.push(cr)}
+   const mesh=new THREE.Mesh(mkSurf(rings,cols),caveMat);scene.add(mesh)}
+  // --- dağa oturan kaya ağzı (sırt tünelleri): uçları kalın, kıvrımlı bir kaya yaka sarar
+  for(const s of[-1,1]){/* ağız yakası: tüpü saran kalın, kıvrımlı kaya halka; dışa doğru yuvarlak dudakla biter */
+   const ms=[-3,-1.5,0,1.5,3,4.3,5.3,5.9,6.3],rings=[],cols=[];
+   for(const mo of ms){const al=s*(h+mo),ring=[],cr=[];const Ec=th_=>T.cone?coneSurfAl(Math.cos(th_)*CAVE_RM,T.tY+Math.sin(th_)*CAVE_RM,s)-h:0;
+    const base=mo<=4.3?4.6:mo<=5.3?3.9:mo<=5.9?2.6:.35;
+    for(let j=0;j<NSEG;j++){const th=j/NSEG*Math.PI*2,rin=tubeR(T,al,th),lump=.8+.45*fbm(al/3+T.x*.03,th*2.4+s*3),up=Math.sin(th),th2=base*lump*(1+.35*Math.max(0,up)+.6*Math.max(0,-up)),p=wallP(T,al+s*Ec(th),th,rin+th2);
+     const g=.46+.12*fbm(p[0]/5,p[2]/5)+.05*up,mos=Math.max(0,up)*.5*sm(.2,.8,fbm(p[0]/4+9,p[2]/4));
+     cr.push([g*(1-mos)+.36*mos,g*.96*(1-mos)+.5*mos,g*.88*(1-mos)+.24*mos]);ring.push(p)}
+    rings.push(ring);cols.push(cr)}
+   {const al=s*(h+CAVE_EXT),ring=[],cr=[];for(let j=0;j<NSEG;j++){const th=j/NSEG*Math.PI*2;ring.push(wallP(T,al+s*(T.cone?coneSurfAl(Math.cos(th)*CAVE_RM,T.tY+Math.sin(th)*CAVE_RM,s)-h:0),th,tubeR(T,al,th)));cr.push([rk[0]*.6,rk[1]*.6,rk[2]*.6])}rings.push(ring);cols.push(cr)}
+   scene.add(new THREE.Mesh(mkSurf(rings,cols),hoodMat));
+   for(let b=0;b<10;b++){const mo=-1+R()*6,al=s*(h+mo),th=(R()<.5?R()*.9+.1:Math.PI-.1-R()*.9),rin=tubeR(T,al,th),bs=1.2+R()*1.6,p=wallP(T,al+s*(T.cone?coneSurfAl(Math.cos(th)*CAVE_RM,T.tY+Math.sin(th)*CAVE_RM,s)-h:0),th,rin+3.6+R()*2);boul.push([p[0],p[1],p[2],bs,R()*3,R()*3,.5+R()*.12])}}
+  // --- engeller: sarkıt (tavandan), dikit (zeminden) ve kaya sütunu. Merkez şerit hep açık kalır.
+  const ceil=(lat,al)=>Math.sqrt(Math.max(16,Math.pow(tubeR(T,al,Math.PI/2),2)-lat*lat))-.4;
+  for(let al=-h+9;al<h-8;al+=6+R()*4){
+   const kind=R(),lat=(R()<.5?-1:1)*(1+R()*6.2),cy=ceil(lat,al),near=Math.abs(lat)<3.2;
+   if(kind<.5){const len=Math.min(2.4+R()*3.8,cy-(near?4.2:1.2)),w=.7+R()*.8;if(len<1.2)continue;
+    T.obs.push({al,lat,yR:cy,yT:cy-len,r0:w*.9,r1:.12,dmg:6});cones.push([al,lat,cy,-1,len,w,T,ti])}
+   else if(kind<.86){const len=Math.min(2+R()*3.2,cy-(near?4.2:1.4)),w=.7+R()*.8;if(len<1.2)continue;
+    T.obs.push({al,lat,yR:-cy,yT:-cy+len,r0:w*.9,r1:.12,dmg:6});cones.push([al,lat,-cy,1,len,w,T,ti])}}
+  const pil=T.cone?[[-36,4.5],[-12,-4.5],[12,4.5],[36,-4.5]]:[[-h*.52,5.4],[0,-5.6],[h*.52,5.4]];
+  for(const[al,lat]of pil){const cy=ceil(lat,al);T.obs.push({al,lat,yR:cy,yT:-cy,r0:2,r1:2,dmg:8});pills.push([al,lat,cy,T])}
+  // --- süs: duvarda sarkıt/dikitler (kaz buralara giremez), kristal kümeleri ve parıltı
+  for(let i=0,n=Math.round(h*1.1);i<n;i++){const al=-h+3+R()*(2*h-6),up=R()<.62,th=up?(.12+R()*.76)*Math.PI:(1.1+R()*.8)*Math.PI,r=tubeR(T,al,th)-.25,p=wallP(T,al,th,r);
+   const len=1+R()*2.6;cones.push([al,0,0,up?-1:1,len,.4+R()*.55,T,ti,p])}
+  for(let i=0,n=Math.round(h*.55);i<n;i++){const al=-h+4+R()*(2*h-8),th=R()*Math.PI*2,r=tubeR(T,al,th)-.3,cc=pal.cr[(R()*pal.cr.length)|0],nl=[-Math.cos(th)*(-T.az),-Math.sin(th),-Math.cos(th)*T.ax];
+   const k=3+((R()*3)|0);for(let q=0;q<k;q++){const p=wallP(T,al+(R()-.5)*3,th+(R()-.5)*.35,r);crys.push([p[0],p[1],p[2],.3+R()*.28,.55+R()*1.0,nl,cc])}
+   if(R()<.7){const p=wallP(T,al,th,r-1.2);glow.push([p[0],p[1],p[2],cc])}}
  }
- // sarkıt, dikit ve parlak kristal kümeleri
- {const lst=[],cr=[];for(const T of TUNNELS){if(T.rail)continue;const n=Math.floor(T.half*1.1);for(let i=0;i<n;i++){const al=-T.half+4+rnd()*(T.half*2-8),up=rnd()<.6,a=up?(.2+rnd()*.6)*Math.PI:(1.2+rnd()*.6)*Math.PI,r=9.3,h=1.2+rnd()*2.6,w=.35+rnd()*.5;
-    const lat=Math.cos(a)*r,y=Math.sin(a)*r;lst.push([T.x+T.ax*al-T.az*lat,T.tY+y,T.z+T.az*al+T.ax*lat,up?-1:1,h,w]);
-    if(rnd()<.18){for(let k=0;k<4;k++)cr.push([T.x+T.ax*al-T.az*lat*.97+(rnd()-.5),T.tY+y*.97+(rnd()-.5),T.z+T.az*al+T.ax*lat*.97+(rnd()-.5),.3+rnd()*.5,rnd()*3,rnd()*3])}}}
-  const sm_=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,6),withDetail(new THREE.MeshLambertMaterial({color:0x8a8178,flatShading:true}),.8),Math.max(1,lst.length)),dd=new THREE.Object3D();
-  lst.forEach((q,i)=>{dd.position.set(q[0],q[1]+(q[3]>0?q[4]/2:-q[4]/2),q[2]);dd.rotation.set(q[3]>0?0:Math.PI,0,0);dd.scale.set(q[5],q[4],q[5]);dd.updateMatrix();sm_.setMatrixAt(i,dd.matrix)});sm_.count=lst.length;sm_.frustumCulled=false;scene.add(sm_);
-  const cm2=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1,0),new THREE.MeshBasicMaterial({color:0x8ff6ff}),Math.max(1,cr.length));
-  cr.forEach((q,i)=>{dd.position.set(q[0],q[1],q[2]);dd.rotation.set(q[4],q[5],0);dd.scale.set(q[3]*.7,q[3]*1.6,q[3]*.7);dd.updateMatrix();cm2.setMatrixAt(i,dd.matrix)});cm2.count=cr.length;cm2.frustumCulled=false;scene.add(cm2)}
- // stalactite columns (obstacles)
- CONE.cols=[[-36,4.5],[-12,-4.5],[12,4.5],[36,-4.5]].map(([al,lat])=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(1.6,2.4,20,8),M(0x5b544c));m.position.set(CONE.x+al,CONE.tY,CONE.z+lat);scene.add(m);return{al,lat}});
+ // --- örnekleme (instanced) ağları
+ {const dd=new THREE.Object3D(),col=new THREE.Color(),Y=new THREE.Vector3(0,1,0);
+  const cg=new THREE.ConeGeometry(1,1,7);cg.translate(0,.5,0);
+  const cm=new THREE.InstancedMesh(cg,new THREE.MeshLambertMaterial({color:0xffffff,flatShading:true}),Math.max(1,cones.length));
+  cones.forEach((c,i)=>{const T=c[6],pal=TPAL[c[7]%TPAL.length],ps=c[8]||wallPos(T,c);dd.position.set(ps[0],ps[1],ps[2]);dd.quaternion.identity();if(c[3]<0)dd.rotation.set(Math.PI,0,0);else dd.rotation.set(0,0,0);dd.scale.set(c[5],c[4],c[5]);dd.updateMatrix();cm.setMatrixAt(i,dd.matrix);
+   const v=.92+((i*37)%11)/55;col.setRGB(pal.rock[0]*v*1.05,pal.rock[1]*v*1.05,pal.rock[2]*v*1.05);cm.setColorAt(i,col)});
+  cm.instanceMatrix.needsUpdate=true;if(cm.instanceColor)cm.instanceColor.needsUpdate=true;cm.frustumCulled=false;scene.add(cm);
+  function wallPos(T,c){const al=c[0],lat=c[1];return[T.x+T.ax*al-T.az*lat,T.tY+c[2],T.z+T.az*al+T.ax*lat]}
+  const kg=new THREE.ConeGeometry(1,2.6,6);kg.translate(0,1.3,0);
+  const km=new THREE.InstancedMesh(kg,new THREE.MeshBasicMaterial({color:0xffffff}),Math.max(1,crys.length));
+  crys.forEach((c,i)=>{const n=new THREE.Vector3(c[5][0],c[5][1],c[5][2]).normalize();n.x+=(((i*13)%7)-3)*.05;n.y+=(((i*7)%5)-2)*.06;n.normalize();dd.position.set(c[0],c[1],c[2]);dd.quaternion.setFromUnitVectors(Y,n);dd.scale.set(c[3],c[4],c[3]);dd.updateMatrix();km.setMatrixAt(i,dd.matrix);col.setHex(c[6]);km.setColorAt(i,col)});
+  km.instanceMatrix.needsUpdate=true;if(km.instanceColor)km.instanceColor.needsUpdate=true;km.frustumCulled=false;scene.add(km);
+  if(glow.length){const gp=new Float32Array(glow.length*3),gc=new Float32Array(glow.length*3);glow.forEach((g,i)=>{gp[i*3]=g[0];gp[i*3+1]=g[1];gp[i*3+2]=g[2];col.setHex(g[3]);gc[i*3]=col.r;gc[i*3+1]=col.g;gc[i*3+2]=col.b});
+   const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.BufferAttribute(gp,3));gg.setAttribute('color',new THREE.BufferAttribute(gc,3));
+   const pm=new THREE.Points(gg,new THREE.PointsMaterial({size:9,map:GLOWTEX,vertexColors:true,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true,fog:false}));pm.frustumCulled=false;scene.add(pm)}
+  const pr=[];for(let i=0;i<=8;i++){const t=i/8;pr.push(new THREE.Vector2(1.45+1.35*Math.pow(Math.abs(2*t-1),2.2),t))}
+  const pg=new THREE.LatheGeometry(pr,10),pM=new THREE.InstancedMesh(pg,new THREE.MeshLambertMaterial({color:0xffffff,flatShading:true}),Math.max(1,pills.length));
+  pills.forEach((p,i)=>{const T=p[3],pal=TPAL[TUNNELS.indexOf(T)%TPAL.length],H=p[2]*2,x=T.x+T.ax*p[0]-T.az*p[1],z=T.z+T.az*p[0]+T.ax*p[1];dd.position.set(x,T.tY-p[2],z);dd.rotation.set(0,i*1.3,0);dd.scale.set(1,H,1);dd.updateMatrix();pM.setMatrixAt(i,dd.matrix);col.setRGB(pal.rock[0]*.9,pal.rock[1]*.9,pal.rock[2]*.9);pM.setColorAt(i,col)});
+  pM.instanceMatrix.needsUpdate=true;if(pM.instanceColor)pM.instanceColor.needsUpdate=true;pM.frustumCulled=false;scene.add(pM);
+  if(boul.length){const bm=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),new THREE.MeshLambertMaterial({color:0xffffff,flatShading:true}),boul.length);
+   boul.forEach((b,i)=>{dd.position.set(b[0],b[1],b[2]);dd.rotation.set(b[4],b[5],0);dd.scale.set(b[3],b[3]*.8,b[3]);dd.updateMatrix();bm.setMatrixAt(i,dd.matrix);col.setRGB(b[6],b[6]*.95,b[6]*.88);bm.setColorAt(i,col)});
+   bm.instanceMatrix.needsUpdate=true;if(bm.instanceColor)bm.instanceColor.needsUpdate=true;bm.frustumCulled=false;scene.add(bm)}}
 }
 
 /* ---------------- grand race course ---------------- */
@@ -1535,6 +1655,54 @@ function buildTurbine(wm,hubRef){const wh=M(0xf4f6f8),pole=new THREE.Mesh(new TH
   const hub=new THREE.Group();hub.position.set(0,22.2,2);wm.add(hub);const hb=new THREE.Mesh(new THREE.SphereGeometry(.5,12,10),M(0xe3e6ea));hub.add(hb);
   for(let k=0;k<3;k++){const bl=new THREE.Group();bl.rotation.z=k*Math.PI*2/3;hub.add(bl);const sh=new THREE.Shape();sh.moveTo(-.18,.2);sh.lineTo(.18,.2);sh.lineTo(.07,8.6);sh.lineTo(-.03,8.6);sh.lineTo(-.18,.2);const b2=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:.08,bevelEnabled:false}),wh);bl.add(b2)}
   return hub}
+/* ---------- çiftlik makineleri: traktör, römork, pulluk, ilaçlama, biçerdöver ---------- */
+const FARM_COL=[[0xc8321f,0xe9e4da],[0x2f7d3a,0xf0c93a],[0x2c5fa8,0xe9e4da],[0xe0a020,0x3a3a3f],[0xd9531e,0xe9e4da],[0x7d3a8a,0xe9e4da]];
+const mBox=()=>aG('box',()=>new THREE.BoxGeometry(1,1,1)),mCyl=()=>aG('cyl16',()=>new THREE.CylinderGeometry(1,1,1,16)),mSph=()=>aG('sph',()=>new THREE.SphereGeometry(1,12,9));
+function pb(g,c,x,y,z,w,h,d,ry,rz){const m=aMesh(g,mBox(),c,x,y,z,w,h,d);if(ry)m.rotation.y=ry;if(rz)m.rotation.z=rz;return m}
+function pw(g,c,x,y,z,r,wd){const m=aMesh(g,mCyl(),c,x,y,z,r,wd,r);m.rotation.z=Math.PI/2;return m}      // aksı X olan tekerlek
+function pz(g,c,x,y,z,r,len){const m=aMesh(g,mCyl(),c,x,y,z,r,len,r);m.rotation.x=Math.PI/2;return m}     // aksı Z olan silindir
+const MDK=0x2b2b2e,MTY=0x17171a,MGL=0x8fc7de,MST=0x8d939b;
+function makeTractor(body,cab,loader){const g=new THREE.Group();
+  pb(g,MDK,0,1.45,.2,1.9,.7,5.4);pb(g,body,0,2.25,1.9,1.95,1.35,2.6);pb(g,MDK,0,2.2,3.25,1.6,1.0,.12);
+  for(const s of[-1,1])aMesh(g,mSph(),0xfff2b0,s*.7,2.45,3.3,.22,.22,.14);
+  pb(g,body,0,3.2,-.55,2.15,2.0,2.1);pb(g,MGL,0,3.4,-.55,2.2,1.2,2.14);pb(g,cab,0,4.3,-.55,2.5,.16,2.5);
+  aMesh(g,mCyl(),MDK,.65,3.7,2.4,.11,1.7,.11);aMesh(g,mSph(),0xf2a21e,0,4.5,-.55,.2,.14,.2);
+  for(const s of[-1,1]){pw(g,MTY,s*1.7,1.45,-.9,1.45,.95);pw(g,cab,s*1.78,1.45,-.9,.78,.97);pb(g,body,s*1.7,3.0,-.9,.55,.14,2.5);
+    pw(g,MTY,s*1.35,.9,2.4,.9,.6);pw(g,cab,s*1.4,.9,2.4,.5,.62)}
+  if(loader){for(const s of[-1,1]){pb(g,MST,s*1.15,2.9,3.4,.2,.2,3.4,0,0);pb(g,MST,s*1.15,2.2,4.9,.2,1.4,.2)}pb(g,MST,0,1.3,5.5,2.6,.2,1.3);pb(g,MST,0,1.8,6.1,2.6,.9,.12)}
+  aBake(g);return g}
+function makeTrailer(body,load){const g=new THREE.Group();
+  pb(g,0x7a5a36,0,1.9,0,3.0,.4,6.4);for(const s of[-1,1])pb(g,body,s*1.5,2.55,0,.14,1.0,6.4);for(const s of[-1,1])pb(g,body,0,2.55,s*3.2,3.0,1.0,.14);
+  for(const s of[-1,1]){pw(g,MTY,s*1.65,1.05,-1.7,1.05,.6);pw(g,MTY,s*1.65,1.05,.5,1.05,.6);pw(g,MST,s*1.7,1.05,-1.7,.5,.62);pw(g,MST,s*1.7,1.05,.5,.5,.62)}
+  pb(g,MDK,0,1.4,4.4,.3,.3,2.6);
+  if(load==='hay'){for(let i=0;i<6;i++){const x=(i%2?-.75:.75),z=-2.3+Math.floor(i/2)*2.1;pb(g,0xe2b84a,x,3.35,z,1.35,1.0,1.8)}pb(g,0xe2b84a,0,4.3,-1.2,1.35,.9,1.8)}
+  else if(load==='grain'){pb(g,0xd9b04a,0,3.2,0,2.8,.7,6)}
+  aBake(g);return g}
+function makePlough(){const g=new THREE.Group();
+  pb(g,0xb8321f,0,1.8,0,3.4,.28,.32);pb(g,0xb8321f,0,1.8,-.6,.28,.28,2.4);pb(g,MDK,0,1.4,2.4,.3,.3,2.6);
+  for(let i=0;i<4;i++){const x=-1.2+i*.8;pb(g,MST,x,1.0,-1.2,.1,1.5,.28);pb(g,MST,x+.18,.65,-1.7,.55,.8,.12,.6);pb(g,0x555a60,x,.3,-1.2,.45,.18,1.1)}
+  pw(g,MTY,1.9,.8,-1.3,.8,.35);aBake(g);return g}
+function makeSprayer(fold){const g=new THREE.Group();
+  pz(g,0xe8ecef,0,2.6,-.4,1.35,4.4);pb(g,MDK,0,1.7,-.4,1.3,.3,5.4);pb(g,MDK,0,1.4,3.2,.3,.3,3);
+  for(const s of[-1,1]){pw(g,MTY,s*1.6,1.1,-1.2,1.1,.55);pw(g,0xf0c93a,s*1.65,1.1,-1.2,.5,.57)}
+  const bw=fold?1.9:8;pb(g,0xf0c93a,0,1.8,-3.4,bw*2,.16,.16);if(!fold){for(let i=-8;i<=8;i+=1.6)pb(g,0x6b6f75,i,1.55,-3.4,.07,.3,.07);pb(g,MDK,0,1.9,-3.4,.2,.9,.2)}
+  aBake(g);return g}
+function makeCombine(body,hdr){const g=new THREE.Group();
+  pb(g,body,0,2.3,-.4,4.0,1.5,8.4);pb(g,body,0,4.3,-1.6,3.6,2.2,4.4);pb(g,MDK,0,2.2,-5.0,3.0,1.3,1.2);
+  pb(g,body,0,4.6,2.2,2.5,2.0,2.4);pb(g,MGL,0,4.85,2.25,2.56,1.4,2.44);pb(g,0xe9e4da,0,5.9,2.2,2.8,.16,2.8);
+  pb(g,body,1.85,6.7,-1.2,.8,.6,3.4);pb(g,MST,2.9,7.0,-.8,2.4,.4,.4,0,.45);pb(g,MST,4.5,7.6,-.8,2.4,.4,.4,0,.15);
+  pb(g,hdr,0,1.3,6.2,8.4,.9,1.8);pz(g,0xf0c93a,0,2.2,6.9,.9,8.2);pb(g,MST,0,.7,6.6,8.2,.12,2.2);
+  for(const s of[-1,1]){pw(g,MTY,s*2.1,1.6,2.0,1.6,1.1);pw(g,MST,s*2.15,1.6,2.0,.8,1.12);pw(g,MTY,s*1.8,1.0,-4.2,1.0,.7)}
+  aMesh(g,mSph(),0xf2a21e,0,6.15,2.2,.2,.14,.2);aBake(g);return g}
+/* tarlada çalışan makine: şeritler boyunca gidip gelir, uçlarda U dönüşü yapar */
+function workMachine(g,obj,x0,x1,z0,z1,y,speed,laneW){const n=Math.max(1,Math.floor((x1-x0)/laneW)),st={lane:0,step:1,dir:1,z:z0+2,mode:0,tt:0};
+  const lx=l=>x0+laneW*(l+.5);g.add(obj);obj.position.set(lx(0),y,st.z);
+  ANIM.push(dt=>{if(dt>.2)dt=.2;
+    if(st.mode===0){st.z+=st.dir*speed*dt;obj.position.set(lx(st.lane),y,st.z);obj.rotation.y=st.dir>0?0:Math.PI;
+      if((st.dir>0&&st.z>z1)||(st.dir<0&&st.z<z0)){st.mode=1;st.tt=0;st.nl=st.lane+st.step;if(st.nl<0||st.nl>=n){st.step=-st.step;st.nl=st.lane+st.step}st.ez=st.dir>0?z1:z0}}
+    else{st.tt+=dt;const p=Math.min(1,st.tt/2.4),e=.5-.5*Math.cos(p*Math.PI),xa=lx(st.lane),xb=lx(st.nl);
+      obj.position.set(xa+(xb-xa)*e,y,st.ez+st.dir*Math.sin(p*Math.PI)*laneW*.9);obj.rotation.y=(st.dir>0?0:Math.PI)+(st.dir>0?1:-1)*0+Math.PI*e*(st.dir>0?1:-1)*(st.dir>0?1:1);
+      if(p>=1){st.mode=0;st.lane=st.nl;st.dir=-st.dir}}})}
 FARMS.forEach((f,fi)=>{
   const g=new THREE.Group();g.position.set(f.x,f.h,f.z);g.rotation.y=f.rot;scene.add(g);
   const c=Math.cos(f.rot),s=Math.sin(f.rot);const W=(lx,lz)=>[f.x+lx*c+lz*s,f.z-lx*s+lz*c];const Y=(lx,lz)=>{const w=W(lx,lz);return height(w[0],w[1])-f.h};
@@ -1549,9 +1717,37 @@ FARMS.forEach((f,fi)=>{
   for(let i=0;i<5;i++){const lx=24+(i%3)*3,lz=-10+Math.floor(i/3)*3.4;{const w=W(lx,lz);WCOLS.push({x:w[0],z:w[1],r:1.5,top:f.h+Y(lx,lz)+2.2})}const b=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,1.8,12),M(0xd8b24a));b.rotation.z=Math.PI/2;b.position.set(lx,Y(lx,lz)+1.1,lz);g.add(b)}
   // wind turbine
   if(f.crop!==1){const wm=new THREE.Group();wm.position.set(-30,Y(-30,-20),-20);g.add(wm);const hub=buildTurbine(wm);ANIM.push(dt=>hub.rotation.z+=dt*1.3);const w=W(-30,-20);PROPS.push({x:w[0],z:w[1],r:3.2,whr:.5,top:f.h+wm.position.y+23.5})}
-  // field
-  const fg=new THREE.PlaneGeometry(76,70,38,36);fg.rotateX(-Math.PI/2);{const p=fg.attributes.position;for(let i=0;i<p.count;i++){const lx=p.getX(i),lz=p.getZ(i)+62;p.setZ(i,lz);p.setY(i,Y(lx,lz)+.3)}fg.computeVertexNormals()}
-  g.add(new THREE.Mesh(fg,new THREE.MeshLambertMaterial({map:fieldTex(f.crop)})));
+  // tarla: düz zemin, iki ayrı parsel, ortada toprak yol, çevresinde çit
+  {let sum=0,cnt=0;for(let ix=-3;ix<=3;ix++)for(let iz=-3;iz<=3;iz++){const w=W(ix*11,62+iz*10);sum+=height(w[0],w[1]);cnt++}
+   FARM_FLAT.push({f,lx:0,lz:62,hx:39,hz:36,y:sum/cnt,bl:11})}
+  const FY=Y(0,62),pc=[f.crop,(f.crop+1)%3];
+  const fpar=(x0,x1,z0,z1,crop)=>{const wd=x1-x0,ln=z1-z0,fg=new THREE.PlaneGeometry(wd,ln,Math.max(2,Math.round(wd/2)),Math.max(2,Math.round(ln/2)));fg.rotateX(-Math.PI/2);
+    {const q=fg.attributes.position;for(let i=0;i<q.count;i++){const lx=q.getX(i)+(x0+x1)/2,lz=q.getZ(i)+(z0+z1)/2;q.setX(i,lx);q.setZ(i,lz);q.setY(i,Y(lx,lz)+.28)}fg.computeVertexNormals()}
+    const t=fieldTex(crop).clone();t.needsUpdate=true;t.repeat.set(wd/15,ln/15);g.add(new THREE.Mesh(fg,new THREE.MeshLambertMaterial({map:t})))};
+  fpar(-38,-1.8,31,97,pc[0]);fpar(1.8,38,31,97,pc[1]);
+  {const lane=(x0,x1,z0,z1)=>{const wd=x1-x0,ln=z1-z0,fg=new THREE.PlaneGeometry(wd,ln,Math.max(1,Math.round(wd/3)),Math.max(1,Math.round(ln/3)));fg.rotateX(-Math.PI/2);const q=fg.attributes.position;for(let i=0;i<q.count;i++){const lx=q.getX(i)+(x0+x1)/2,lz=q.getZ(i)+(z0+z1)/2;q.setX(i,lx);q.setZ(i,lz);q.setY(i,Y(lx,lz)+.34)}fg.computeVertexNormals();g.add(new THREE.Mesh(fg,new THREE.MeshLambertMaterial({color:0x9c8058})))};
+   lane(-1.8,1.8,26,97);lane(-38,38,26,31)}
+  // çit: direkler ve iki sıra tahta; ön ortada kapı boşluğu
+  {const fn=new THREE.Group(),X0=-39.4,X1=39.4,Z0=25.2,Z1=98.6,PO=0x6e4e2c,PL=0xb08a58;
+   const seg=(ax,az,bx,bz)=>{const L=Math.hypot(bx-ax,bz-az),n=Math.max(1,Math.round(L/3.8)),dx=(bx-ax)/n,dz=(bz-az)/n,ry=Math.atan2(-dz,dx);
+     for(let i=0;i<=n;i++){const x=ax+dx*i,z=az+dz*i,y=Y(x,z);const pm=aMesh(fn,mBox(),PO,x,y+.9,z,.26,1.8,.26);
+       const w=W(x,z);softAdd(w[0],w[1],y+f.h,y+f.h+1.8,.4)}
+     for(let i=0;i<n;i++){const x=ax+dx*(i+.5),z=az+dz*(i+.5),y=Y(x,z),sl=Math.atan2(Y(ax+dx*(i+1),az+dz*(i+1))-Y(ax+dx*i,az+dz*i),L/n);
+       for(const hh of[.65,1.3]){const m=aMesh(fn,mBox(),PL,x,y+hh,z,L/n,.14,.08);m.rotation.set(0,ry,sl,'YXZ')}}};
+   seg(X0,Z0,-3.2,Z0);seg(3.2,Z0,X1,Z0);seg(X1,Z0,X1,Z1);seg(X1,Z1,X0,Z1);seg(X0,Z1,X0,Z0);
+   for(const sx of[-3.2,3.2]){const y=Y(sx,Z0);aMesh(fn,mBox(),PO,sx,y+1.3,Z0,.4,2.6,.4)}
+   aBake(fn);g.add(fn)}
+  // tarlada çalışan makineler (parsel ürününe göre)
+  [[pc[0],-38,-1.8],[pc[1],1.8,38]].forEach(([cr,xa,xb],pi)=>{const rig=new THREE.Group(),col=FARM_COL[(fi+pi)%FARM_COL.length];let lw=4.4,zA=41,zB=93;
+    if(cr===0){rig.add(makeCombine(col[0],col[1]));lw=8.6;zA=33;zB=84}
+    else if(cr===1){rig.add(makeTractor(col[0],col[1]));const sp=makeSprayer(false);sp.position.z=-8.4;rig.add(sp);lw=16;zA=42;zB=93}
+    else{rig.add(makeTractor(col[0],col[1]));const pl=makePlough();pl.position.z=-7.4;rig.add(pl);lw=3.4;zA=42;zB=93}
+    workMachine(g,rig,xa+.4,xb-.4,zA,zB,FY,cr===0?3.4:4.6,Math.min(lw,(xb-xa)/2));
+    MACH.push({rig,W,top:f.h+FY+(cr===0?8:5),base:f.h+FY,c:cr===0?[[0,0,5.6],[0,2.5,4.5]]:cr===1?[[0,0,3.6],[0,-8.4,4.2]]:[[0,0,3.6],[0,-7.4,3.6]]})});
+  // avluda duran makineler
+  {const col=FARM_COL[(fi+2)%FARM_COL.length],yd=[[-30,-30,0,'t'],[-15,-30,Math.PI/2,'r'],[-1,-30,Math.PI/2,'p'],[14,-30,Math.PI/2,'s'],[30,-31,Math.PI/2,'c']];
+   for(const[lx,lz,ry,k]of yd){let m;if(k==='t')m=makeTractor(col[0],col[1],true);else if(k==='r')m=makeTrailer(0x9a7448,'hay');else if(k==='p')m=makePlough();else if(k==='s')m=makeSprayer(true);else m=makeCombine(FARM_COL[(fi+4)%FARM_COL.length][0],0xd8d2c4);
+    const yy=Y(lx,lz);m.position.set(lx,yy,lz);m.rotation.y=k==='t'?Math.PI/2:ry;g.add(m);const w=W(lx,lz),rr=k==='c'?5.2:k==='t'?3.6:3;PROPS.push({x:w[0],z:w[1],r:rr,hr:rr*(k==='c'?1.15:1),top:f.h+yy+(k==='c'?7.5:k==='t'?4.6:3.2)});WCOLS.push({x:w[0],z:w[1],r:rr*.8,top:f.h+yy+(k==='c'?7:4)})}}
   // animals
   for(let k=0;k<5;k++){const a=k<3?makeSheep():makeCow();const lx=-14+k*6+(k%2)*1.5,lz=22+(k%2)*5;a.position.set(lx,Y(lx,lz),lz);a.rotation.y=rnd()*6.28;if(k>=3)a.scale.setScalar(1.12);g.add(a);{const aw=W(lx,lz);WCOLS.push({x:aw[0],z:aw[1],r:k>=3?2.0:1.35,top:height(aw[0],aw[1])+2.8})}
     const ph=rnd()*6;ANIM.push(dt=>{const hd=a.userData.head;hd.rotation.x=Math.max(0,Math.sin(clock*.7+ph))*.75;hd.rotation.y=Math.sin(clock*.5+ph)*.25;a.rotation.y+=Math.sin(clock*.2+ph)*dt*.15})}
@@ -1788,11 +1984,24 @@ for(let i=0,n=0;i<900&&n<12;i++){const x=470+rnd()*300,z=(rnd()*2-1)*720;if(heig
    const Wt=4.3,Hw=2.6,Hr=4.3,lamp=[];
    for(let i=RTUN.a+6;i<RTUN.b-4;i+=6){const f=tb.frame(i);for(const sd of[-1,1])lamp.push([f.x+f.sx*(Wt-.45)*sd,f.y+3.4,f.z+f.sz*(Wt-.45)*sd])}
    const lm=new THREE.InstancedMesh(new THREE.SphereGeometry(.24,8,6),new THREE.MeshBasicMaterial({color:0xffd27a}),Math.max(1,lamp.length));lamp.forEach((q,i)=>{d.position.set(q[0],q[1],q[2]);d.rotation.set(0,0,0);d.updateMatrix();lm.setMatrixAt(i,d.matrix)});lm.count=lamp.length;scene.add(lm);
+   /* kaya yaka: ağızda tüneli saran, araziye gömülen kalın kaya kabuğu */
+   {const CB={p:[],c:[]},RR=lrng(931);
+    const run=(i0,i1,flip)=>{const idx=[];for(let i=i0;i<=i1;i++)idx.push(i);
+     const rings=idx.map((i,q)=>{const f=tb.frame(Math.max(1,Math.min(RAIL.pts.length-2,i))),u=flip?(i1-i)/(i1-i0):(i-i0)/(i1-i0),ex=1.0+1.9*Math.min(1,u*2.2),ring=[];
+      for(let j=0;j<=16;j++){const an=j/16*Math.PI,lump=.9+.2*fbm(i*.35,j*.6+(flip?9:0)),lw=(Wt+ex)*lump,hh=(Hr+ex*.85)*lump;ring.push([lw*Math.cos(an),Hw+.4+hh*Math.sin(an)])}
+      ring.unshift([ (Wt+ex)*.98,-3.2]);ring.push([-(Wt+ex)*.98,-3.2]);return{f,ring}});
+     for(let q=0;q<rings.length-1;q++){const A=rings[q],B=rings[q+1];for(let j=0;j<A.ring.length-1;j++){
+       const pt=(r,jj)=>[r.f.x+r.f.sx*r.ring[jj][0],r.f.y+r.ring[jj][1],r.f.z+r.f.sz*r.ring[jj][0]];
+       const v=[pt(A,j),pt(A,j+1),pt(B,j+1),pt(B,j)],hv=(v[0][1]+v[2][1])/2-A.f.y,k=.5+.1*RR()+(hv>6?.05:0);
+       for(const t of[0,1,2,0,2,3]){CB.p.push(v[t][0],v[t][1],v[t][2]);CB.c.push(k*1.0,k*1.08,k*.72)}}}};
+    run(RTUN.a-1,RTUN.a+12,false);run(RTUN.b-12,RTUN.b+1,true);
+    const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(CB.p,3));cg.setAttribute('color',new THREE.Float32BufferAttribute(CB.c,3));cg.computeVertexNormals();
+    scene.add(new THREE.Mesh(cg,withDetail(new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,flatShading:true}),.8)))}
    for(const [ei,out] of[[RTUN.a,-1],[RTUN.b,1]]){const f=tb.frame(ei),tx=-f.sz,tz=f.sx,g2=new THREE.Group();g2.position.set(f.x,f.y,f.z);g2.rotation.y=Math.atan2(tx,tz);scene.add(g2);
      for(let k=0;k<=14;k++){const a=k/14*Math.PI,st=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.4,2.6),M([0x9a948a,0x7f796f,0xa8a296][k%3]));st.position.set((Wt+.7)*Math.cos(a),Hw+(Hr+.7)*Math.sin(a),0);st.rotation.z=a-Math.PI/2;g2.add(st)}
      for(const sd of[-1,1]){const pil=new THREE.Mesh(new THREE.BoxGeometry(1.5,Hw+.8,2.6),M(0x8d877d));pil.position.set(sd*(Wt+.7),(Hw+.8)/2-.4,0);g2.add(pil);
-       const wing=new THREE.Mesh(new THREE.BoxGeometry(1.3,6.4,8),M(0x857f75));wing.position.set(sd*(Wt+2.1),2.4,out*4.2);g2.add(wing);
-       for(let k=0;k<3;k++){const bo=new THREE.Mesh(new THREE.DodecahedronGeometry(1.8+rnd()*.8,0),M([0x7a746c,0x8a847a,0x6b665e,0x93897c,0x77706a][k%5]));bo.position.set(sd*(Wt+3.4+rnd()*1.6),1.2+k*1.7,out*(2+k*2.6));bo.rotation.set(rnd()*3,rnd()*3,0);g2.add(bo)}}
+       
+       for(let k=0;k<3;k++){const bo=new THREE.Mesh(new THREE.DodecahedronGeometry(1.8+rnd()*.8,0),M([0x7a746c,0x8a847a,0x6b665e,0x93897c,0x77706a][k%5]));bo.position.set(sd*(Wt+3.4+rnd()*1.6),1.2+k*1.7,out*(2+k*2.6));bo.rotation.set(rnd()*3,rnd()*3,0)}}
      const bn=banner('TÜNEL',3.4,.9,'#2c2c32','#f2c14e');bn.position.set(0,Hw+Hr+1.9,out*.2);g2.add(bn)}}
  // station
  let bi=0,bd=1e9;RAIL.pts.forEach((p,i)=>{const dd=Math.hypot(p.x,p.z-600);if(dd<bd){bd=dd;bi=i}});const s0=RAIL.S[bi],p=railAt(s0),q=railAt(s0+3);const yaw=Math.atan2(q.x-p.x,q.z-p.z),rx=Math.cos(yaw),rz=-Math.sin(yaw);
@@ -2623,7 +2832,7 @@ const redTrees=[];
    if(x>500||Math.abs(x)>770||Math.abs(z)>770)return false;
    if(Math.hypot(x-CONE.x,z-CONE.z)<CONE.Rb+12)return false;
    if(raceD(x,z)<RACE_HW+18||mtnH(x,z)>-50)return false;
-   {const rn=railNear(x,z);if(rn&&rn.d<14)return false}if(nearFarm(x,z,10))return false;if(Math.hypot(x-LH.x,z-LH.z)<30)return false;if(nearMouth(x,z,30))return false;
+   {const rn=railNear(x,z);if(rn&&rn.d<14)return false}if(nearFarm(x,z,10))return false;if(Math.hypot(x-LH.x,z-LH.z)<30)return false;if(nearMouth(x,z,110))return false;
    if(COURSE.some(c=>Math.hypot(c.p.x-x,c.p.z-z)<32))return false;
    return !redTrees.some(t=>Math.hypot(t.x-x,t.z-z)<18)};
  for(let x=370;x>-760;x-=64)for(const side of[-1,1]){if(rnd()<.55)continue;const w=10+sm(-800,400,x)*14;const z=riverZ(x)+side*(w+12+rnd()*30);if(ok(x,z))redTrees.push({x,z,h:height(x,z),s:1.1+rnd()*.5})}
@@ -2864,7 +3073,7 @@ let mObjs=[],lastMission='free',updates=null;
 function addM(o){if(o.isInstancedMesh)o.frustumCulled=false;scene.add(o);mObjs.push(o);return o}
 function beam(color){return new THREE.Mesh(new THREE.CylinderGeometry(2.5,2.5,500,10,1,true),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false}))}
 const rider=()=>RIDERS[sel.rider];
-function endCleanup(){mObjs.forEach(o=>scene.remove(o));mObjs=[];setStorm(0);rain.visible=false;if(rig)rig.visible=true;rigGoose&&rigGoose.userData.unfold();if(rigGoose)rigGoose.userData.feet.visible=false;updates=null;CHASE=null;chaseCleanup();if(NESTOBJ.eggs)NESTOBJ.eggs.children.forEach(e=>e.visible=true);setSpecial(null);WALK.on=false;if(WALK.nils&&WALK.nils.parent===scene)scene.remove(WALK.nils);WALK.nils=null;DM.on=false}
+function endCleanup(){mObjs.forEach(o=>scene.remove(o));mObjs=[];setStorm(0);rain.visible=false;if(rig)rig.visible=true;rigGoose&&rigGoose.userData.unfold();if(rigGoose)rigGoose.userData.feet.visible=false;updates=null;CHASE=null;chaseCleanup();{const v=document.getElementById('corrVig'),w=document.getElementById('corrWarn');if(v)v.style.opacity='0';if(w)w.classList.remove('on')}if(NESTOBJ.eggs)NESTOBJ.eggs.children.forEach(e=>e.visible=true);setSpecial(null);WALK.on=false;if(WALK.nils&&WALK.nils.parent===scene)scene.remove(WALK.nils);WALK.nils=null;DM.on=false}
 function startMission(id){
   if(paused)setPause(false);
   lastMission=id;endCleanup();buildRig();setCampVisible(false);
@@ -3129,7 +3338,7 @@ const SEC_TXT={forest:'🌲 Ormana daldı!',water:'🌊 Suyun üstünden!',harbo
 function setupChase(){
   const RT=chaseRoute(),PT=RT.pts,NP=PT.length,LEN=RT.len;
   for(const t of RT.hide)t.hide=true;RT.hidden=true;if(typeof TV!=='undefined')TV.t=-9;
-  const GRACE=20,LOST=200,FEA_EVERY=100,base=26+player.g.speed*5;
+  const GRACE=20,LOST=200,FEA_EVERY=100,GUIDE=2.6,CORR=21,CORR_IN=14,base=26+player.g.speed*5;
   // ---- parkur örnekleyici
   const wrap=s=>((s%LEN)+LEN)%LEN;
   const idxAt=s=>{let lo=0,hi=NP;while(hi-lo>1){const m=(lo+hi)>>1;if(PT[m].s<=s)lo=m;else hi=m}return lo};
@@ -3159,7 +3368,7 @@ function setupChase(){
    player.speed=base*1.1;player.stamina=player.maxSt;player.tun=-1;player.stun=0}
   invuln=2.5;shieldShown=0;FCAM.yaw=0;FCAM.pitch=0;
   rigGoose.userData.unfold();rigGoose.userData.feet.visible=false;rigGoose.userData.tuck.visible=true;
-  setTimeout(screech,120);toast('🦅 Kartal yumurtanı kaptı! Yetiş!',2.6);setObjective('Amansız Takip');
+  setTimeout(screech,120);toast('🦅 Kartal yumurtanı kaptı! Peşine düş!',2.4);setObjective('Amansız Takip');
   while(E.secI<RT.sec.length&&RT.sec[E.secI].s<E.s+1)E.secI++;
   // ---- havada asılı tüyler
   const POOL=[];for(let i=0;i<64;i++){const f=makeFeather();f.visible=false;addM(f);POOL.push({g:f,on:false,life:0,ph:0,y0:0})}let pi=0;
@@ -3190,12 +3399,29 @@ function setupChase(){
   const band=d=>d<20?1.32:d<45?1.32-(d-20)/25*.2:d<100?1.12-(d-45)/55*.1:d<160?1.02-(d-100)/60*.14:.87;
   const OPEN=new Set(['air','water','hill','valley','dive','start','harbor']);
   const q0={},q1={},tq={};
+  // ---- koridor: parkurun (kartalın izinin) çevresinde CORR m yarıçaplı sabit tüp. Dışında enerji ek olarak saniyede 1 azalır.
+  const CS=45,NRG=16,NR={d:0,x:0,y:0,z:0,s:0};
+  const nearRoute=(px,py,pz)=>{let bi=0,bd=1e18;
+    for(let i=0;i<NP;i++){const p=PT[i],dx=p.x-px,dy=p.y-py,dz=p.z-pz,d=dx*dx+dy*dy+dz*dz;if(d<bd){bd=d;bi=i}}
+    let best=1e18;
+    for(let j=-1;j<=0;j++){const a=PT[(bi+j+NP)%NP],b=PT[(bi+j+1+NP)%NP],ax=b.x-a.x,ay=b.y-a.y,az=b.z-a.z,l2=ax*ax+ay*ay+az*az||1;
+      const t=Math.max(0,Math.min(1,((px-a.x)*ax+(py-a.y)*ay+(pz-a.z)*az)/l2)),qx=a.x+ax*t,qy=a.y+ay*t,qz=a.z+az*t,d=Math.hypot(px-qx,py-qy,pz-qz);
+      if(d<best){best=d;NR.x=qx;NR.y=qy;NR.z=qz}}
+    NR.d=best;NR.s=PT[bi].s;return NR};
+  const cMat=new THREE.MeshBasicMaterial({color:0x7dffb0,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide}),cGeo=new THREE.TorusGeometry(CORR,.5,5,56);
+  const cRings=[];for(let i=0;i<NRG;i++){const m=new THREE.Mesh(cGeo,cMat);m.frustumCulled=false;m.visible=false;m.renderOrder=4;addM(m);cRings.push(m)}
+  const cq={},ct={};let cBase=-99999,cOut=false,cWarnT=0,cInfo=false,cSnd=0;
+  const placeRings=sN=>{const b=Math.round(sN/CS);if(b===cBase)return;cBase=b;
+    for(let i=0;i<NRG;i++){const s=(b+i-3)*CS,q=at(s,cq),t=tanAt(s,ct),m=cRings[i];m.position.set(q.x,q.y,q.z);m.rotation.set(-Math.atan(t.sl),Math.atan2(t.tx,t.tz),0);m.visible=true}};
+  const cVig=document.getElementById('corrVig'),cWarn=document.getElementById('corrWarn');
+  const corrUi=(on,txt,ang)=>{if(cVig)cVig.style.opacity=on?'1':'0';if(cWarn){cWarn.classList.toggle('on',on);if(on)cWarn.innerHTML=txt+'<i style="transform:rotate('+ang+'rad)">⬆</i>'}};
   CHASE={
+    lock:()=>E.rt<GUIDE&&!state.done,
     E,ribs,trailP,route:RT,
     faceYaw:()=>Math.atan2(-(E.p.x-player.pos.x),-(E.p.z-player.pos.z)),
     gauge:d=>{const f=document.getElementById('cbFill');if(!f)return;const g=E.rt<GRACE;f.style.width=Math.min(100,d/LOST*100)+'%';f.style.background=g?'#4aa8ff':d<120?'#4caf50':d<160?'#e8a20c':'#e2456b'},
     end:kind=>{
-      if(state.done)return;if(crash)abortCrash();if(rig)rig.visible=true;invuln=0;state.done=true;state.mode='flyDone';state.target=null;
+      if(state.done)return;if(crash)abortCrash();if(rig)rig.visible=true;invuln=0;state.done=true;state.mode='flyDone';state.target=null;corrUi(false);
       const sc=score(),best=store.get('kz-chase-best',0),rec=sc>best;if(rec)store.set('kz-chase-best',sc);
       feathers+=got;saveShop();
       if(rec)fanfare();else sadTone();toast(kind==='lost'?'🦅 Kartal kayboldu!':'Enerjin bitti!',2.2);
@@ -3213,7 +3439,7 @@ function setupChase(){
       const dq=player.pos.distanceTo(q);
       if(magT>0&&flying&&dq<RR*5){const k=Math.min(1,dt*2.6);q.x+=(player.pos.x-q.x)*k;q.z+=(player.pos.z-q.z)*k;f.y0+=(player.pos.y-f.y0)*k}
       if(flying&&dq<(magT>0?RR*3.2:RR)){f.on=false;f.g.visible=false;got++;energy=Math.min(100,energy+2);updateHearts();sfx(1250+Math.random()*200,.08,'triangle',.07);
-        burst(q.clone(),pmB,3,.5);if(gotToastT<=0){toast('🪶 Altın tüy! ⚡ +2 enerji',.8);gotToastT=.9}}}
+        burst(q.clone(),pmB,3,.5);}}
     gotToastT-=dt;magT-=dt;
     for(const b of balls)b.rotation.y+=dt*.25;
     for(const th of therms){const u=th.g.userData;u.a.rotation.y+=dt*.9;u.b.rotation.y-=dt*1.4;
@@ -3277,6 +3503,22 @@ function setupChase(){
       if(state.mode==='fly'&&E.rt>GRACE&&dP>LOST){farT+=dt;if(farT>1.5){CHASE.end('lost');return}}else farT=0;
       objT-=dt;if(objT<=0){objT=.2;const g=Math.max(0,GRACE-E.rt);const el=document.getElementById('chaseStat');if(el)el.textContent=`🪶${got} ⭐${score()} 🔁${E.lap+1}`+(magT>0?` 🧲${Math.ceil(magT)}`:'')+(dP<80?' 💨':'')+(g>0?` ⏳${Math.ceil(g)}`:'')}
       state.target=E.p}
+    // ---- başlangıç otopilotu: ilk GUIDE sn oyuncu kartalın olduğu yöne otomatik döner
+    if(flying&&E.rt<GUIDE){const dx=E.p.x-player.pos.x,dy=E.p.y-player.pos.y,dz=E.p.z-player.pos.z,hd=Math.hypot(dx,dz);
+      if(hd>8){const k=Math.min(1,dt*5);player.yaw+=angDiff(Math.atan2(-dx,-dz),player.yaw)*k;player.pitch+=(Math.max(-.4,Math.min(.5,Math.atan2(dy,hd)))-player.pitch)*k}
+      FCAM.yaw=0;FCAM.pitch=0;invuln=Math.max(invuln,.2)}
+    // ---- koridor
+    {const nr=nearRoute(player.pos.x,player.pos.y,player.pos.z);placeRings(nr.s);
+     const out=flying&&E.rt>=GUIDE&&nr.d>CORR,near=flying&&E.rt>=GUIDE&&!out&&nr.d>CORR_IN;
+     cMat.opacity=out?.4+.18*Math.sin(E.rt*10):near?.26:.17;
+     if(out!==cOut){cOut=out;cMat.color.setHex(out?0xff5577:0x7dffb0)}
+     if(E.rt>=GUIDE&&!cInfo){cInfo=true;toast('🚧 Yeşil koridorda kal! Dışında enerjin saniyede 3 azalır',2.6)}
+     if(out){energy-=dt*3;cSnd-=dt;if(cSnd<=0){cSnd=1;sfx(260,.12,'square',.06)}
+       const dx=nr.x-player.pos.x,dz=nr.z-player.pos.z,ca=Math.cos(player.yaw),sa=Math.sin(player.yaw),dr=dx*ca-dz*sa,df=-dx*sa-dz*ca;
+       corrUi(true,'🚧 Koridor dışı! ⚡ −3/sn',Math.atan2(dr,df).toFixed(2));
+       if(energy<=0){energy=0;updateHearts();CHASE.end('energy');return}updateHearts()}
+     else if(near){corrUi(false);cWarnT-=dt;if(cWarnT<=0){cWarnT=2.5;toast('⚠️ Koridorun kenarı! Yola dön',1)}}
+     else corrUi(false)}
     eg.rotation.set(E.pitch,E.yaw,Math.max(-.85,Math.min(.85,E.yr*.45)));
     eg.userData.pose(E.ph,E.amp,E.sw);eg.userData.tail.rotation.x=-E.pitch*.5;
   };
@@ -3412,8 +3654,6 @@ function setupGrand(){
         if(b.t<1.38){if(!b.hitP&&Math.hypot(player.pos.x-b.x,player.pos.z-b.z)<7.5&&player.pos.y<240){b.hitP=true;player.stun=1.4;shake=.6;sfx(90,.4,'square',.12);toast('Yıldırım çarptı! ⚡',1.3)}
           bots.forEach(bt=>{if(!b.hitB.has(bt)&&Math.hypot(bt.m.position.x-b.x,bt.m.position.z-b.z)<7.5){b.hitB.add(bt);bt.stun=1.3}})}}
       if(b.t>1.5){scene.remove(b.warn);if(b.strike)scene.remove(b.strike);bolts.splice(i,1)}}
-    // stalactites in the cave
-    if(player.tun===0){const t=tunnelInfo(CONE,player.pos);for(const c of CONE.cols){if(Math.hypot(t.al-c.al,t.lat-c.lat)<3.6&&!(player.stun>.5)){player.stun=.9;shake=.4;sfx(120,.25,'square',.1);toast('Sarkıta çarptın!',1);player.pos.z+=Math.sign(t.lat-c.lat||1)*2;break}}}
   };
 }
 
@@ -4051,15 +4291,28 @@ function hurt(amount,away,kind){
   if(amount>=FALL_AT){startCrash(away,kind,amount);return}
   const P=player;invuln=.7;shake=.25;sfx(kind==='green'?210:150,.18,'square',.1);
   burst(P.pos.clone(),kind==='green'?sproutMat:dustMat,12,.7);
-  if(kind!=='wall'){P.pos.x+=away.x*2.5;P.pos.z+=away.z*2.5;P.pos.y+=.6}P.speed*=.55;
-  if(away.x||away.z)P.yaw+=angDiff(Math.atan2(-away.x,-away.z),P.yaw)*.35;
-  toast(kind==='green'?`🌲 Ağaç! -${amount}`:kind==='soft'?`🪵 Çarptın! -${amount}`:kind==='wall'?`⛰️ Duvara çarptın! -${amount}`:kind==='ship'?`🚢 Gemiye çarptın! -${amount}`:`🏠 Yapı! -${amount}`,.9);
+  const TT=P.tun>=0?TUNNELS[P.tun]:null;
+  if(TT){/* tünel içi: geri dönme yok; eksene hizala, merkeze çek, uzun koruma */
+    const ti=tunnelInfo(TT,P.pos),fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),sg=(fx*TT.ax+fz*TT.az)>=0?1:-1,ty=Math.atan2(-sg*TT.ax,-sg*TT.az);
+    P.yaw+=angDiff(ty,P.yaw)*.75;const nl=ti.lat*.35,ny=ti.dy*.45;
+    P.pos.x=TT.x+ti.al*TT.ax-nl*TT.az;P.pos.z=TT.z+ti.al*TT.az+nl*TT.ax;P.pos.y=TT.tY+(TT.sl||0)*ti.al+ny;
+    P.speed=Math.max(P.speed*.85,Math.min(P.speed,14));invuln=1.8}
+  else if(P.rtun){P.speed=Math.max(P.speed*.85,Math.min(P.speed,14));invuln=1.8}
+  else{
+  if(kind!=='wall'&&kind!=='mach'){P.pos.x+=away.x*2.5;P.pos.z+=away.z*2.5;P.pos.y+=.6}P.speed*=.55;
+  if(kind==='mach'){P.pos.x+=away.x*3;P.pos.z+=away.z*3;P.pos.y+=1}
+  if(away.x||away.z)P.yaw+=angDiff(Math.atan2(-away.x,-away.z),P.yaw)*.35}
+  toast(kind==='green'?`🌲 Ağaç! -${amount}`:kind==='soft'?`🪵 Çarptın! -${amount}`:kind==='mach'?`🚜 Makine! -${amount}`:kind==='cave'?`🪨 Mağara engeli! -${amount}`:kind==='wall'?`⛰️ Duvara çarptın! -${amount}`:kind==='ship'?`🚢 Gemiye çarptın! -${amount}`:`🏠 Yapı! -${amount}`,.9);
   if(energy<=0)finish(false,'Enerjin bitti! Yolda gördüğün kalpleri toplayarak enerji kazanabilirsin.')}
 function hazards(dt){
   if(invuln>0){invuln-=dt;if(invuln<0)invuln=0;const sec=invuln>1.2?Math.ceil(invuln):0;if(sec!==shieldShown){shieldShown=sec;updateHearts()}
     rig.visible=invuln<=0||Math.floor(invuln*8)%4!==0;return}
   const P=player.pos;
   if(player.hitWall){player.hitWall=false;const fx=-Math.sin(player.yaw),fz=-Math.cos(player.yaw);sfx(120,.3,'square',.12);hurt(DMG.wall,new V3(-fx,0,-fz),'wall');return}
+  if(player.tun>=0){const T=TUNNELS[player.tun];if(T&&T.obs){const ti=tunnelInfo(T,P);
+    for(const o of T.obs){if(Math.abs(ti.al-o.al)>o.r0+GR+2)continue;const y0=Math.min(o.yR,o.yT),y1=Math.max(o.yR,o.yT),tt=Math.max(0,Math.min(1,(ti.dy-o.yR)/((o.yT-o.yR)||1))),r=o.r0+(o.r1-o.r0)*tt;
+      const hd=Math.hypot(ti.al-o.al,ti.lat-o.lat),vg=Math.max(0,y0-ti.dy,ti.dy-y1);
+      if(Math.hypot(hd,vg)<r+GR*.8){const ox=T.x+T.ax*o.al-T.az*o.lat,oz=T.z+T.az*o.al+T.ax*o.lat,ax=P.x-ox,az=P.z-oz,al=Math.hypot(ax,az)||1;hurt(o.dmg,new V3(ax/al,0,az/al),'cave');return}}}}
   for(const t of redTrees){const dx=P.x-t.x,dz=P.z-t.z,d2=dx*dx+dz*dz;if(d2>200*t.s*t.s)continue;let hit=false;
     for(const o of CROWN){const cx=t.x+o[0]*t.s,cy=t.h+o[1]*t.s,cz=t.z+o[2]*t.s,r=3.35*o[3]*t.s+GR;const ex=P.x-cx,ey=P.y-cy,ez=P.z-cz;if(ex*ex+ey*ey+ez*ez<r*r){hit=true;break}}
     if(!hit){const tr=.85*t.s+GR*.8;if(d2<tr*tr&&P.y>t.h-1&&P.y<t.h+8*t.s)hit=true}
@@ -4071,6 +4324,10 @@ function hazards(dt){
   for(const sc of SHIPCOL){const g=sc.g,d=SHD[sc.k],dx=P.x-g.position.x,dz=P.z-g.position.z;if(dx*dx+dz*dz>d[0]*d[0]*.3)continue;const c=Math.cos(g.rotation.y),sn=Math.sin(g.rotation.y),lx=dx*c-dz*sn,lz=dx*sn+dz*c;
     if(Math.abs(lx)<d[1]/2+GR*.7&&Math.abs(lz)<d[0]/2+GR*.7&&P.y<g.position.y+d[2]+GR*.5&&P.y>g.position.y-3){const hd=Math.hypot(dx,dz)||1;hurt(DMG.ship,new V3(dx/hd,0,dz/hd),'ship');return}}
   {const sh=softHit(P);if(sh){hurt(2,new V3(sh.dx/sh.hd,0,sh.dz/sh.hd),'soft');return}}
+  for(const m of MACH){const ry=m.rig.rotation.y,cy=Math.cos(ry),sy=Math.sin(ry),px=m.rig.position.x,pz=m.rig.position.z;
+    if(P.y>=m.top+GR*.5||P.y<m.base-1)continue;
+    for(const q of m.c){const w=m.W(px+q[0]*cy+q[1]*sy,pz-q[0]*sy+q[1]*cy),dx=P.x-w[0],dz=P.z-w[1],rr=q[2]+GR*.8;
+      if(dx*dx+dz*dz<rr*rr){const hd=Math.hypot(dx,dz)||1;sfx(180,.3,'square',.1);hurt(6,new V3(dx/hd,0,dz/hd),'mach');return}}}
   const ph=propHit(P);
   if(ph){const p=ph.p,dx=P.x-p.x,dz=P.z-p.z,px=ph.hr+GR-Math.abs(dx),pz=ph.hr+GR-Math.abs(dz),py=p.top+GR*.6-P.y;let away;
     if(py<Math.min(px,pz)){P.y=p.top+GR*.6+.8;away=new V3(0,0,0)}
@@ -4129,7 +4386,13 @@ function wkLocal(b,x,z){const f=b.f,dx=x-f.x,dz=z-f.z,c=Math.cos(f.rot),s=Math.s
 function meshH(x,z){const cs=SIZE/TSEG,fx=(x+SIZE/2)/cs,fz=(z+SIZE/2)/cs,ix=Math.max(0,Math.min(TSEG-1,Math.floor(fx))),iz=Math.max(0,Math.min(TSEG-1,Math.floor(fz))),u=fx-ix,v=fz-iz,X=-SIZE/2+ix*cs,Z=-SIZE/2+iz*cs;
   const ha=height(X,Z),hd=height(X+cs,Z),hb=height(X,Z+cs);
   if(u+v<=1)return ha+u*(hd-ha)+v*(hb-ha);const hc=height(X+cs,Z+cs);return hc+(1-u)*(hb-hc)+(1-v)*(hd-hc)}
-function wkFloor(x,z,y){let best=meshH(x,z),fb=-1e9;{const tp=wkTopAt(x,z,y,WK.STEP+.05);if(tp>best)best=tp}
+function rtunSeg(x,z,wd){if(!RTUN)return null;const P=RAIL.pts;let best=null,bd=wd;for(let i=RTUN.a;i<RTUN.b;i++){const A=P[i],B=P[i+1],dx=B.x-A.x,dz=B.z-A.z,L2=dx*dx+dz*dz||1,t=((x-A.x)*dx+(z-A.z)*dz)/L2;if(t<0||t>1)continue;const qx=A.x+dx*t,qz=A.z+dz*t,d=Math.hypot(x-qx,z-qz);if(d<bd){bd=d;best={d,qx,qz,qy:A.y+(B.y-A.y)*t}}}return best}
+function rtunFloor(x,z){if(!RTUN)return null;const P=RAIL.pts;let best=null,bd=3.7;for(let i=RTUN.a;i<RTUN.b;i++){const A=P[i],B=P[i+1],dx=B.x-A.x,dz=B.z-A.z,L2=dx*dx+dz*dz||1,t=Math.max(0,Math.min(1,((x-A.x)*dx+(z-A.z)*dz)/L2)),qx=A.x+dx*t,qz=A.z+dz*t,d=Math.hypot(x-qx,z-qz);if(d<bd){bd=d;best=A.y+(B.y-A.y)*t}}return best}
+function caveAt(x,y,z){for(let i=0;i<TUNNELS.length;i++){const T=TUNNELS[i];if(T.cone||T.rail||!T.rAt)continue;const t=tunnelInfo(T,{x,y,z});
+    if(Math.abs(t.al)<T.half+CAVE_EXT-.3&&Math.abs(t.lat)<CAVE_RM*.72&&t.dy<4){const r=T.rAt(t.al,-Math.PI/2);return{i,T,t,floor:T.tY-Math.sqrt(Math.max(1,r*r-t.lat*t.lat))+.25}}}return null}
+function wkFloor(x,z,y){{const cv=caveAt(x,y,z);if(cv)return{h:cv.floor,kind:'tun'}}
+{const rt=rtunFloor(x,z);if(rt!==null)return{h:rt,kind:'tun'}}
+  let best=meshH(x,z),fb=-1e9;{const tp=wkTopAt(x,z,y,WK.STEP+.05);if(tp>best)best=tp}
   for(const f of FARMS){if(Math.abs(x-f.x)>110||Math.abs(z-f.z)>110)continue;const[lx,lz]=farmLocal(f,x,z);if(lx>-38&&lx<38&&lz>27&&lz<97)best=Math.max(best,height(x,z)+.3)}
   for(const b of BLD){const f=b.f;if(Math.abs(x-f.x)>(b.reach||48)||Math.abs(z-f.z)>(b.reach||48))continue;const[lx,lz]=wkLocal(b,x,z);if(Math.hypot(lx-b.lx,lz-b.lz)>b.rad)continue;
     for(const fl of b.floors)if(lx>=fl[0]&&lx<=fl[1]&&lz>=fl[2]&&lz<=fl[3]&&fl[4]<=y+WK.STEP&&fl[4]>fb)fb=fl[4];
@@ -4251,7 +4514,10 @@ function updateWalk(dt,inp){const W=WALK;if(!W.on)return;W.t+=dt;W.grace=Math.ma
   // kaz bekliyor: ara sıra yem arar
   const gp=W.gp;if(gp){
     if(W.call){updateCall(dt)}
-    else{W.pk+=dt;const pk=Math.max(0,Math.sin(W.pk*.9))*(Math.sin(W.pk*.23)>.3?1:0);rig.rotation.set(-.45*pk,gp.yaw,Math.sin(W.pk*.7)*.02)}
+    else{W.pk+=dt;const pk=Math.max(0,Math.sin(W.pk*.9))*(Math.sin(W.pk*.23)>.3?1:0);rig.rotation.set(-.45*pk,gp.yaw,Math.sin(W.pk*.7)*.02)
+      {const fx=-Math.sin(gp.yaw),fz=-Math.cos(gp.yaw),rx=Math.cos(gp.yaw),rz=-Math.sin(gp.yaw);let hm=gp.y;
+       for(const[u,v]of[[1.6,0],[-1.6,0],[.9,.9],[.9,-.9],[-.9,.9],[-.9,-.9],[0,1.1],[0,-1.1]]){const h=height(gp.x+fx*u+rx*v,gp.z+fz*u+rz*v);if(h>hm)hm=h}
+       rig.position.set(gp.x,hm+1.85,gp.z)}}
     const dist=Math.hypot(W.x-gp.x,W.z-gp.z),want=W.call?null:dist<7?'mount':dist>50?'call':null;
     if(want!==W.nearShown){W.nearShown=want;setSpecial(want==='mount'?'🪿<br>Kaza bin':want==='call'?'📣<br>Kazı çağır':null)}
     if(want&&inp.pressed&&W.grace<=0){if(want==='mount')startMount();else startCall()}}
@@ -4271,8 +4537,14 @@ function camWalk(dt){const W=WALK,K=WK.K;
   const tgt=new V3(W.x,Math.max(W.y,W.swim?-.2:-9)+(W.swim?.9:1.55*K),W.z),dist=W.inside?3.7:7.6,pit=W.inside?.3:W.camPitch;
   const dir=new V3(Math.sin(W.camYaw)*Math.cos(pit),Math.sin(pit)+.06,Math.cos(W.camYaw)*Math.cos(pit)).normalize();let ok=dist;
   for(let s=.7;s<=dist;s+=.35){if(wkSolidAt(tgt.x+dir.x*s,tgt.y+dir.y*s,tgt.z+dir.z*s)){ok=Math.max(.9,s-.7);break}}
-  const want=tgt.clone().addScaledVector(dir,ok);want.y=Math.max(want.y,height(want.x,want.z)+.9,W.swim?.6:-9);
-  camera.position.lerp(want,1-Math.exp(-dt*9));camera.lookAt(tgt);const fv=camera.userData.baseFov;camera.fov+=(fv-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix()}
+  const want=tgt.clone().addScaledVector(dir,ok);
+  const wi=rtunSeg(W.x,W.z,3.9);let inT=false,CCw=null;
+  if(!wi&&!W.swim){const pk=camPick(tgt,want);want.copy(pk.pos);CCw=pk.C}
+  if(wi){const c=rtunSeg(want.x,want.z,40);if(c){inT=true;const lim=3.1;if(c.d>lim){const k=lim/c.d;want.x=c.qx+(want.x-c.qx)*k;want.z=c.qz+(want.z-c.qz)*k}want.y=Math.max(c.qy+.9,Math.min(want.y,c.qy+6))}}
+  const cvW=caveAt(W.x,W.y+1,W.z);
+  if(!inT&&!cvW)want.y=Math.max(want.y,height(want.x,want.z)+.9,W.swim?.6:-9);
+  camera.position.lerp(want,1-Math.exp(-dt*9));if(cvW){const T=cvW.T,c=tunnelInfo(T,camera.position);if(Math.abs(c.al)>T.half+CAVE_EXT-.5||c.r>6.5){const al=Math.max(-(T.half+CAVE_EXT-.5),Math.min(T.half+CAVE_EXT-.5,c.al)),k=c.r>6.5?6.5/c.r:1,nl=c.lat*k,ny=c.dy*k;camera.position.set(T.x+al*T.ax-nl*T.az,T.tY+ny,T.z+al*T.az+nl*T.ax)}}
+  else if(CCw)camClip(tgt,camera.position,CCw);camera.lookAt(tgt);const fv=camera.userData.baseFov;camera.fov+=(fv-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix()}
 
 /* yarış maden tüneli: 1 = içi (boşluk), 2 = kaya kabuğu (duvar), 0 = dışı */
 function raceTunZone(x,y,z){const q=raceNear(x,z);if(!q||q.s<RACE.tunA||q.s>RACE.tunB)return 0;
@@ -4282,6 +4554,7 @@ function raceTunZone(x,y,z){const q=raceNear(x,z);if(!q||q.s<RACE.tunA||q.s>RACE
   if(l<Wo&&dy>-7&&dy<outTop)return 2;return 0}
 /* ---------------- flight step ---------------- */
 function flyStep(dt,inp){
+  if(CHASE&&state.mission==='chase'&&CHASE.lock())inp={x:0,y:0,act:false,brake:false,auto:inp.auto};
   const P=player,ox=player.pos.x,oy=player.pos.y,oz=player.pos.z,turn=.75+P.g.agil*.22;
   const slow=1-Math.min(1,P.speed/18);P.slow=slow;
   P.yaw-=inp.x*turn*(1+slow*.4)*dt;
@@ -4301,10 +4574,21 @@ function flyStep(dt,inp){
   const cp=Math.cos(P.pitch);
   P.pos.x+=fx*cp*P.speed*dt;P.pos.z+=fz*cp*P.speed*dt;P.pos.y+=Math.sin(P.pitch)*P.speed*dt+inp.y*14*slow*dt;
   const bx0=P.pos.x,by0=P.pos.y,bz0=P.pos.z;P.tun=tunnelHold(P.pos,P.tun,8);let push=Math.hypot(P.pos.x-bx0,P.pos.y-by0,P.pos.z-bz0);
+  /* tren tüneli (eğri): en yakın ray parçasına göre tüp içinde tut; duvardan sızmayı ve yüzeye fırlamayı engeller */
+  if(P.tun<0&&RTUN){const sg=rtunSeg(P.pos.x,P.pos.z,8);
+    if(sg){const dy=P.pos.y-sg.qy;
+      if(P.rtun||(P.tunPrev>=0&&TUNNELS[P.tunPrev]&&TUNNELS[P.tunPrev].rail)||(sg.d<3.6&&dy>.5&&dy<5.8)){P.rtun=true;const px0=P.pos.x,py0=P.pos.y,pz0=P.pos.z;
+        if(sg.d>3.4){const k=3.4/sg.d;P.pos.x=sg.qx+(P.pos.x-sg.qx)*k;P.pos.z=sg.qz+(P.pos.z-sg.qz)*k}
+        const dd=Math.min(3.4,sg.d),top=2.4+4.3*Math.sqrt(Math.max(0,1-(dd/4.3)*(dd/4.3)));
+        P.pos.y=Math.max(sg.qy+.9,Math.min(sg.qy+Math.min(5.4,top-.5),P.pos.y));
+        push+=Math.hypot(P.pos.x-px0,P.pos.y-py0,P.pos.z-pz0)}}
+    else P.rtun=false}
+  else if(P.tun>=0)P.rtun=false;
+  P.tunPrev=P.tun;
   let rz=P.tun<0?raceTunZone(P.pos.x,P.pos.y,P.pos.z):0;
   if(rz===2){const pz=raceTunZone(ox,oy,oz);if(pz===2){const q=raceNear(P.pos.x,P.pos.z);P.pos.y=Math.max(P.pos.y,q.e+4.6+11.2+2);rz=0}else{P.pos.set(ox,oy,oz);P.speed*=.7;if(P.speed>8&&invuln<=0)P.hitWall=true;rz=pz}}
   if(rz===1){const q=raceNear(P.pos.x,P.pos.z);if(q&&P.pos.y<q.e+1.7)P.pos.y=q.e+1.7}
-  else if(P.tun<0){const g0=solidTop(P.pos.x,P.pos.z,P.pos.y,true)+1.7;if(P.pos.y<g0){push+=g0-P.pos.y;P.pos.y=g0}}
+  else if(P.tun<0&&!P.rtun){const g0=solidTop(P.pos.x,P.pos.z,P.pos.y,true)+1.7;if(P.pos.y<g0){push+=g0-P.pos.y;P.pos.y=g0}}
   /* dağ / tünel / mağara duvarına sürtünme ve çarpma: enerji kaybı */
   P.scr=Math.max(0,(P.scr||0)-dt*5);const stp=push>.2&&(solidTop(P.pos.x+fx*4,P.pos.z+fz*4,P.pos.y,true)-solidTop(P.pos.x,P.pos.z,P.pos.y,true)>3.2);if(P.speed>8&&push>(stp?.2:.5)){P.scr+=push;if(push>1.1||P.scr>1.8){P.scr=0;if(invuln<=0){P.hitWall=true;if(P.tun<0)P.pos.set(ox,oy,oz)}}}
   splashT-=dt;if(P.tun<0&&P.pos.y<3.6&&P.speed>10&&splashT<=0&&height(P.pos.x,P.pos.z)<.1){splashT=.1;burst(new V3(P.pos.x,.3,P.pos.z),splashMat,3,.5)}
@@ -4317,12 +4601,82 @@ function updateRig(dt,flying){
   if(flying){player.flapT+=dt*(player.boost?15:8+sl*6);rigGoose.userData.flap(player.flapT,player.pitch<-.25&&sl<.3?.2:.75+sl*.2)}
 }
 const FCAM={yaw:0,pitch:0};
+/* ---------------- kamera çarpışması: kamera hiçbir katı cismin içine giremez ---------------- */
+function treeTest(t,px,py,pz,g){const dx=px-t.x,dz=pz-t.z,d2=dx*dx+dz*dz,s=t.s,q=6.4*s+g;if(d2>q*q)return false;const y=py-(t.h-.6),hd=Math.sqrt(d2);
+  if(t.type===0){if(y>-g&&y<16.2*s+g){const r=y<3.2*s?.7*s:3.8*s*Math.max(0,1-(y-3.2*s)/(13*s));if(hd<r+g)return true}}
+  else if(t.type===1){const ey=y-8.4*s,r=4.3*s+g;if(hd*hd+ey*ey<r*r)return true;if(hd<.75*s+g&&y>-g&&y<6*s)return true}
+  else{const a1=3.1*s+g,b1=5*s+g,ey=y-10*s;if(hd*hd/(a1*a1)+ey*ey/(b1*b1)<1)return true;if(hd<.4*s+g&&y>-g&&y<9*s)return true}
+  return false}
+function camTree(px,py,pz,g,skip){const cx=Math.floor(px/24),cz=Math.floor(pz/24);
+  for(let ix=cx-1;ix<=cx+1;ix++)for(let iz=cz-1;iz<=cz+1;iz++){const a=TGRID.get(ix*1024+iz);if(!a)continue;
+    for(const t of a){if(t.hide||(skip&&skip.has(t)))continue;if(treeTest(t,px,py,pz,g))return true}}
+  return false}
+function camTreesAround(c){const set=new Set(),cx=Math.floor(c.x/24),cz=Math.floor(c.z/24);
+  for(let ix=cx-1;ix<=cx+1;ix++)for(let iz=cz-1;iz<=cz+1;iz++){const a=TGRID.get(ix*1024+iz);if(!a)continue;for(const t of a)if(treeTest(t,c.x,c.y,c.z,.3))set.add(t)}
+  return set}
+function camOpenTun(x,y,z){for(const T of TUNNELS){if(T.rail)continue;const t=tunnelInfo(T,{x,y,z});if(Math.abs(t.al)<T.half&&t.r<(T.rad||9.5)+.2)return true}
+  const s=rtunSeg(x,z,4.5);return !!(s&&y>s.qy-.4&&y<s.qy+7.4)}
+let _cc=null;
+function camCands(c,R){R=Math.max(R,46);
+  if(!_cc||Math.abs(_cc.x-c.x)>12||Math.abs(_cc.z-c.z)>12||_cc.R<R){const pr=[],rt=[],wc=[],RR=R+14;for(const p of PROPS){if(p.air)continue;const hr=(p.hr||p.r*.72)+RR;if(Math.abs(p.x-c.x)<hr&&Math.abs(p.z-c.z)<hr)pr.push(p)}
+    for(const t of redTrees)if(Math.abs(t.x-c.x)<RR+12&&Math.abs(t.z-c.z)<RR+12)rt.push(t);
+    for(const w of WCOLS)if(Math.abs(w.x-c.x)<RR+w.r&&Math.abs(w.z-c.z)<RR+w.r)wc.push(w);
+    _cc={x:c.x,z:c.z,R,pr,rt,wc}}
+  /* hedefin kendisi içinde durduğu cisim (ev sundurması, çalı vb.) kamerayı engellemesin */
+  const inP=p=>{const hr=(p.hr||p.r*.72)+.2;return Math.abs(c.x-p.x)<hr&&Math.abs(c.z-p.z)<hr&&c.y<p.top+.3};
+  const rt2=_cc.rt.filter(t=>{for(const o of CROWN){const ex=c.x-(t.x+o[0]*t.s),ey=c.y-(t.h+o[1]*t.s),ez=c.z-(t.z+o[2]*t.s),r=3.35*o[3]*t.s+.2;if(ex*ex+ey*ey+ez*ez<r*r)return false}return true});
+  return{skipT:camTreesAround(c),pr:_cc.pr.filter(p=>!inP(p)),rt:rt2,wc:_cc.wc.filter(w=>Math.hypot(c.x-w.x,c.z-w.z)>w.r+.2),cx:c.x,cz:c.z,R}}
+const CAMM=.7,_cp={x:0,y:0,z:0};
+function camBlocked(x,y,z,C){
+  if(camOpenTun(x,y,z))return false;
+  if(y<ground(x,z)+CAMM)return true;
+  {const ct=coneTop(x,z);if(ct>-1e8&&y<ct+CAMM)return true}
+  for(const p of C.pr){const hr=(p.hr||p.r*.72)+CAMM;if(Math.abs(x-p.x)>hr||Math.abs(z-p.z)>hr)continue;const bot=p.bot!==undefined?p.bot:ground(p.x,p.z)-1;if(y<p.top+CAMM&&y>bot-CAMM)return true}
+  for(const w of C.wc){const dx=x-w.x,dz=z-w.z,r=w.r+CAMM;if(dx*dx+dz*dz<r*r&&y<w.top+CAMM)return true}
+  for(const t of C.rt){const dx=x-t.x,dz=z-t.z,d2=dx*dx+dz*dz;if(d2>200*t.s*t.s)continue;for(const o of CROWN){const ex=x-(t.x+o[0]*t.s),ey=y-(t.h+o[1]*t.s),ez=z-(t.z+o[2]*t.s),r=3.35*o[3]*t.s+CAMM;if(ex*ex+ey*ey+ez*ez<r*r)return true}
+    const tr=.85*t.s+CAMM;if(d2<tr*tr&&y>t.h-1&&y<t.h+8*t.s)return true}
+  if(camTree(x,y,z,CAMM*.8,C.skipT))return true;
+  {const cx=Math.floor(x/8),cz=Math.floor(z/8);for(let ix=cx-1;ix<=cx+1;ix++)for(let iz=cz-1;iz<=cz+1;iz++){const a=SOFT.get(ix*4096+iz);if(!a)continue;for(const o of a){const dx=x-o.x,dz=z-o.z,rr=o.r+CAMM*.6;if(dx*dx+dz*dz<rr*rr&&y>o.y0-CAMM*.6&&y<o.y1+CAMM*.6)return true}}}
+  if(!(WALK.on&&WALK.inside)&&wkSolidAt(x,y,z))return true;
+  return false}
+/* hedeften p'ye giden doğrudaki ilk engele kadar serbest mesafe (0..L) */
+function camFree(t,p,C){const dx=p.x-t.x,dy=p.y-t.y,dz=p.z-t.z,L=Math.hypot(dx,dy,dz)||1e-3,hl=Math.hypot(dx,dz)||1,px=-dz/hl*.5,pz=dx/hl*.5;
+  for(let s=.9;s<=L+.001;s+=.45){const k=Math.min(s,L)/L,x=t.x+dx*k,y=t.y+dy*k,z=t.z+dz*k;
+    if(camBlocked(x,y,z,C)||camBlocked(x+px,y,z+pz,C)||camBlocked(x-px,y,z-pz,C)||camBlocked(x,y+.45,z,C)){return Math.max(0,s-.9)}}
+  return L}
+const _cv=new V3(),_cy=new V3(0,1,0);
+const CAMPICK={dy:0,lift:0,sc:1};
+/* istenen kamera noktası kapalıysa: en uygun açı (yan/yukarı) seçilir, gerekirse yaklaşır */
+function camPick(t,want){const C=camCands(t,Math.max(30,want.distanceTo(t)+14)),v=want.clone().sub(t),L=Math.max(.5,v.length());
+  const f0=camFree(t,want,C);
+  if(f0>=L-.01){CAMPICK.lift*=.9;CAMPICK.sc+=(1-CAMPICK.sc)*.1;return{pos:want,C}}
+  /* kamera HER ZAMAN karakterin arkasında kalır: yalnızca yükseklik (aşağı-yukarı) ve uzaklık değişir */
+  let best=null,bc=1e9,fb=null,fbf=-1;
+  for(const sc of[1,.82,.66,.5,.36,.26])for(const lift of[0,.25,.55,.9,1.4,2]){
+    const o=new V3(v.x*sc,v.y*sc+lift*L*sc*.9,v.z*sc),pt=t.clone().add(o),ol=o.length(),f=camFree(t,pt,C);
+    const cost=(1-sc)*1.6+lift*.45;
+    if(f>=ol-.01){if(cost<bc){bc=cost;best={o,sc,lift}}}
+    else if(f>fbf){fbf=f;fb={o,sc,lift,f}}}
+  if(best){CAMPICK.lift=best.lift;CAMPICK.sc=best.sc;return{pos:t.clone().add(best.o),C}}
+  CAMPICK.lift=fb.lift;CAMPICK.sc=fb.sc;
+  return{pos:t.clone().addScaledVector(fb.o.clone().normalize(),Math.max(1.1,fb.f)),C}}
+/* son güvence: hedef-kamera doğrusu ve kameranın kendisi kesinlikle boşta */
+function camClip(t,pos,C){const f=camFree(t,pos,C),L=pos.distanceTo(t);if(f>=L-.01&&!camBlocked(pos.x,pos.y,pos.z,C))return;
+  const k=Math.max(.05,Math.min(1,f/Math.max(L,1e-3)));pos.set(t.x+(pos.x-t.x)*k,t.y+(pos.y-t.y)*k,t.z+(pos.z-t.z)*k);
+  let g=0;while(camBlocked(pos.x,pos.y,pos.z,C)&&g++<8)pos.y+=.5;
+  if(camBlocked(pos.x,pos.y,pos.z,C)){pos.set(t.x,t.y+.25,t.z)}}
 function camFly(dt){
   const P=player;if(!(swipe.id!==null&&(state.mode==='fly'||state.mode==='flyDone'))){const k=Math.exp(-dt*4.5);FCAM.yaw*=k;FCAM.pitch*=k;if(Math.abs(FCAM.yaw)<.002)FCAM.yaw=0;if(Math.abs(FCAM.pitch)<.002)FCAM.pitch=0}
   const ca=P.yaw+FCAM.yaw,back=new V3(Math.sin(ca),0,Math.cos(ca)),cpz=Math.cos(FCAM.pitch*.7);
-  const want=P.pos.clone().addScaledVector(back,13*cpz).add(new V3(0,4.5-P.pitch*5+Math.sin(FCAM.pitch)*13,0));
-  camera.position.lerp(want,1-Math.exp(-dt*5));
-  if(P.tun>=0)tunnelHold(camera.position,P.tun,6.5);else{const gh=solidTop(camera.position.x,camera.position.z,camera.position.y)+1.5;if(camera.position.y<gh)camera.position.y=gh}
+  const ts=rtunSeg(P.pos.x,P.pos.z,4.9),inRT=!!(ts&&P.pos.y>ts.qy-1.5&&P.pos.y<ts.qy+8.5);
+  const want=inRT?P.pos.clone().addScaledVector(back,7*cpz).add(new V3(0,1.7-P.pitch*3+Math.sin(FCAM.pitch)*6,0)):P.pos.clone().addScaledVector(back,13*cpz).add(new V3(0,4.5-P.pitch*5+Math.sin(FCAM.pitch)*13,0));
+  let CC=null;const tgtF=P.pos.clone();tgtF.y+=1.1;
+  if(!inRT&&P.tun<0){const pk=camPick(tgtF,want);want.copy(pk.pos);CC=pk.C}
+  camera.position.lerp(want,1-Math.exp(-dt*(inRT?9:(CAMPICK.dy||CAMPICK.lift?7:5))));
+  if(CC)camClip(tgtF,camera.position,CC);
+  if(inRT){const c=rtunSeg(camera.position.x,camera.position.z,40);if(c){const lim=3.1;if(c.d>lim){const k=lim/c.d;camera.position.x=c.qx+(camera.position.x-c.qx)*k;camera.position.z=c.qz+(camera.position.z-c.qz)*k}camera.position.y=Math.max(c.qy+.9,Math.min(camera.position.y,c.qy+6))}
+    else{const gh=solidTop(camera.position.x,camera.position.z,camera.position.y)+1.5;if(camera.position.y<gh)camera.position.y=gh}}
+  else if(P.tun>=0)tunnelHold(camera.position,P.tun,6.5);else{const gh=solidTop(camera.position.x,camera.position.z,camera.position.y)+1.5;if(camera.position.y<gh)camera.position.y=gh}
   camera.lookAt(P.pos.x-Math.sin(ca)*8,P.pos.y+1.5+Math.sin(P.pitch)*6,P.pos.z-Math.cos(ca)*8);
   const f=camera.userData.baseFov+(P.boost?9:0);camera.fov+=(f-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix();
 }
