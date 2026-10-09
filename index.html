@@ -902,8 +902,25 @@ function cuReg(mesh,base,nearR,rad){
   CU_PROPS.push(o);return o}
 /* --- uzak nesne gizleme: büyük gruplardaki (yarış süsleri, çiftlikler, çitler) küçücük kalan uzak parçaları çizme.
    Gizleme `layers` ile yapılır: oyunun `visible` mantığına dokunmaz, hareket eden parçalar otomatik dışarıda bırakılır. --- */
-const DC={lvl:(()=>{const v=store.get('kz-dc2',2);return v===0||v===1||v===2?v:2})(),list:[],hidden:0,gh:0,ghid:0};
+const DC={lvl:(()=>{const v=store.get('kz-dc2',2);return v===0||v===1||v===2?v:2})(),list:[],hidden:0,gh:0,ghid:0,tk:0};
 function dcSet(e,hide){if(e.hidden===hide)return;e.hidden=hide;for(const o of e.items){o._h=(o._h||0)+(hide?1:-1);o.layers.mask=o._h>0?0:o._lm}}
+const FL={lod:0,list:null};
+function flockLod(){
+  if(!FL.list){FL.list=flock.map(f=>{const inner=f.m.children[0],det=[],neck=[];
+    inner.children.slice(1,13).forEach((n,i)=>{if(i%2===1&&i<11)neck.push(n)});
+    inner.traverse(o=>{if(!o.isMesh)return;const g=o.geometry,ty=g&&g.type;
+      if(ty==='BoxGeometry'||(ty==='SphereGeometry'&&g.parameters&&g.parameters.radius<.1)||o.parent===f.m.userData.tuck)det.push(o)});
+    return{g:f.m,det,neck,tier:0}})}
+  let c=0;const cp=camera.position;
+  for(const f of FL.list){const p=f.g.position,dx=p.x-cp.x,dy=p.y-cp.y,dz=p.z-cp.z,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    /* kademeler: 0 tam, 1 (>120 m) tüy/kuyruk/göz yok, 2 (>260 m) boyun yarı, 3 (>720 m) gizli */
+    let t=f.tier;
+    if(t===0&&d>125)t=1;else if(t>=1&&d<110)t=0;
+    if(t>=1){if(t===1&&d>270)t=2;else if(t>=2&&d<240)t=1;if(d>740)t=3;else if(t===3&&d<690)t=2}
+    if(t!==f.tier){f.tier=t;const lo=t>=1,mid=t>=2;
+      for(const o of f.det)o.visible=!lo;for(const o of f.neck)o.visible=!mid;f.g.visible=t<3}
+    if(t>0)c++}
+  FL.lod=c}
 function dcRegister(){
   const skip=new Set([typeof rig!=='undefined'?rig:null,typeof rigRider!=='undefined'?rigRider:null,typeof rigGoose!=='undefined'?rigGoose:null,typeof campGoose!=='undefined'?campGoose:null,typeof campRider!=='undefined'?campRider:null,typeof SHOW!=='undefined'?SHOW.goose:null,typeof SHOW!=='undefined'?SHOW.kid:null]);
   scene.updateMatrixWorld(true);
@@ -912,7 +929,11 @@ function dcRegister(){
   const bnd=ch=>{box.makeEmpty();box.setFromObject(ch);if(box.isEmpty())return null;box.getCenter(ct);box.getSize(sz);const r=sz.length()/2*1.2+1.5;
     if(!isFinite(r)||!isFinite(ct.x+ct.y+ct.z))return null;return{cx:ct.x,cy:ct.y,cz:ct.z,r}};
   const add=(ch,items,b,kind)=>{for(const o of items)if(o._lm===undefined)o._lm=o.layers.mask;
-    const m=ch.matrixWorld.elements;DC.list.push({ch,items,cx:b.cx,cy:b.cy,cz:b.cz,r:b.r,px:m[12],py:m[13],pz:m[14],dyn:false,hidden:false,kind,t:0})};
+    const pr=[items[0],items[items.length>>1],items[items.length-1],ch];const pp=[];for(const o of pr){const m=o.matrixWorld.elements;pp.push(m[12],m[13],m[14])}
+    DC.list.push({ch,items,cx:b.cx,cy:b.cy,cz:b.cz,r:b.r,pr,pp,dyn:false,hidden:false,kind,t:0})};
+  const addMesh=o=>{if(!o.geometry)return;if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();const bs=o.geometry.boundingSphere;if(!bs)return;
+    const e=o.matrixWorld.elements,sc=Math.max(Math.hypot(e[0],e[1],e[2]),Math.hypot(e[4],e[5],e[6]),Math.hypot(e[8],e[9],e[10]));const r=bs.radius*sc;if(!isFinite(r))return;
+    if(o._lm===undefined)o._lm=o.layers.mask;DC.list.push({ch:o,items:[o],cx:0,cy:0,cz:0,r,pr:null,pp:null,dyn:false,hidden:false,kind:'m',t:0})};
   const part=(ch,depth)=>{
     if(ch.isLight||ch.isCamera||skip.has(ch)||seen.has(ch))return;
     const{items,inst}=collect(ch);if(inst||!items.length)return;
@@ -921,8 +942,13 @@ function dcRegister(){
       if(any){/* büyük çocuğun doğrudan mesh'leri */ const direct=ch.children.filter(c=>c.isMesh||c.isPoints||c.isLine||c.isSprite);if(direct.length){const bb=bnd(ch);if(bb)add(ch,direct,bb,'p')}return}}
     if(b.r>400)return;
     add(ch,items,b,'p')};
+  const flockSet=new Set(typeof flock!=='undefined'?flock.map(f=>f.m):[]);
   for(const top of scene.children){
-    if(!top.isGroup||skip.has(top)||top.children.length<8)continue;
+    if(!top.isGroup||skip.has(top)||flockSet.has(top))continue;
+    if(top.children.length<8){ /* tren vb.: az çocuklu ama çok parçalı gruplar */
+      const{items,inst}=collect(top);
+      if(!inst&&items.length>=12){const b=bnd(top);if(b&&b.r<260){add(top,items,b,'g');for(const o of items)addMesh(o)}}
+      continue}
     for(const ch of top.children)part(ch,0);
     /* grup düzeyi (güçlü mod): küçük/orta bağımsız gruplar tamamen */
     const{items,inst}=collect(top);
@@ -938,10 +964,14 @@ function dcUpdate(cp,now){
   const GH=Math.max(380,Math.min(TV.R*5.5,900,fogF*.66));DC.gh=GH;
   let hid=0,gh=0;
   for(const e of DC.list){
-    const isG=e.kind==='g';
+    const isG=e.kind==='g',isM=e.kind==='m';
+    if(isM){ /* tek parça: güncel konum + küçüklük kuralı (hareketli parçalar için de güvenli) */
+      if(!L2){if(e.hidden)dcSet(e,false);continue}
+      const m=e.ch.matrixWorld.elements,dx=m[12]-cp.x,dy=m[13]-cp.y,dz=m[14]-cp.z,d=Math.sqrt(dx*dx+dy*dy+dz*dz),t=.0048;
+      const hide=e.hidden?(d-e.r>140&&e.r<d*t*1.25):(d-e.r>160&&e.r<d*t);
+      if(hide!==e.hidden)dcSet(e,hide);if(hide)hid++;continue}
     if(isG&&!L2){if(e.hidden)dcSet(e,false);continue}
-    const m=e.ch.matrixWorld.elements;
-    if(!e.dyn&&Math.abs(m[12]-e.px)+Math.abs(m[13]-e.py)+Math.abs(m[14]-e.pz)>1.5)e.dyn=true;
+    if(!e.dyn){let s=0;for(let k=0;k<4;k++){const m=e.pr[k].matrixWorld.elements;s+=Math.abs(m[12]-e.pp[k*3])+Math.abs(m[13]-e.pp[k*3+1])+Math.abs(m[14]-e.pp[k*3+2])}if(s>1.5)e.dyn=true}
     if(e.dyn){
       if(!isG){if(e.hidden)dcSet(e,false);continue}
       /* hareketli grup (tren vb.): sınırlar periyodik yenilenir */
@@ -3220,7 +3250,7 @@ function perfTick(now,t0){PERF.cpu+=performance.now()-t0;PERF.n++;
     const rd=PERF.rend/PERF.n;
     PERF.el.textContent='FPS '+fps.toFixed(0)+' (hedef '+fpsTarget()+')  CPU '+cpu.toFixed(1)+' ms (render '+rd.toFixed(1)+')\n'+
       'çizim '+inf.calls+'  üçgen '+(inf.triangles/1000).toFixed(0)+'k\n'+
-      'ağaç '+tr+'  çim/çalı/kaya '+pr+'  gizli '+DC.hidden+'/'+DC.list.length+'\n'+
+      'ağaç '+tr+'  çim/çalı/kaya '+pr+'  gizli '+DC.hidden+'+grup '+DC.ghid+'+kaz '+FL.lod+'/'+DC.list.length+'\n'+
       'DPR '+renderer.getPixelRatio().toFixed(2)+'  '+renderer.domElement.width+'x'+renderer.domElement.height+'  '+aa+'\n'+
       'GPU '+PERF.gl+(PERF.rows?'\n'+PERF.rows:'')}
   if(now-PERF.scanT>2500){PERF.scanT=now;try{perfScan()}catch(e){PERF.rows='tarama hatası'}}
@@ -5165,7 +5195,7 @@ function loop(now){
   if(hintT>0){hintT-=dt;if(hintT<=0)hideOrbitHint()}
   // decor
   for(const f of falls){f.tex.offset.y+=dt*1.4;const s=5+Math.sin(clock*6)*.6;f.foam.scale.set(s,1.5,s)}
-  flock.forEach((f,i)=>{const a=clock*.06+i*.05,R=300+(i%3)*14;f.m.position.set(Math.cos(a)*R-50,150+Math.sin(clock+i)*2+(i%2)*4,Math.sin(a)*R-100+(i>2?10:0));f.m.rotation.y=-a;f.m.userData.flap(clock*8+i,.7)});
+  flock.forEach((f,i)=>{const a=clock*.06+i*.05,R=300+(i%3)*14;f.m.position.set(Math.cos(a)*R-50,150+Math.sin(clock+i)*2+(i%2)*4,Math.sin(a)*R-100+(i>2?10:0));f.m.rotation.y=-a;f.m.userData.flap(clock*8+i,.7)});try{flockLod()}catch(e){FL.lod=-1}if(clock-DC.tk>.5){DC.tk=clock;try{dcUpdate(camera.position,clock)}catch(e){}}
   water.position.x=Math.round(camera.position.x/40)*40;water.position.z=Math.round(camera.position.z/40)*40;waterT.value=clock;waterNM.offset.set((clock*.012)%1,(clock*.018)%1);
   if(flash>0){flash=Math.max(0,flash-dt*1.5);hemi.intensity=.4+flash*2}
   const inp=getInput();
