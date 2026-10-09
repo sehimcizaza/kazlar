@@ -900,6 +900,40 @@ function cuReg(mesh,base,nearR,rad){
       const q=n*16;for(let k=0;k<16;k++)M[q+k]=Mc[e+k];if(hasC){const a=n*3,b=i*3;C[a]=Cc[b];C[a+1]=Cc[b+1];C[a+2]=Cc[b+2]}n++}
     mesh.count=n;o.n=n;mesh.instanceMatrix.needsUpdate=true;mesh.instanceMatrix.updateRange.count=Math.max(1,n)*16;if(hasC){mesh.instanceColor.needsUpdate=true;mesh.instanceColor.updateRange.count=Math.max(1,n)*3}}};
   CU_PROPS.push(o);return o}
+/* --- uzak nesne gizleme: büyük gruplardaki (yarış süsleri, çiftlikler, çitler) küçücük kalan uzak parçaları çizme.
+   Gizleme `layers` ile yapılır: oyunun `visible` mantığına dokunmaz, hareket eden parçalar otomatik dışarıda bırakılır. --- */
+const DC={on:store.get('kz-dc',true)!==false,list:[],hidden:0};
+function dcSet(e,hide){e.hidden=hide;for(const o of e.items)o.layers.mask=hide?0:o._lm}
+function dcRegister(){
+  const skip=new Set([typeof rig!=='undefined'?rig:null,typeof rigRider!=='undefined'?rigRider:null,typeof rigGoose!=='undefined'?rigGoose:null,typeof campGoose!=='undefined'?campGoose:null,typeof campRider!=='undefined'?campRider:null,typeof SHOW!=='undefined'?SHOW.goose:null,typeof SHOW!=='undefined'?SHOW.kid:null]);
+  scene.updateMatrixWorld(true);
+  const box=new THREE.Box3(),sz=new THREE.Vector3(),ct=new THREE.Vector3();
+  for(const top of scene.children){
+    if(!top.isGroup||skip.has(top)||top.children.length<8)continue;
+    for(const ch of top.children){
+      if(ch.isLight||ch.isCamera||skip.has(ch))continue;
+      const items=[];let inst=false;
+      ch.traverse(o=>{if(o.isInstancedMesh)inst=true;if(o.isMesh||o.isPoints||o.isLine||o.isSprite)items.push(o)});
+      if(inst||!items.length)continue;
+      box.makeEmpty();box.setFromObject(ch);if(box.isEmpty())continue;
+      box.getCenter(ct);box.getSize(sz);const r=sz.length()/2*1.2+1.5;
+      if(!isFinite(r)||!isFinite(ct.x+ct.y+ct.z)||r>400)continue;
+      for(const o of items)o._lm=o.layers.mask;
+      const m=ch.matrixWorld.elements;
+      DC.list.push({ch,items,cx:ct.x,cy:ct.y,cz:ct.z,r,px:m[12],py:m[13],pz:m[14],dyn:false,hidden:false})}}}
+function dcUpdate(cp){
+  if(!DC.list.length)return;
+  if(!DC.on){if(DC.hidden){for(const e of DC.list)if(e.hidden)dcSet(e,false);DC.hidden=0}return}
+  const thr=Math.min(.012,Math.max(.0045,.0065*130/TV.R)),MIN=150;let hid=0;
+  for(const e of DC.list){
+    if(e.dyn)continue;
+    const m=e.ch.matrixWorld.elements;
+    if(Math.abs(m[12]-e.px)+Math.abs(m[13]-e.py)+Math.abs(m[14]-e.pz)>1.5){e.dyn=true;if(e.hidden)dcSet(e,false);continue}
+    const dx=e.cx-cp.x,dy=e.cy-cp.y,dz=e.cz-cp.z,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    const hide=e.hidden?(d-e.r>MIN*.9&&e.r<d*thr*1.2):(d-e.r>MIN&&e.r<d*thr);
+    if(hide!==e.hidden)dcSet(e,hide);
+    if(hide)hid++}
+  DC.hidden=hid}
 function updateTreeLOD(force,now){if(!TV.ready)return;
   const dirty=force||TV.t<0||now<TV.t;
   if(!dirty&&now-TV.t<.05)return;
@@ -916,7 +950,8 @@ function updateTreeLOD(force,now){if(!TV.ready)return;
     if(d2>NEAR2){const s=t.s;if(!cuInView(t.x,t.h+8*s,t.z,12*s+.25*Math.sqrt(d2)))continue}
     const ty=t.type,hi=d2<R2,m=hi?TV.hi[ty]:TV.lo[ty],i=n[ty][hi?0:1]++;m.T.setMatrixAt(i,t.m);m.L.setMatrixAt(i,t.m);m.L.setColorAt(i,t.col)}
   for(let ty=0;ty<3;ty++)for(const k of[0,1]){const m=(k?TV.lo:TV.hi)[ty],c=n[ty][k];m.T.count=m.L.count=c;m.T.instanceMatrix.needsUpdate=m.L.instanceMatrix.needsUpdate=true;m.T.instanceMatrix.updateRange.count=m.L.instanceMatrix.updateRange.count=Math.max(1,c)*16;if(m.L.instanceColor){m.L.instanceColor.needsUpdate=true;m.L.instanceColor.updateRange.count=Math.max(1,c)*3}}
-  for(const pc of CU_PROPS)pc.update(cx,cz)}
+  for(const pc of CU_PROPS)pc.update(cx,cz);
+  dcUpdate(cp)}
 updateTreeLOD(true,0);
 {const dummy=new THREE.Object3D(),col=new THREE.Color();
  // rocks
@@ -3142,6 +3177,7 @@ const PERF={on:!!store.get('kz-perf',false),el:null,n:0,cpu:0,rend:0,last:0,scan
 function perfInit(){if(PERF.el)return;try{const gl=renderer.getContext(),ex=gl.getExtension('WEBGL_debug_renderer_info');PERF.gl=(ex?gl.getParameter(ex.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER))+(typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?' [WebGL2]':' [WebGL1]')}catch(e){PERF.gl='?'}
   const d=document.createElement('div');d.style.cssText='position:fixed;left:6px;top:6px;z-index:99999;pointer-events:none;font:11px/1.35 monospace;color:#7CFF7C;background:rgba(0,0,0,.6);padding:4px 7px;border-radius:6px;white-space:pre;display:none';document.body.appendChild(d);PERF.el=d}
 function setPerf(on){PERF.on=on;store.set('kz-perf',on);perfInit();PERF.el.style.display=on?'block':'none';PERF.n=0;PERF.cpu=0;PERF.last=0;if(curScreen==='hub')renderHub(true)}
+function setDC(on){DC.on=on;store.set('kz-dc',on);TV.t=-9;if(curScreen==='hub')renderHub(true)}
 function setAA(on){aaPref=on;store.set('kz-aa',on);toast('Kenar yumuşatma için oyunu kapatıp yeniden aç',3);if(curScreen==='hub')renderHub(true)}
 function perfScan(){
   const fr=new THREE.Frustum(),pm=new THREE.Matrix4(),sph=new THREE.Sphere();camera.updateMatrixWorld();fr.setFromProjectionMatrix(pm.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
@@ -3149,6 +3185,7 @@ function perfScan(){
   scene.children.forEach((top,ti)=>{if(!top.visible)return;let n=0,tris=0,inst=0,mx=0;const mats=new Set();
     top.traverse(o=>{if(!(o.isMesh||o.isPoints||o.isLine))return;
       for(let q=o;q;q=q.parent){if(!q.visible)return}
+      if(!o.layers.test(camera.layers))return
       if(o.frustumCulled&&o.geometry){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();sph.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);if(!fr.intersectsSphere(sph))return}
       const ms=Array.isArray(o.material)?o.material:[o.material];n+=ms.length;ms.forEach(m=>mats.add(m.uuid));if(o.isInstancedMesh)inst++;
       const g=o.geometry,t=g&&(g.index?g.index.count/3:(g.attributes.position?g.attributes.position.count/3:0));tris+=(o.isInstancedMesh?o.count:1)*(t||0)});
@@ -3163,7 +3200,7 @@ function perfTick(now,t0){PERF.cpu+=performance.now()-t0;PERF.n++;
     const rd=PERF.rend/PERF.n;
     PERF.el.textContent='FPS '+fps.toFixed(0)+' (hedef '+fpsTarget()+')  CPU '+cpu.toFixed(1)+' ms (render '+rd.toFixed(1)+')\n'+
       'çizim '+inf.calls+'  üçgen '+(inf.triangles/1000).toFixed(0)+'k\n'+
-      'ağaç '+tr+'  çim/çalı/kaya '+pr+'\n'+
+      'ağaç '+tr+'  çim/çalı/kaya '+pr+'  gizli '+DC.hidden+'/'+DC.list.length+'\n'+
       'DPR '+renderer.getPixelRatio().toFixed(2)+'  '+renderer.domElement.width+'x'+renderer.domElement.height+'  '+aa+'\n'+
       'GPU '+PERF.gl+(PERF.rows?'\n'+PERF.rows:'')}
   if(now-PERF.scanT>2500){PERF.scanT=now;try{perfScan()}catch(e){PERF.rows='tarama hatası'}}
@@ -3173,7 +3210,7 @@ function settingsHtml(){const o=(a,v,ic,t,sub)=>`<button class="opt${v?' on':''}
   return `<div class="sgroup"><h3>🎮 Yön kontrolü</h3><p class="hint2">Ekranın solundaki kontrolü seç. Koşu görevinde sadece ◀ ▶ tuşları çıkar.</p><div class="optrow">${o('ctrl="joy"',ctrlMode==='joy','🕹️','Joystick','sürükle')}${o('ctrl="pad"',ctrlMode==='pad','🔘','Tuşlar','◀ ▶ ▲ ▼')}</div></div>
   <div class="sgroup"><h3>✨ Grafik kalitesi</h3><p class="hint2">Telefon yavaşlarsa Düşük'ü seç. Yüksek: uzaktaki ağaçlar da ayrıntılı, görüntü daha keskin.</p><div class="optrow">${o('gfx="low"',gfx==='low','🔋','Düşük')}${o('gfx="mid"',gfx==='mid','⚖️','Orta')}${o('gfx="high"',gfx==='high','💎','Yüksek')}</div></div>
   <div class="sgroup"><h3>🎞️ Akıcılık (FPS)</h3><p class="hint2">Düşük FPS telefonu daha az ısıtır ve pili korur. 90 ve 120 sadece ekranın destekliyorsa çalışır. Dinamik: oyun yavaşlarsa FPS'i kendiliğinden düşürür, menüde 30'a iner.</p><div class="optrow">${o('fps="45"',FPSM.mode==='45','45','FPS')}${o('fps="60"',FPSM.mode==='60','60','FPS')}${o('fps="90"',FPSM.mode==='90','90','FPS')}${o('fps="120"',FPSM.mode==='120','120','FPS')}${o('fps="dyn"',FPSM.mode==='dyn','🔄','Dinamik')}</div></div>
-  <div class="sgroup"><h3>🛠️ Test ayarları</h3><p class="hint2">Isınma testi için. Kenar yumuşatma değişikliği, oyunu kapatıp yeniden açınca geçerli olur.</p><div class="optrow">${o('perf="on"',PERF.on,'📊','Bilgi paneli','açık')}${o('perf="off"',!PERF.on,'🚫','Bilgi paneli','kapalı')}</div><div class="optrow">${o('aa="on"',aaPref,'✨','Kenar yumuşatma','açık')}${o('aa="off"',!aaPref,'▫️','Kenar yumuşatma','kapalı')}</div></div>
+  <div class="sgroup"><h3>🛠️ Test ayarları</h3><p class="hint2">Isınma testi için. Kenar yumuşatma değişikliği, oyunu kapatıp yeniden açınca geçerli olur.</p><div class="optrow">${o('perf="on"',PERF.on,'📊','Bilgi paneli','açık')}${o('perf="off"',!PERF.on,'🚫','Bilgi paneli','kapalı')}</div><div class="optrow">${o('dc="on"',DC.on,'🧹','Uzak gizleme','açık')}${o('dc="off"',!DC.on,'👁️','Uzak gizleme','kapalı')}</div><div class="optrow">${o('aa="on"',aaPref,'✨','Kenar yumuşatma','açık')}${o('aa="off"',!aaPref,'▫️','Kenar yumuşatma','kapalı')}</div></div>
   <div class="sgroup"><h3>🔊 Ses ve müzik</h3><div class="optrow">${o('snd="on"',!muted,'🔊','Açık')}${o('snd="off"',muted,'🔇','Kapalı')}</div></div>`}
 function renderHub(keep){
   syncShowcase();
@@ -3204,6 +3241,7 @@ $('#hubBody').addEventListener('click',e=>{const t=e.target;unlockAudio();let b;
   if((b=t.closest('[data-fps]'))){setFps(b.dataset.fps);sfx(600,.08,'triangle',.08);return}
   if((b=t.closest('[data-perf]'))){setPerf(b.dataset.perf==='on');return}
   if((b=t.closest('[data-aa]'))){setAA(b.dataset.aa==='on');return}
+  if((b=t.closest('[data-dc]'))){setDC(b.dataset.dc==='on');return}
     if((b=t.closest('[data-snd]'))){setMuted(b.dataset.snd==='off');return}
   if((b=t.closest('[data-buy]'))){buyItem(b.dataset.buy);return}
   if((b=t.closest('[data-eq]'))){toggleEquip(b.dataset.eq);return}
@@ -5145,6 +5183,7 @@ setTimeout(()=>{try{const f=()=>{if(!CHASE_ROUTE&&state.mode==='menu')chaseRoute
 /* tüm dokuları baştan GPU'ya yükle (geç yüklemede siyah kalmasın) */
 function warmTex(){try{const seen=new Set();scene.traverse(o=>{const ms=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];for(const m of ms)for(const k of['map','alphaMap','normalMap']){const t=m[k];if(t&&!seen.has(t)){seen.add(t);try{renderer.initTexture(t)}catch(e){}}}})}catch(e){}}
 warmTex();setTimeout(warmTex,6000);
+try{dcRegister();TV.t=-9}catch(e){console.error('dcRegister',e)}
 if(PERF.on)setPerf(true);
 requestAnimationFrame(loop);
 })();
