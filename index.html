@@ -268,7 +268,7 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
 #topright,#actWrap,#flyX,#dpad,#compass{z-index:3}
 /* ---- uçuş tuş düzeni: sağ başparmak için çeyrek daire (yay) ----
    Merkez: sağ alt köşe (4vh içeride). Başparmağın doğal dinlenme noktasına en sık basılan/basılı tutulan Turbo;
-   iç yay (R≈42): Yavaşla, Sola yat, Sağa yat (basılı tutulan, sık); dış yay (R≈64): Slalom, Roket, görev tuşu, Kazdan in (seyrek).
+   iç yay (R≈43): Yavaşla, Sola yat, Roket, Sağa yat (basılı tutulan, sık); dış yay (R≈64): Kazdan in, Slalom, görev tuşu (seyrek).
    Konumlar: --r = merkezin sağ kenara, --b = merkezin alt kenara uzaklığı, --d = çap (hepsi vh) */
 #flyX{display:none;position:absolute;inset:0;pointer-events:none}
 #hud.fsw #flyX{display:block}
@@ -289,21 +289,21 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
   background:radial-gradient(closest-side,#ffd36b 0 81%,transparent 83%),conic-gradient(#3ec46d calc(var(--st)*360deg),rgba(31,51,72,.28) 0)}
 #hud.fsw #stam{display:none!important}
 /* 2) iç yay */
-#hud.fsw #brakeBtn{--r:44.8;--b:16.7;--d:17.5;font-size:calc(var(--vh)*2.9);background:#ffe1e1;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord)}
-#bankL{--r:34.7;--b:35.1;background:#d9f0ff!important}#bankR{--r:17;--b:46.5;background:#d9f0ff!important}
+#hud.fsw #brakeBtn{--r:46.5;--b:13.2;--d:17.5;font-size:calc(var(--vh)*2.9);background:#ffe1e1;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord)}
+#bankL{--r:40.1;--b:29.9;background:#d9f0ff!important}#bankR{--r:10.7;--b:49;background:#d9f0ff!important}
 /* 3) dış yay */
-#slalomBtn{--r:58.3;--b:40.4;--d:14!important;background:#ffe9a6!important}
+#slalomBtn{--r:53;--b:47.6;--d:14!important;background:#ffe9a6!important}
 #slalomBtn svg{width:56%!important;height:56%!important}
 #slalomBtn span{font-size:calc(var(--vh)*2.3)}
-#rocketBtn{--r:41.6;--b:58.3;--d:15!important;--ch:1;border-color:#0e1d38!important;box-shadow:0 4px 0 #0e1d38!important;background:radial-gradient(closest-side,#16305e 0 76%,transparent 78%),conic-gradient(#ffd21f calc(var(--ch)*360deg),rgba(14,29,56,.35) 0)!important}
+#rocketBtn{--r:27.4;--b:42.6;--d:16!important;--ch:1;border-color:#0e1d38!important;box-shadow:0 4px 0 #0e1d38!important;background:radial-gradient(closest-side,#16305e 0 76%,transparent 78%),conic-gradient(#ffd21f calc(var(--ch)*360deg),rgba(14,29,56,.35) 0)!important}
 #rocketBtn svg{width:62%!important;height:62%!important}#rocketBtn .rkf{opacity:.35}#rocketBtn.go .rkf{opacity:1}#rocketBtn.go svg{animation:rkS .1s infinite alternate}
 #rocketBtn.empty{filter:grayscale(.85);opacity:.55}#rocketBtn.full{box-shadow:0 4px 0 #0e1d38,0 0 calc(var(--vh)*2.4) #ffd21f!important}
 @keyframes rkS{from{transform:translate(-1px,0)}to{transform:translate(1px,-1px)}}
-#hud.fsw #spBtn{--r:17.3;--b:69.1;--d:14;font-size:calc(var(--vh)*2.2);background:#c9f5d6;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);display:none}
+#hud.fsw #spBtn{--r:28;--b:65.8;--d:14;font-size:calc(var(--vh)*2.2);background:#c9f5d6;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);display:none}
 #hud.fsw #spBtn.on{display:flex}
 #hud.fsw #spBtn.mash{--d:18;background:var(--berry);color:#fff}
 #hud.fsw #spBtn.down{transform:translateY(4px);box-shadow:0 0 0 var(--fjord)}
-#inBinBtn{--r:66.8;--b:18.7;--d:14.5!important;background:#cfeeff!important;font-size:calc(var(--vh)*2.3)!important}
+#inBinBtn{--r:66.6;--b:19.8;--d:14.5!important;background:#cfeeff!important;font-size:calc(var(--vh)*2.3)!important}
 </style>
 </head>
 <body>
@@ -883,33 +883,58 @@ const TV={ready:false,t:-9,hi:[],lo:[],R:150,FAR:1100};
    TV.hi[ty]={T:mk(bufToGeo(hiB.T),trunkMat),L:mk(bufToGeo(hiB.L,[.3,.42,.55][ty]),leafMats[ty])};TV.lo[ty]={T:mk(bufToGeo(loB.T),trunkMat),L:mk(bufToGeo(loB.L),lowLeaf)}}
  trees.forEach(t=>{dm.position.set(t.x,t.h-.6,t.z);dm.rotation.set(0,rnd()*6.3,0);dm.scale.setScalar(t.s);dm.updateMatrix();t.m=dm.matrix.clone();t.col=new THREE.Color(.86+rnd()*.28,.88+rnd()*.24,.84+rnd()*.24)});
  TV.ready=true}
-function updateTreeLOD(force,now){if(!TV.ready)return;if(!force&&now-TV.t<.3)return;TV.t=now;
-  const cx=camera.position.x,cz=camera.position.z,R2=TV.R*TV.R,F2=TV.FAR*TV.FAR,n=[[0,0],[0,0],[0,0]];
-  for(const t of trees){if(t.hide)continue;const dx=t.x-cx,dz=t.z-cz,d2=dx*dx+dz*dz;if(d2>F2)continue;const ty=t.type,hi=d2<R2,m=hi?TV.hi[ty]:TV.lo[ty],i=n[ty][hi?0:1]++;m.T.setMatrixAt(i,t.m);m.L.setMatrixAt(i,t.m);m.L.setColorAt(i,t.col)}
-  for(let ty=0;ty<3;ty++)for(const k of[0,1]){const m=(k?TV.lo:TV.hi)[ty],c=n[ty][k];m.T.count=m.L.count=c;m.T.instanceMatrix.needsUpdate=m.L.instanceMatrix.needsUpdate=true;if(m.L.instanceColor)m.L.instanceColor.needsUpdate=true}}
+/* --- görüş alanı + mesafe tabanlı elemeler (ağaç, çimen, çiçek, çalı, kaya) --- */
+const CU_PROPS=[];
+const _cuFr=new THREE.Frustum(),_cuPm=new THREE.Matrix4(),_cuF=new THREE.Vector3(),_cuLp=new THREE.Vector3(1e9,0,0),_cuLf=new THREE.Vector3(0,0,-1),_cuSig=[0,0,0,0];
+function cuInView(x,y,z,r){const P=_cuFr.planes;for(let i=0;i<6;i++){const p=P[i],n=p.normal;if(n.x*x+n.y*y+n.z*z+p.constant<-r)return false}return true}
+function cuReg(mesh,base,nearR,rad){
+  const N=mesh.count,M=mesh.instanceMatrix.array,Mc=M.slice(),hasC=!!mesh.instanceColor,C=hasC?mesh.instanceColor.array:null,Cc=hasC?C.slice():null,nr2=nearR*nearR;
+  const o={update(cx,cz){const R=base*Math.max(.4,TV.R/130),R2=R*R;let n=0;
+    for(let i=0;i<N;i++){const e=i*16,x=Mc[e+12],z=Mc[e+14],dx=x-cx,dz=z-cz,d2=dx*dx+dz*dz;if(d2>R2)continue;
+      if(d2>nr2&&!cuInView(x,Mc[e+13],z,rad+.25*Math.sqrt(d2)))continue;
+      const q=n*16;for(let k=0;k<16;k++)M[q+k]=Mc[e+k];if(hasC){const a=n*3,b=i*3;C[a]=Cc[b];C[a+1]=Cc[b+1];C[a+2]=Cc[b+2]}n++}
+    mesh.count=n;mesh.instanceMatrix.needsUpdate=true;mesh.instanceMatrix.updateRange.count=Math.max(1,n)*16;if(hasC){mesh.instanceColor.needsUpdate=true;mesh.instanceColor.updateRange.count=Math.max(1,n)*3}}};
+  CU_PROPS.push(o);return o}
+function updateTreeLOD(force,now){if(!TV.ready)return;
+  const dirty=force||TV.t<0||now<TV.t;
+  if(!dirty&&now-TV.t<.05)return;
+  camera.updateMatrixWorld();
+  const cp=camera.position;camera.getWorldDirection(_cuF);const pe=camera.projectionMatrix.elements;
+  if(!dirty){
+    const moved=cp.distanceToSquared(_cuLp),turned=_cuF.dot(_cuLf),ch=Math.abs(pe[0]-_cuSig[0])+Math.abs(pe[5]-_cuSig[1])+Math.abs(pe[8]-_cuSig[2])+Math.abs(pe[9]-_cuSig[3]);
+    const big=moved>144||turned<.995||ch>.002;
+    if(!big&&!(now-TV.t>=.3&&(moved>1||turned<.9998)))return}
+  TV.t=now;_cuLp.copy(cp);_cuLf.copy(_cuF);_cuSig[0]=pe[0];_cuSig[1]=pe[5];_cuSig[2]=pe[8];_cuSig[3]=pe[9];
+  _cuFr.setFromProjectionMatrix(_cuPm.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
+  const cx=cp.x,cz=cp.z,R2=TV.R*TV.R,F2=TV.FAR*TV.FAR,NEAR2=70*70,n=[[0,0],[0,0],[0,0]];
+  for(const t of trees){if(t.hide)continue;const dx=t.x-cx,dz=t.z-cz,d2=dx*dx+dz*dz;if(d2>F2)continue;
+    if(d2>NEAR2){const s=t.s;if(!cuInView(t.x,t.h+8*s,t.z,12*s+.25*Math.sqrt(d2)))continue}
+    const ty=t.type,hi=d2<R2,m=hi?TV.hi[ty]:TV.lo[ty],i=n[ty][hi?0:1]++;m.T.setMatrixAt(i,t.m);m.L.setMatrixAt(i,t.m);m.L.setColorAt(i,t.col)}
+  for(let ty=0;ty<3;ty++)for(const k of[0,1]){const m=(k?TV.lo:TV.hi)[ty],c=n[ty][k];m.T.count=m.L.count=c;m.T.instanceMatrix.needsUpdate=m.L.instanceMatrix.needsUpdate=true;m.T.instanceMatrix.updateRange.count=m.L.instanceMatrix.updateRange.count=Math.max(1,c)*16;if(m.L.instanceColor){m.L.instanceColor.needsUpdate=true;m.L.instanceColor.updateRange.count=Math.max(1,c)*3}}
+  for(const pc of CU_PROPS)pc.update(cx,cz)}
 updateTreeLOD(true,0);
 {const dummy=new THREE.Object3D(),col=new THREE.Color();
  // rocks
  const rocks=[];for(let i=0;i<4000&&rocks.length<300;i++){const x=(rnd()*2-1)*860,z=(rnd()*2-1)*860,h=height(x,z);if(h<-1||h>140)continue;if(Math.hypot(x-NSITE.x,z-NSITE.z)<NSITE.B+8)continue;if(nearFarm(x,z,6)||raceD(x,z)<RACE_HW+9||mtnH(x,z)>-50)continue;const rn=railNear(x,z);if(rn&&rn.d<8)continue;if(nearFarm(x,z,3))continue;if(slope(x,z)>.5||h<3||rnd()<.4)rocks.push({x,z,h,s:.6+rnd()*2})}
  var WROCKS=rocks;const rkG=new THREE.IcosahedronGeometry(2.4,2);{const q=rkG.attributes.position;for(let i=0;i<q.count;i++){const x=q.getX(i),y=q.getY(i),z=q.getZ(i),k=1+(fbm(x*.9+7,z*.9+y*.7)-.5)*.55;q.setXYZ(i,x*k,y*k,z*k)}rkG.computeVertexNormals()}
   const rk=new THREE.InstancedMesh(rkG,withDetail(new THREE.MeshLambertMaterial({color:0x8d8a84}),.9),rocks.length);
- rocks.forEach((r,i)=>{dummy.position.set(r.x,r.h,r.z);dummy.rotation.set(rnd()*3,rnd()*3,0);dummy.scale.set(r.s,r.s*.7,r.s);dummy.updateMatrix();rk.setMatrixAt(i,dummy.matrix)});scene.add(rk);
+ rocks.forEach((r,i)=>{dummy.position.set(r.x,r.h,r.z);dummy.rotation.set(rnd()*3,rnd()*3,0);dummy.scale.set(r.s,r.s*.7,r.s);dummy.updateMatrix();rk.setMatrixAt(i,dummy.matrix)});scene.add(rk);cuReg(rk,650,60,8);
  // bushes
  const bush=[];for(let i=0;i<6000&&bush.length<650;i++){const x=(rnd()*2-1)*820,z=(rnd()*2-1)*820,h=height(x,z);if(h<1.2||h>60||slope(x,z)>.6)continue;if(Math.hypot(x-NSITE.x,z-NSITE.z)<NSITE.B+4)continue;if(nearFarm(x,z,6)||raceD(x,z)<RACE_HW+7||mtnH(x,z)>-50)continue;const rn=railNear(x,z);if(rn&&rn.d<6)continue;if(nearFarm(x,z,0))continue;bush.push({x,z,h,s:.6+rnd()*.9})}
  const bm=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.5,2),new THREE.MeshLambertMaterial({color:0xffffff,flatShading:false}),bush.length);
- bush.forEach((b,i)=>{dummy.position.set(b.x,b.h+.6*b.s,b.z);dummy.rotation.set(rnd(),rnd()*3,0);dummy.scale.set(b.s*1.3,b.s,b.s*1.2);dummy.updateMatrix();bm.setMatrixAt(i,dummy.matrix);bm.setColorAt(i,col.setHSL(.25+rnd()*.08,.5,.28+rnd()*.12))});scene.add(bm);
+ bush.forEach((b,i)=>{dummy.position.set(b.x,b.h+.6*b.s,b.z);dummy.rotation.set(rnd(),rnd()*3,0);dummy.scale.set(b.s*1.3,b.s,b.s*1.2);dummy.updateMatrix();bm.setMatrixAt(i,dummy.matrix);bm.setColorAt(i,col.setHSL(.25+rnd()*.08,.5,.28+rnd()*.12))});scene.add(bm);cuReg(bm,450,40,5);
   // çim tutamları: çapraz kartlar, çayırlarda
  {const c=document.createElement('canvas');c.width=64;c.height=64;const g=c.getContext('2d'),RG=lrng(91);for(let i=0;i<16;i++){const x=4+i*3.6,h=26+RG()*34;g.strokeStyle=['#4f9a2e','#68b23a','#3d8527','#7cc243'][i%4];g.lineWidth=2.4;g.beginPath();g.moveTo(x,64);g.quadraticCurveTo(x+(RG()-.5)*10,64-h*.6,x+(RG()-.5)*16,64-h);g.stroke()}
   const gt=new THREE.CanvasTexture(c);gt.generateMipmaps=false;gt.minFilter=THREE.LinearFilter;const gb={p:[],n:[],u:[],c:[],i:[]},Rg=lrng(5);
   for(let k=0;k<3;k++){const a=k*1.047,ru=[Math.cos(a)*.7,0,Math.sin(a)*.7];addCard(gb,[0,.55,0],ru,[0,.55,0],[0,-.5,0],[1,1,1],Rg)}
   const gl=[];for(let i=0;i<60000&&gl.length<9000;i++){const x=(rnd()*2-1)*800,z=(rnd()*2-1)*800;if(fbm(x/70+5,z/70+5)<.5)continue;const h=height(x,z);if(h<1.3||h>40||slope(x,z)>.45)continue;if(nearFarm(x,z,6)||raceD(x,z)<RACE_HW+4||mtnH(x,z)>-50)continue;const rn=railNear(x,z);if(rn&&rn.d<5)continue;if(nearFarm(x,z,-8))continue;gl.push([x,h,z])}
   const gm=new THREE.InstancedMesh(bufToGeo(gb),new THREE.MeshLambertMaterial({map:gt,alphaTest:.4,side:THREE.DoubleSide,vertexColors:true}),Math.max(1,gl.length)),dg=new THREE.Object3D();
-  gl.forEach((q,i)=>{dg.position.set(q[0],q[1]-.05,q[2]);dg.rotation.set(0,rnd()*6.3,0);dg.scale.setScalar(.9+rnd()*1.1);dg.updateMatrix();gm.setMatrixAt(i,dg.matrix);gm.setColorAt(i,col.setRGB(.85+rnd()*.3,.9+rnd()*.2,.8+rnd()*.2))});gm.count=gl.length;gm.frustumCulled=false;scene.add(gm)}
+  gl.forEach((q,i)=>{dg.position.set(q[0],q[1]-.05,q[2]);dg.rotation.set(0,rnd()*6.3,0);dg.scale.setScalar(.9+rnd()*1.1);dg.updateMatrix();gm.setMatrixAt(i,dg.matrix);gm.setColorAt(i,col.setRGB(.85+rnd()*.3,.9+rnd()*.2,.8+rnd()*.2))});gm.count=gl.length;gm.frustumCulled=false;scene.add(gm);cuReg(gm,230,30,3)}
   // flower meadows
  const fl=[];const pal=[0xffffff,0xffd84a,0xff7eb6,0xb77cff,0xff5a5a,0x6ec6ff];
  for(let i=0;i<24000&&fl.length<4200;i++){const x=(rnd()*2-1)*760,z=(rnd()*2-1)*760;if(nearFarm(x,z,6)||raceD(x,z)<RACE_HW+6||mtnH(x,z)>-50)continue;if(Math.hypot(x-NSITE.x,z-NSITE.z)<NSITE.B+4)continue;if(fbm(x/70+5,z/70+5)<.52)continue;const h=height(x,z);if(h<1.4||h>35||slope(x,z)>.4)continue;const rn=railNear(x,z);if(rn&&rn.d<6)continue;if(nearFarm(x,z,2))continue;fl.push({x,z,h})}
  const fi=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.42,0),new THREE.MeshLambertMaterial({color:0xffffff}),fl.length);
- fl.forEach((f,i)=>{dummy.position.set(f.x,f.h+.35,f.z);dummy.rotation.set(0,rnd()*3,0);dummy.scale.set(1,.6,1);dummy.updateMatrix();fi.setMatrixAt(i,dummy.matrix);fi.setColorAt(i,col.setHex(pal[Math.floor(rnd()*pal.length)]))});scene.add(fi);
+ fl.forEach((f,i)=>{dummy.position.set(f.x,f.h+.35,f.z);dummy.rotation.set(0,rnd()*3,0);dummy.scale.set(1,.6,1);dummy.updateMatrix();fi.setMatrixAt(i,dummy.matrix);fi.setColorAt(i,col.setHex(pal[Math.floor(rnd()*pal.length)]))});scene.add(fi);cuReg(fi,300,30,1.5);updateTreeLOD(true,0);
 
  // clouds: soft shaded puffs (3 point clouds, one draw call each)
  {const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
