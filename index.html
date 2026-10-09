@@ -3138,22 +3138,36 @@ function dynFps(now,el){
   else{FPSM.bad=0;if(FPSM.ema<iv*1.08&&FPSM.lvl<60&&now-FPSM.okT>10000&&now-FPSM.hold>20000){FPSM.lvl=FPSM.lvl<45?45:60;FPSM.ema=1000/FPSM.lvl;FPSM.okT=now}}}
 /* --- test paneli: FPS, CPU süresi, çizim yükü, GPU adı --- */
 let aaPref=store.get('kz-aa',true)!==false;
-const PERF={on:!!store.get('kz-perf',false),el:null,n:0,cpu:0,last:0,gl:''};
+const PERF={on:!!store.get('kz-perf',false),el:null,n:0,cpu:0,rend:0,last:0,scanT:0,rows:'',gl:''};
 function perfInit(){if(PERF.el)return;try{const gl=renderer.getContext(),ex=gl.getExtension('WEBGL_debug_renderer_info');PERF.gl=(ex?gl.getParameter(ex.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER))+(typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?' [WebGL2]':' [WebGL1]')}catch(e){PERF.gl='?'}
   const d=document.createElement('div');d.style.cssText='position:fixed;left:6px;top:6px;z-index:99999;pointer-events:none;font:11px/1.35 monospace;color:#7CFF7C;background:rgba(0,0,0,.6);padding:4px 7px;border-radius:6px;white-space:pre;display:none';document.body.appendChild(d);PERF.el=d}
 function setPerf(on){PERF.on=on;store.set('kz-perf',on);perfInit();PERF.el.style.display=on?'block':'none';PERF.n=0;PERF.cpu=0;PERF.last=0;if(curScreen==='hub')renderHub(true)}
 function setAA(on){aaPref=on;store.set('kz-aa',on);toast('Kenar yumuşatma için oyunu kapatıp yeniden aç',3);if(curScreen==='hub')renderHub(true)}
+function perfScan(){
+  const fr=new THREE.Frustum(),pm=new THREE.Matrix4(),sph=new THREE.Sphere();camera.updateMatrixWorld();fr.setFromProjectionMatrix(pm.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
+  const rows=[];let tot=0,all=0;
+  scene.children.forEach((top,ti)=>{if(!top.visible)return;let n=0,tris=0,inst=0,mx=0;const mats=new Set();
+    top.traverse(o=>{if(!(o.isMesh||o.isPoints||o.isLine))return;
+      for(let q=o;q;q=q.parent){if(!q.visible)return}
+      if(o.frustumCulled&&o.geometry){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();sph.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);if(!fr.intersectsSphere(sph))return}
+      const ms=Array.isArray(o.material)?o.material:[o.material];n+=ms.length;ms.forEach(m=>mats.add(m.uuid));if(o.isInstancedMesh)inst++;
+      const g=o.geometry,t=g&&(g.index?g.index.count/3:(g.attributes.position?g.attributes.position.count/3:0));tris+=(o.isInstancedMesh?o.count:1)*(t||0)});
+    all+=n;if(n>0)rows.push({ti,n,m:mats.size,t:tris,inst,c:top.children.length,d:top.position.distanceTo(camera.position)|0,ty:top.type})});
+  rows.sort((a,b)=>b.n-a.n);
+  PERF.rows='üst grup '+rows.length+'  toplam '+all+'  anim '+ANIM.length+'\n'+rows.slice(0,6).map(r=>'#'+r.ti+' '+r.ty+' çizim '+r.n+' mat '+r.m+' '+(r.t/1000).toFixed(0)+'k alt '+r.c+' uzak '+r.d+'m'+(r.inst?' inst '+r.inst:'')).join('\n')}
 function perfTick(now,t0){PERF.cpu+=performance.now()-t0;PERF.n++;
   if(now-PERF.last<500)return;
   if(PERF.last){const dt=(now-PERF.last)/1000,fps=PERF.n/dt,cpu=PERF.cpu/PERF.n,inf=renderer.info.render;
     let tr=0;for(let ty=0;ty<3;ty++)tr+=TV.hi[ty].T.count+TV.lo[ty].T.count;let pr=0;for(const pc of CU_PROPS)pr+=pc.n||0;
     let aa='?';try{aa=renderer.getContext().getContextAttributes().antialias?'AA açık':'AA kapalı'}catch(e){}
-    PERF.el.textContent='FPS '+fps.toFixed(0)+' (hedef '+fpsTarget()+')  CPU '+cpu.toFixed(1)+' ms\n'+
+    const rd=PERF.rend/PERF.n;
+    PERF.el.textContent='FPS '+fps.toFixed(0)+' (hedef '+fpsTarget()+')  CPU '+cpu.toFixed(1)+' ms (render '+rd.toFixed(1)+')\n'+
       'çizim '+inf.calls+'  üçgen '+(inf.triangles/1000).toFixed(0)+'k\n'+
       'ağaç '+tr+'  çim/çalı/kaya '+pr+'\n'+
       'DPR '+renderer.getPixelRatio().toFixed(2)+'  '+renderer.domElement.width+'x'+renderer.domElement.height+'  '+aa+'\n'+
-      'GPU '+PERF.gl}
-  PERF.last=now;PERF.n=0;PERF.cpu=0}
+      'GPU '+PERF.gl+(PERF.rows?'\n'+PERF.rows:'')}
+  if(now-PERF.scanT>2500){PERF.scanT=now;try{perfScan()}catch(e){PERF.rows='tarama hatası'}}
+  PERF.last=now;PERF.n=0;PERF.cpu=0;PERF.rend=0}
 function setFps(v){if(!FPS_OK.includes(v))return;FPSM.mode=v;store.set('kz-fps',v);FPSM.lastT=0;FPSM.lvl=60;FPSM.ema=16.7;FPSM.bad=0;FPSM.okT=0;FPSM.hold=0;if(curScreen==='hub')renderHub(true)}
 function settingsHtml(){const o=(a,v,ic,t,sub)=>`<button class="opt${v?' on':''}" data-${a}><b>${ic}</b><span>${t}${sub?'<br><small>'+sub+'</small>':''}</span></button>`;
   return `<div class="sgroup"><h3>🎮 Yön kontrolü</h3><p class="hint2">Ekranın solundaki kontrolü seç. Koşu görevinde sadece ◀ ▶ tuşları çıkar.</p><div class="optrow">${o('ctrl="joy"',ctrlMode==='joy','🕹️','Joystick','sürükle')}${o('ctrl="pad"',ctrlMode==='pad','🔘','Tuşlar','◀ ▶ ▲ ▼')}</div></div>
@@ -5117,8 +5131,9 @@ function loop(now){
   sunDisc.position.copy(camera.position).add(new V3(600,900,400).normalize().multiplyScalar(2200));sunDisc.lookAt(camera.position);sunGlow.position.copy(sunDisc.position);sunGlow.visible=sunDisc.visible;
   updateRain(dt);updateLeaves(dt);updateTrains(dt);updatePickups(dt);for(const f of ANIM)f(dt);
   updateTreeLOD(false,clock);
+  const _r0=PERF.on?performance.now():0;
   renderer.render(scene,camera);
-  if(PERF.on)perfTick(now,_pt);
+  if(PERF.on){PERF.rend+=performance.now()-_r0;perfTick(now,_pt)}
   requestAnimationFrame(loop);
 }
 refreshNest();placeFlying(HOME.x,HOME.y+40,HOME.z,0);menuGoose();
