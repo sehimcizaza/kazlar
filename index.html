@@ -782,13 +782,18 @@ for(int i=0;i<4;i++){vec4 A=uCVa[i],B=uCVb[i];if(B.x>0.){vec2 d=vWP.xz-A.xy;floa
 for(int i=0;i<4;i++){vec4 A=uRTa[i],B=uRTb[i];vec2 d=vWP.xz-A.xy;float t=dot(d,A.zw);if(t>0.&&t<B.x){float l=d.x*A.w-d.y*A.z;float ry=mix(B.y,B.z,clamp(t/B.x,0.,1.));float dy=vWP.y-ry;float k=abs(l)/4.6;if(k<1.&&dy>-.6&&dy<2.7+4.5*sqrt(1.-k*k))discard;}}
 {float gr=smoothstep(.0,.06,diffuseColor.g-diffuseColor.r*.98)*smoothstep(.72,.95,normalize(vWN).y);
  if(gr>0.){vec2 p=vWP.xz;float d=length(vWP-cameraPosition),fade=1.-smoothstep(60.,240.,d);
-  float n1=vn(p*.035),n2=vn(p*.16+7.),n3=vn(p*.9+3.);
-  float bl=vn(vec2(p.x*7.,p.y*1.3)+vn(p*.3)*4.),bl2=vn(vec2(p.y*6.,p.x*1.7)+9.);
+  float n1=vn(p*.035),n2=vn(p*.16+7.);
   vec3 tint=mix(vec3(.78,1.04,.7),vec3(1.16,1.04,.6),smoothstep(.4,.75,n1));tint*=.8+.4*n2;
-  float streak=.82+.34*(bl*.6+bl2*.4);
-  vec3 col=diffuseColor.rgb*tint*mix(1.,streak,fade);
-  col=mix(col,vec3(1.,.96,.88),step(.93,n3)*step(.5,vn(p*2.3))*fade*.85);
-  col=mix(col,vec3(1.,.82,.25),step(.955,vn(p*1.1+20.))*fade*.85);
+  vec3 col=diffuseColor.rgb*tint;
+  if(fade>0.){
+   float n3=vn(p*.9+3.);
+   float bl=vn(vec2(p.x*7.,p.y*1.3)+vn(p*.3)*4.),bl2=vn(vec2(p.y*6.,p.x*1.7)+9.);
+   float streak=.82+.34*(bl*.6+bl2*.4);
+   col=diffuseColor.rgb*tint*mix(1.,streak,fade);
+   float wf=step(.93,n3);if(wf>0.)wf*=step(.5,vn(p*2.3));
+   col=mix(col,vec3(1.,.96,.88),wf*fade*.85);
+   col=mix(col,vec3(1.,.82,.25),step(.955,vn(p*1.1+20.))*fade*.85);
+  }
   diffuseColor.rgb=mix(diffuseColor.rgb,col,gr);}}`;
   sh.uniforms.uRTa={value:RTU_A};sh.uniforms.uRTb={value:RTU_B};sh.uniforms.uCVa={value:CVU_A};sh.uniforms.uCVb={value:CVU_B};sh.fragmentShader='uniform vec4 uRTa[4];uniform vec4 uRTb[4];uniform vec4 uCVa[4];uniform vec4 uCVb[4];\n'+hdr+sh.fragmentShader.replace('#include <color_fragment>',code)}}
 const terrainMesh=new THREE.Mesh(tGeo,terrainMat);scene.add(terrainMesh);
@@ -3122,9 +3127,20 @@ function shopHtml(){
 let gfx=store.get('kz-gfx','mid');
 function applyGfx(){const q={low:{pr:1,hi:70,far:700},mid:{pr:1.5,hi:130,far:1000},high:{pr:1.75,hi:190,far:1250}}[gfx]||{pr:1.5,hi:130,far:1000};renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,q.pr));TV.R=q.hi;TV.FAR=q.far;TV.t=-9;resize()}
 function setGfx(v){gfx=v;store.set('kz-gfx',v);applyGfx();if(curScreen==='hub')renderHub(true)}
+/* --- FPS sınırı: 45/60/90/120 veya Dinamik (menüde 30, oyunda 30-60 arası kendini ayarlar) --- */
+const FPS_OK=['45','60','90','120','dyn'];
+const FPSM={mode:(v=>FPS_OK.includes(v)?v:'60')(String(store.get('kz-fps','60'))),lastT:0,lvl:60,ema:16.7,bad:0,okT:0,hold:0};
+function fpsTarget(){if(paused)return 20;if(FPSM.mode==='dyn')return state.mode==='menu'?30:FPSM.lvl;return +FPSM.mode||60}
+function dynFps(now,el){
+  if(state.mode==='menu'||paused){FPSM.ema=1000/FPSM.lvl;FPSM.bad=0;FPSM.okT=now;return}
+  const iv=1000/FPSM.lvl;FPSM.ema+=(Math.min(el,iv*3)-FPSM.ema)*.05;
+  if(FPSM.ema>iv*1.22){if(!FPSM.bad)FPSM.bad=now;else if(now-FPSM.bad>1500&&FPSM.lvl>30){FPSM.lvl=FPSM.lvl>45?45:30;FPSM.ema=1000/FPSM.lvl;FPSM.bad=0;FPSM.okT=now;FPSM.hold=now}}
+  else{FPSM.bad=0;if(FPSM.ema<iv*1.08&&FPSM.lvl<60&&now-FPSM.okT>10000&&now-FPSM.hold>20000){FPSM.lvl=FPSM.lvl<45?45:60;FPSM.ema=1000/FPSM.lvl;FPSM.okT=now}}}
+function setFps(v){if(!FPS_OK.includes(v))return;FPSM.mode=v;store.set('kz-fps',v);FPSM.lastT=0;FPSM.lvl=60;FPSM.ema=16.7;FPSM.bad=0;FPSM.okT=0;FPSM.hold=0;if(curScreen==='hub')renderHub(true)}
 function settingsHtml(){const o=(a,v,ic,t,sub)=>`<button class="opt${v?' on':''}" data-${a}><b>${ic}</b><span>${t}${sub?'<br><small>'+sub+'</small>':''}</span></button>`;
   return `<div class="sgroup"><h3>🎮 Yön kontrolü</h3><p class="hint2">Ekranın solundaki kontrolü seç. Koşu görevinde sadece ◀ ▶ tuşları çıkar.</p><div class="optrow">${o('ctrl="joy"',ctrlMode==='joy','🕹️','Joystick','sürükle')}${o('ctrl="pad"',ctrlMode==='pad','🔘','Tuşlar','◀ ▶ ▲ ▼')}</div></div>
   <div class="sgroup"><h3>✨ Grafik kalitesi</h3><p class="hint2">Telefon yavaşlarsa Düşük'ü seç. Yüksek: uzaktaki ağaçlar da ayrıntılı, görüntü daha keskin.</p><div class="optrow">${o('gfx="low"',gfx==='low','🔋','Düşük')}${o('gfx="mid"',gfx==='mid','⚖️','Orta')}${o('gfx="high"',gfx==='high','💎','Yüksek')}</div></div>
+  <div class="sgroup"><h3>🎞️ Akıcılık (FPS)</h3><p class="hint2">Düşük FPS telefonu daha az ısıtır ve pili korur. 90 ve 120 sadece ekranın destekliyorsa çalışır. Dinamik: oyun yavaşlarsa FPS'i kendiliğinden düşürür, menüde 30'a iner.</p><div class="optrow">${o('fps="45"',FPSM.mode==='45','45','FPS')}${o('fps="60"',FPSM.mode==='60','60','FPS')}${o('fps="90"',FPSM.mode==='90','90','FPS')}${o('fps="120"',FPSM.mode==='120','120','FPS')}${o('fps="dyn"',FPSM.mode==='dyn','🔄','Dinamik')}</div></div>
   <div class="sgroup"><h3>🔊 Ses ve müzik</h3><div class="optrow">${o('snd="on"',!muted,'🔊','Açık')}${o('snd="off"',muted,'🔇','Kapalı')}</div></div>`}
 function renderHub(keep){
   syncShowcase();
@@ -3152,6 +3168,7 @@ $('#hubBody').addEventListener('click',e=>{const t=e.target;unlockAudio();let b;
   if((b=t.closest('[data-spin]'))){CAM.user=false;SHOW.spin=0;return}
   if((b=t.closest('[data-ctrl]'))){setCtrl(b.dataset.ctrl);sfx(600,.08,'triangle',.08);return}
   if((b=t.closest('[data-gfx]'))){setGfx(b.dataset.gfx);return}
+  if((b=t.closest('[data-fps]'))){setFps(b.dataset.fps);sfx(600,.08,'triangle',.08);return}
     if((b=t.closest('[data-snd]'))){setMuted(b.dataset.snd==='off');return}
   if((b=t.closest('[data-buy]'))){buyItem(b.dataset.buy);return}
   if((b=t.closest('[data-eq]'))){toggleEquip(b.dataset.eq);return}
@@ -5044,6 +5061,10 @@ function applyView(dt){const on=state.mode==='menu'&&curScreen==='hub'&&!hubMin,
   camera.updateProjectionMatrix()}
 
 function loop(now){
+  {const iv=1000/fpsTarget(),el=now-FPSM.lastT;
+   if(el<iv-1){requestAnimationFrame(loop);return}
+   FPSM.lastT=el>iv*2.5?now:FPSM.lastT+iv;
+   if(FPSM.mode==='dyn')dynFps(now,el)}
   if(paused){last=now;renderer.render(scene,camera);requestAnimationFrame(loop);return}
   const dt=Math.min(.05,(now-last)/1000);last=now;clock+=dt;
   if(toastT>0){toastT-=dt;if(toastT<=0)$('#toast').classList.remove('on')}
