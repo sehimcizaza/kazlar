@@ -372,7 +372,9 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
       <button class="tab" data-tab="missions" role="tab"><span class="ti">🎮</span>Görevler</button>
       <button class="tab" data-tab="rider" role="tab"><span class="ti">🧒</span>Karakter</button>
       <button class="tab" data-tab="goose" role="tab"><span class="ti">🪿</span>Kaz</button>
-      <button class="tab" data-tab="nest" role="tab"><span class="ti">🏡</span>Yuvam</button>
+      <button class="tab" data-tab="home" role="tab"><span class="ti">🏡</span>Yuvam</button>
+      <button class="tab" data-tab="nest" role="tab"><span class="ti">👗</span>Dolap</button>
+      <button class="tab" data-tab="journal" role="tab"><span class="ti">📖</span>Defter</button>
       <button class="tab" data-tab="profile" role="tab"><span class="ti">👤</span>Profil</button>
       <button class="tab" data-tab="settings" role="tab"><span class="ti">⚙️</span>Ayarlar</button>
     </div>
@@ -3359,10 +3361,10 @@ function sadTone(){[392,330,262].forEach((f,i)=>setTimeout(()=>sfx(f,.3,'triangl
 
 /* ---------------- UI ---------------- */
 /* ---------------- tabbed hub menu ---------------- */
-let curScreen='title',hubTab='missions',missionCat='all',nestSub='decor';
+let curScreen='title',hubTab='missions',missionCat='all',nestSub='goose';
 const HUBMAP={riderScreen:'rider',gooseScreen:'goose',missionScreen:'missions',nestScreen:'nest'};
 const CATS=[{id:'all',label:'Hepsi'},{id:'race',label:'🏁 Yarış'},{id:'farm',label:'🧺 Çiftlik'},{id:'adv',label:'🌲 Macera'}];
-const NSUB=[{id:'decor',label:'🌼 Yuva'},{id:'goose',label:'🪿 Kaz giysileri'},{id:'kid',label:'🧒 Karakter giysileri'}];
+const NSUB=[{id:'goose',label:'🪿 Kaz giysileri'},{id:'kid',label:'🧒 Karakter giysileri'}];
 let slotF='all';
 const MCAT={race:'race',lights:'adv',gr:'race',deliver:'farm',seed:'farm',scare:'farm',fish:'adv',food:'adv',shelter:'adv',fox:'adv',rescue:'adv',free:'adv'};
 function toMenuMode(){if(state.mode!=='menu'){abortCrash();endCleanup();setPickups(false);state.mode='menu';$('#hud').classList.remove('show')}menuGoose()}
@@ -3524,6 +3526,7 @@ function renderHub(keep){
   else if(hubTab==='nest'){sub.style.display='flex';sub.innerHTML=chipsHtml(NSUB,nestSub,'sub');body.innerHTML=shopHtml()}
   else if(hubTab==='settings'){sub.style.display='none';sub.innerHTML='';body.innerHTML=settingsHtml()}
   else if(hubTab==='profile'){sub.style.display='none';sub.innerHTML='';body.innerHTML=profileHtml()}
+  else if(hubTab==='journal'){sub.style.display='none';sub.innerHTML='';body.innerHTML=journalHtml()}
   else{sub.style.display='none';sub.innerHTML='';body.innerHTML=hubTab==='rider'?ridersHtml():gooseHtml()}
   body.scrollTop=top}
 function pickIn(attr,idx){document.querySelectorAll('#hubBody [data-'+attr+']').forEach(x=>x.classList.toggle('sel',+x.dataset[attr]===idx))}
@@ -3622,6 +3625,7 @@ function finish(success,msg,st){
   const pts=state.mission==='free'?null:(success&&st?st*100+(state.limit?Math.max(0,Math.round((state.limit-state.time)*2)):Math.max(0,Math.round(300-state.time)))+bn*2:(state.pts||0)),PA=pts===null?null:addScore(state.mission,pts);
   if(success&&st){bestStars[state.mission]=Math.max(bestStars[state.mission]||0,st);store.set('kz-stars',bestStars);feathers+=st*10+bn;saveShop()}
   $('#resGain').textContent=success&&st?`+${st*10+bn} 🪶 altın tüy kazandın${bn?' ('+bn+' ödül dahil)':''}! (Toplam: ${feathers})`:'';
+  if(success&&st&&state.mission!=='free'){try{$('#resGain').textContent+=' · '+advAward(10+st*8,st===3?1:0)}catch(e){}}
   setTimeout(()=>{$('#hud').classList.remove('show');$('#resTitle').textContent=success?'Harika iş!':'Bir daha deneyelim';$('#resStars').textContent=success?('★'.repeat(st)+'☆'.repeat(3-st)):'☆☆☆';$('#resMsg').textContent=msg;setResPts(pts,PA);showScreen('resultScreen')},fd);
 }
 const timeBonus=()=>rider().id==='nils'?20:0;
@@ -3764,6 +3768,7 @@ function setupTA(){
     const mine={s:sc,pop:sumPop+rpts,rb:sumRB,e:eb,n:round};if(M2)mpSend({t:'tfin',s:mine});
     toast(kind==='time'?'⏱ Süre doldu!':(remote?'⚡ Arkadaşının enerjisi bitti!':'⚡ Enerjin bitti!'),2.2);
     $('#resGain').textContent=gotF?`+${gotF} 🪶 altın tüy kazandın! (Toplam: ${feathers})`:'';
+    if(!M2&&sc>0){try{$('#resGain').textContent+=(gotF?' · ':'')+advAward(Math.max(10,Math.min(40,Math.round(sc/60))),sc>=2500?1:0)}catch(e){}}
     const showMP=()=>{const o=MP.taFin,nm=MP.oppName||'Arkadaşın';let v='';if(o){v=sc>o.s?'🏆 Sen kazandın!':sc<o.s?'🏆 '+nm+' kazandı!':'🤝 Berabere!'}else v='Arkadaşının sonucu bekleniyor…';
       $('#resTitle').textContent=(kind==='time'?'⏱ Süre doldu! ':(remote?'⚡ Arkadaşının enerjisi bitti! ':'⚡ Enerjin bitti! '))+v;
       $('#resMsg').textContent=`Sen: ${mine.s} (balon ${mine.pop} + tur payı ${mine.rb} + kalan enerji ×1,2 = ${mine.e})`+(o?` · ${nm}: ${o.s} (balon ${o.pop} + tur payı ${o.rb} + enerji ${o.e}) · Ulaşılan tur: ${mine.n}`:'')};
@@ -4031,7 +4036,7 @@ const SEC_TXT={forest:'🌲 Ormana daldı!',water:'🌊 Suyun üstünden!',harbo
 function setupChase(){
   const RT=chaseRoute(),PT=RT.pts,NP=PT.length,LEN=RT.len;
   for(const t of RT.hide)t.hide=true;RT.hidden=true;if(typeof TV!=='undefined')TV.t=-9;
-  const GRACE=20,LOST=200,FEA_EVERY=100,GUIDE=2.6,CORR=21,CMIN=13,CORR_IN=14,base=26+player.g.speed*5;
+  const GRACE=20,LOST=200,FEA_EVERY=100,GUIDE=2.6,CORR=21,CMIN=11,CORR_IN=14,base=26+player.g.speed*5;
   // ---- parkur örnekleyici
   const wrap=s=>((s%LEN)+LEN)%LEN;
   const idxAt=s=>{let lo=0,hi=NP;while(hi-lo>1){const m=(lo+hi)>>1;if(PT[m].s<=s)lo=m;else hi=m}return lo};
@@ -4119,6 +4124,7 @@ function setupChase(){
       feathers+=got;saveShop();const PA=addScore('chase',sc);
       if(rec)fanfare();else sadTone();toast(kind==='lost'?'🦅 Kartal kayboldu!':'Enerjin bitti!',2.2);
       $('#resGain').textContent=got?`+${got} 🪶 altın tüy kazandın! Mağazada harcayabilirsin. (Toplam: ${feathers})`:'';
+      if(sc>0){try{$('#resGain').textContent+=(got?' · ':'')+advAward(Math.max(10,Math.min(40,Math.round(sc/60))),sc>=2500?1:0)}catch(e){}}
       setTimeout(()=>{$('#hud').classList.remove('show');$('#resTitle').textContent=kind==='lost'?'🦅 Kartal kayboldu!':'⚡ Enerjin bitti!';$('#resStars').textContent='⭐ '+sc;
         $('#resMsg').textContent=`${rec?'🏆 Yeni rekor! ':''}Takip edilen yol: ${Math.round(E.trav)} m · Tur: ${E.lap} · Tüy: ${got} · Kemer: ${gatesN} · Kartala çarpma: ${hits}. Rekorun: ${Math.max(sc,best)}`;setResPts(sc,PA);showScreen('resultScreen')},1700)}};
   updates=dt=>{
@@ -4204,10 +4210,7 @@ function setupChase(){
     {const nr=nearRoute(player.pos.x,player.pos.y,player.pos.z);placeRings(nr.s);
      const CW=Math.max(CMIN,CORR-2.5*E.lap),CWI=CW*CORR_IN/CORR,DMG=4+Math.min(E.lap,3);
      if(cCur!==CW){cCur=CW;for(const m of cRings)m.scale.setScalar(CW/CORR)}
-     let safe=false;{const pp=player.pos;
-       for(const th of therms)if(Math.hypot(pp.x-th.x,pp.z-th.z)<22&&pp.y<th.y0+55){safe=true;break}
-       if(!safe)for(const b of balls)if(pp.distanceTo(b.position)<26){safe=true;break}}
-     const out=flying&&E.rt>=GUIDE&&!safe&&nr.d>CW,near=flying&&E.rt>=GUIDE&&!safe&&!out&&nr.d>CWI;
+     const out=flying&&E.rt>=GUIDE&&nr.d>CW,near=flying&&E.rt>=GUIDE&&!out&&nr.d>CWI;
      cMat.opacity=out?.4+.18*Math.sin(E.rt*10):near?.26:.17;
      if(out!==cOut){cOut=out;cMat.color.setHex(out?0xff5577:0x7dffb0)}
      if(E.rt>=GUIDE&&!cInfo){cInfo=true;toast('🚧 Yeşil koridorda kal! Dışında enerjin hızla azalır',2.6)}
@@ -5358,7 +5361,7 @@ function flyStep(dt,inp){
   const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw);
   const here=solidTop(P.pos.x,P.pos.z,P.pos.y,true),ahead=Math.max(solidTop(P.pos.x+fx*24,P.pos.z+fz*24,P.pos.y,true),solidTop(P.pos.x+fx*12,P.pos.z+fz*12,P.pos.y,true));
   if(ahead>here+1.2&&P.pos.y<ahead+2.8&&P.tun<0&&slow<.6)pt=Math.max(pt,.55);
-  if(P.pos.y>270)pt=Math.min(pt,0);
+  if(P.pos.y>(ADV.realm?3000:270))pt=Math.min(pt,0);
   if(!(ROCK.held&&ROCK.ch>0&&P.tun<0&&!P.rtun&&P.pos.y<262))P.pitch+=(pt-P.pitch)*Math.min(1,dt*2.5);
   P.roll+=(-inp.x*.7*(1-slow*.6)-P.roll)*Math.min(1,dt*3);
   {const was=ROCK.on;ROCK.on=ROCK.held&&ROCK.ch>0&&P.tun<0&&!P.rtun&&!(P.stun>0)&&P.pos.y<262&&state.mode==='fly';
@@ -5679,13 +5682,1380 @@ function loop(now){
   applyView(dt);
   sky.position.copy(camera.position);
   sunDisc.position.copy(camera.position).add(new V3(600,900,400).normalize().multiplyScalar(2200));sunDisc.lookAt(camera.position);sunGlow.position.copy(sunDisc.position);sunGlow.visible=sunDisc.visible;
-  updateRain(dt);updateLeaves(dt);updateTrains(dt);updatePickups(dt);for(const f of ANIM)f(dt);
+  updateRain(dt);updateLeaves(dt);updateTrains(dt);updatePickups(dt);if(!ADV.err)try{advUpdate(dt)}catch(e){ADV.err=1;console.error('adv',e)}for(const f of ANIM)f(dt);
   updateTreeLOD(false,clock);
   const _r0=PERF.on?performance.now():0;
   renderer.render(scene,camera);
   if(PERF.on){PERF.rend+=performance.now()-_r0;perfTick(now,_pt)}
   requestAnimationFrame(loop);
 }
+/* ================= MACERACI DEFTERİ: tüy türleri, gizli keşifler, Kayıp Harita ================= */
+const ADV={s:Object.assign({white:0,whiteAll:0,blue:0,rainbow:0,found:{},seen:{},claimed:{},realms:{},treasure:false},store.get('kz-adv',{})),
+  built:false,g:null,vis:false,fx:[],feat:[],chip:null,island:null,beam:null,msg:'',cool:0,tmr:[]};
+ADV.s.found=ADV.s.found||{};ADV.s.realms=ADV.s.realms||{};ADV.s.seen=ADV.s.seen||{};ADV.s.claimed=ADV.s.claimed||{};
+function advSave(){store.set('kz-adv',ADV.s)}
+const _advGT={};
+function advGlowTex(c){return _advGT[c]||(_advGT[c]=(()=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d'),gr=x.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.2,`rgba(${c},.9)`);gr.addColorStop(.55,`rgba(${c},.3)`);gr.addColorStop(1,`rgba(${c},0)`);x.fillStyle=gr;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(cv)})())}
+const advSpriteMat=(c,fog)=>new THREE.SpriteMaterial({map:advGlowTex(c),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:!!fog});
+const advWearItem=(who,type,key)=>SHOP.find(i=>i.who===who&&i.type===type&&i.key===key);
+
+/* ---- yerler: bilinen mekânlar (uğrayınca defterine yazılır) ve 5 gizli keşif ---- */
+const ADV_LM=[];
+{ADV_LM.push({id:'nest',name:'Kaz yuvası',icon:'🏡',p:HOME,r:45});
+ ADV_LM.push({id:'light',name:'Deniz feneri',icon:'🗼',p:LH,r:48});
+ ADV_LM.push({id:'harbor',name:'Liman',icon:'⚓',p:new V3(HAR.x,2,HAR.z),r:55});
+ if(STATION)ADV_LM.push({id:'station',name:'Tren istasyonu',icon:'🚉',p:STATION,r:45});
+ for(const z of[-90,-230,-380,-560]){const x0=coastX(z);if(height(x0-3,z)>=12){ADV_LM.push({id:'cliff',name:'Kıyı şelalesi',icon:'💦',p:new V3(x0+8,5,z),r:40});break}}}
+const ADV_SP=[];
+{ADV_SP.push({id:'summit',name:'Buz Dağı zirvesi',icon:'🏔️',p:new V3(CONE.x,coneTop(CONE.x,CONE.z)+5,CONE.z),r:13,piece:1,
+   hint:'Buzlu dağın en tepesinde bir şey parlıyor. Yükseğe uç!'});
+ ADV_SP.push({id:'cave',name:'Gizli maden mağarası',icon:'🕳️',p:new V3(CONE.x,CONE.tY,CONE.z),r:9,piece:1,
+   hint:'Dağın içinden geçen tünelin tam ortasında, karanlıkta mavi bir ışık var.'});
+ ADV_SP.push({id:'falls',name:'Şelalenin arkası',icon:'🌊',p:new V3(CAVE.x,CAVE.y+1,CAVE.z),r:12,piece:1,
+   hint:'Büyük şelalenin arkasındaki oyukta eski bir sır saklı.'});
+ {let best=null,bd=1e9;const sp=STATION||HOME;
+  for(let x=-700;x<=700;x+=14)for(let z=-700;z<=700;z+=14){const h=height(x,z);if(h<2||h>40)continue;const r=railNear(x,z);if(!r||r.d>5||r.v||r.tun)continue;const d=Math.abs(Math.hypot(x-sp.x,z-sp.z)-230);if(d<bd){bd=d;best=new V3(x+5,h+3.5,z)}}
+  ADV_SP.push({id:'rail',name:'Tren yolu kenarı',icon:'🚂',p:best||new V3(HOME.x-60,HOME.y+8,HOME.z+90),r:11,piece:1,
+   hint:'Tren yolunun hemen yanında, rayların kıyısında unutulmuş bir kutu var.'})}
+ {const z=-300;let x=coastX(z)+110;for(let k=0;k<40&&height(x,z)>-2.5;k++)x+=20;
+  ADV_SP.push({id:'island',name:'Hazine adası',icon:'🏝️',p:new V3(x,9,z),r:24,island:true,
+   hint:'Denizin ortasında küçük bir ada var. Sandığını açmak için haritanın 4 parçası gerek.'})}}
+const advSpot=id=>ADV_SP.find(s=>s.id===id);
+function advPieces(){return ADV_SP.filter(s=>s.piece&&ADV.s.found[s.id]).length}
+function advPlaces(){return Object.keys(ADV.s.seen).length+Object.keys(ADV.s.found).length}
+const ADV_TOTAL_PLACES=ADV_LM.length+ADV_SP.length;
+
+/* ---- ödüller (defterden alınır, ücretsiz) ---- */
+const ADV_REW=[
+ {id:'p3',cat:'places',need:3,name:'İlk adımlar',txt:'+15 altın tüy',gold:15},
+ {id:'p5',cat:'places',need:5,name:'Kaşif çantası',txt:'Mavi sırt çantası (kaz)',items:[['g','back','pack_blue']]},
+ {id:'p10',cat:'places',need:ADV_TOTAL_PLACES,name:'Büyük kaşif',txt:'Kaşif şapkası (karakter) + Korsan şapkası (kaz)',items:[['k','hat','explorer'],['g','hat','pirate']]},
+ {id:'w25',cat:'white',need:25,name:'Tüy avcısı',txt:'Parti şapkası (kaz)',items:[['g','hat','party']]},
+ {id:'w100',cat:'white',need:100,name:'Tüy ustası',txt:'Atkı (kaz) + 10 altın tüy',items:[['g','neck','scarf']],gold:10},
+ {id:'b2',cat:'blue',need:2,name:'Mavi parıltı',txt:'Mavi pelerin (kaz)',items:[['g','back','cape_blue']]},
+ {id:'b4',cat:'blue',need:4,name:'Gizemli ışık',txt:'Uçuş gözlüğü (kaz)',items:[['g','eyes','goggles']]},
+ {id:'story',cat:'story',need:1,name:'Kayıp Harita tamamlandı',txt:'Melek kanatları + Gökkuşağı şemsiyesi (kaz)',items:[['g','back','wings'],['g','hand','umb_rainbow']]}];
+const advVal=c=>c==='places'?advPlaces():c==='white'?ADV.s.whiteAll:c==='blue'?ADV.s.blue:(ADV.s.treasure?1:0);
+function advClaim(id){const r=ADV_REW.find(x=>x.id===id);if(!r||ADV.s.claimed[id]||advVal(r.cat)<r.need)return;
+  ADV.s.claimed[id]=true;let got=[];
+  if(r.gold){feathers+=r.gold;got.push('+'+r.gold+' 🪶')}
+  for(const[w,t,k]of(r.items||[])){const it=advWearItem(w,t,k);if(it&&!owned.includes(it.id)){owned.push(it.id);got.push(it.icon+' '+it.name)}}
+  saveShop();advSave();fanfare();ADV.msg=`🎁 ${r.name}: ${got.join(', ')||'ödül alındı'}`}
+
+/* ---- ödül hesabı (görev sonlarında) ---- */
+function advAward(w,b,nm){const S=ADV.s;if(!nm&&state.mission&&state.mission!=='free'){try{advRQEvent('mission',state.mission)}catch(e){console.error(e)}}S.white+=w;S.whiteAll+=w;S.blue+=b;
+  const g=Math.floor(S.whiteAll/10)-Math.floor((S.whiteAll-w)/10);if(g>0){feathers+=g;saveShop()}advSave();
+  return `⚪ +${w} beyaz tüy${b?' · 🔵 +'+b+' mavi tüy':''}${g?' · +'+g+' 🪶 (10 beyaz = 1 altın)':''}`}
+
+/* ---- sahne nesneleri ---- */
+function advBuild(){if(ADV.built)return;ADV.built=true;featherParts();
+  const G=ADV.g=new THREE.Group();G.visible=false;scene.add(G);
+  const wm=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide,fog:false}),gm=advSpriteMat('190,225,255',false);
+  const R=mulberry32(7771);let n=0;
+  for(let i=0;i<400&&n<42;i++){const x=(R()*2-1)*700,z=(R()*2-1)*700;if(Math.hypot(x-HOME.x,z-HOME.z)<50)continue;
+    const h=height(x,z),land=h>1.8,low=n%3===0&&land;let y=low?h+2.4:solidTop(x,z,300)+7+R()*24;if(y>190||(!low&&h<-1&&R()<.4&&false))continue;
+    const f=new THREE.Group(),m=new THREE.Mesh(FEA_GEO,wm);m.scale.setScalar(1.9);m.rotation.x=-.3;f.add(m);const sp=new THREE.Sprite(gm);sp.scale.set(7,7,1);f.add(sp);
+    f.position.set(x,y,z);G.add(f);ADV.feat.push({g:f,m,low,on:true,ph:R()*6.28});n++}
+  /* gizli yerlerde minik ışıltı: yaklaşınca fark edilir */
+  for(const s of ADV_SP){const sp=new THREE.Sprite(advSpriteMat('120,210,255',true));sp.scale.set(6,6,1);sp.position.copy(s.p);G.add(sp);s.spark=sp}
+  /* hazine adası */
+  {const s=advSpot('island'),g=new THREE.Group(),L=c=>new THREE.MeshLambertMaterial({color:c});g.position.set(s.p.x,-.6,s.p.z);
+   const sand=new THREE.Mesh(new THREE.CylinderGeometry(9,14,3.4,20),L(0xe6d29a));sand.position.y=.7;g.add(sand);
+   const gr=new THREE.Mesh(new THREE.CylinderGeometry(6.4,8.4,.9,20),L(0x5fae4a));gr.position.y=2.6;g.add(gr);
+   const tr=new THREE.Mesh(new THREE.CylinderGeometry(.3,.45,6,8),L(0x8a5a32));tr.position.set(-2.5,5.5,-1);tr.rotation.z=.18;g.add(tr);
+   for(let k=0;k<6;k++){const lf=new THREE.Mesh(new THREE.ConeGeometry(.7,4,6),L(0x2f9e5c));lf.position.set(-2.1+Math.cos(k)*1.5,8.4,-1+Math.sin(k)*1.5);lf.rotation.set(Math.sin(k)*1.1,0,-Math.cos(k)*1.1);g.add(lf)}
+   const cb=new THREE.Mesh(new THREE.BoxGeometry(2.6,1.5,1.6),L(0x7a4a22));cb.position.set(2,3.8,1.2);g.add(cb);
+   const lid=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,2.6,10,1,false,0,Math.PI),L(0x8f5a2a));lid.rotation.z=Math.PI/2;lid.rotation.y=Math.PI/2;lid.position.set(2,4.55,1.2);g.add(lid);
+   const bd=new THREE.Mesh(new THREE.BoxGeometry(2.7,.3,.4),L(0xf2c14e));bd.position.set(2,4.2,1.2);g.add(bd);
+   G.add(g);ADV.island=g}
+  ADV.beam=beam(0xffe27a);ADV.beam.position.set(advSpot('island').p.x,250,advSpot('island').p.z);ADV.beam.visible=false;G.add(ADV.beam);
+  ADV.portal=advMakePortal(0xffe27a,0x9be7ff);ADV.portal.position.set(advSpot('island').p.x,52,advSpot('island').p.z);ADV.portal.visible=false;scene.add(ADV.portal);
+  /* HUD rozeti */
+  const c=document.createElement('div');c.id='advChip';c.className='chip';c.style.display='none';c.style.fontWeight='800';$('#hud').appendChild(c);ADV.chip=c}
+function advChipUpdate(){if(!ADV.chip)return;const S=ADV.s,np=advPieces();ADV.chip.textContent=`⚪ ${S.white}  🔵 ${S.blue}  🌈 ${S.rainbow}  ·  🗺️ ${S.treasure?'✔':np+'/4'}`}
+function advFx(p,rgb,size,life,delay){ADV.fx.push({sp:null,p:p.clone(),rgb,size,life,t:-(delay||0)})}
+function advToast(msg,d){advNote(msg,d||2.4)}
+function advDiscover(s){const S=ADV.s;
+  if(s.island){
+    if(!S.found.island){S.found.island=true;S.blue+=1;feathers+=3;saveShop();advSave();fanfare();advFx(s.p,'255,226,122',34,1.4);advFx(s.p,'120,210,255',46,1.8,.25);
+      advToast(`${s.icon} Keşfettin: ${s.name}!  🔵 +1 mavi tüy`,3);if(advPieces()<4)ADV.tmr.push([2.6,()=>advToast(`🔒 Sandık kilitli… haritanın parçaları: ${advPieces()}/4`,3)])}
+    return}
+  S.found[s.id]=true;S.blue+=1;feathers+=3;saveShop();advSave();fanfare();
+  advFx(s.p,'120,210,255',28,1.3);advFx(s.p,'255,255,255',40,1.7,.2);advFx(s.p,'255,226,122',52,2,.4);
+  advToast(`${s.icon} Keşfettin: ${s.name}!`,3);
+  const np=advPieces();ADV.tmr.push([2.4,()=>advToast(`🗺️ Haritanın ${np}. parçası bulundu (${np}/4)  🔵 +1 mavi tüy`,3)]);
+  if(np>=4)ADV.tmr.push([5.2,()=>advToast('🏝️ Harita tamamlandı! Pusula hazine adasını gösteriyor',3.4)])}
+function advOpenChest(s){const S=ADV.s;S.treasure=true;S.rainbow+=1;feathers+=30;saveShop();
+  for(const id of['p3']){}advClaim('story');advSave();
+  fanfare();setTimeout(fanfare,500);
+  ['255,120,120','255,210,90','120,230,140','110,190,255','200,140,255'].forEach((c,i)=>advFx(s.p,c,30+i*10,1.6+i*.2,i*.25));
+  advToast('🌈 Hazineyi buldun! Gökkuşağı tüyü kazandın!',4);
+  ADV.tmr.push([3.2,()=>advToast('🪶 +30 altın tüy · 😇 Melek kanatları ve 🌈 şemsiye Defterinde!',4)]);
+  ADV.tmr.push([7,()=>advToast('♾️ Hazine adasının üstünde gizemli bir kapı belirdi!',4)])}
+
+const _advV=new V3();
+function advPos(){if(state.mode==='walk')return _advV.set(WALK.x,WALK.y+1.2,WALK.z);if(state.mode==='fly')return player.pos;return null}
+function advUpdate(dt){
+  const on=state.mission==='free'&&!state.done&&(state.mode==='fly'||state.mode==='walk'||state.mode==='takeoff'||state.mode==='scripted');
+  if(!ADV.built){if(!on)return;advBuild()}
+  if(on!==ADV.vis){ADV.vis=on;ADV.chip.style.display=on?'':'none';
+    if(on){ADV.feat.forEach(f=>{f.on=true;f.g.visible=true});advChipUpdate()}
+    else{if(ADV.realm)advLeaveRealm(false);if(ADV.gate)advCloseGate(false);if(advSpot('island')&&state.target===advSpot('island').p)state.target=null}}
+  ADV.g.visible=on&&!ADV.realm;ADV.portal.visible=on&&!ADV.realm&&(ADV.s.treasure||ADV_PREVIEW);
+  if(ADV.portal.visible){ADV.portal.userData.a.rotation.y+=dt*.8;ADV.portal.userData.b.rotation.x+=dt*1.1}
+  /* efektler ve zamanlayıcılar çalışmaya devam eder */
+  for(let i=ADV.fx.length-1;i>=0;i--){const e=ADV.fx[i];e.t+=dt;if(e.t<0)continue;if(!e.sp){e.sp=new THREE.Sprite(advSpriteMat(e.rgb,false));e.sp.position.copy(e.p);scene.add(e.sp)}
+    const k=e.t/e.life;if(k>=1){scene.remove(e.sp);e.sp.material.dispose();ADV.fx.splice(i,1);continue}
+    const s=e.size*(.15+k*.85);e.sp.scale.set(s,s,1);e.sp.material.opacity=1-k}
+  for(let i=ADV.tmr.length-1;i>=0;i--){const t=ADV.tmr[i];t[0]-=dt;if(t[0]<=0){ADV.tmr.splice(i,1);t[1]()}}
+  if(!on){advQHide();return}
+  const P=advPos();if(!P)return;
+  if(ADV.realm){advQHide();advRealmUpdate(dt,P);return}
+  advQUpdate(dt,P);
+  /* beyaz tüyler */
+  const walk=state.mode==='walk';
+  for(const f of ADV.feat){if(!f.on)continue;const g=f.g;f.m.rotation.y+=dt*1.8;g.position.y+=Math.sin(clock*2+f.ph)*dt*.5;
+    if(P.distanceTo(g.position)<(walk?(f.low?3.6:2.2):7.5)){f.on=false;g.visible=false;const S=ADV.s;S.white++;S.whiteAll++;
+      const gold=S.whiteAll%10===0;if(gold){feathers+=1;saveShop()}advSave();advChipUpdate();sfx(880+Math.min(8,S.white%9)*60,.12,'triangle',.1);
+      advFx(g.position,'190,225,255',9,.6);advToast(gold?'⚪ +1 beyaz tüy · 10 beyaz = +1 altın tüy 🪶':`⚪ +1 beyaz tüy (${S.white})`,gold?2:.9)}}
+  /* yerler ve gizli keşifler */
+  for(const l of ADV_LM){if(ADV.s.seen[l.id])continue;if(Math.hypot(P.x-l.p.x,P.z-l.p.z)<l.r){ADV.s.seen[l.id]=true;advSave();sfx(660,.1,'triangle',.1);setTimeout(()=>sfx(990,.16,'triangle',.1),90);advToast(`${l.icon} Defterine yazıldı: ${l.name}`,2.2)}}
+  ADV.cool-=dt;
+  for(const s of ADV_SP){const near=P.distanceTo(s.p)<s.r;
+    if(s.spark){s.spark.visible=!ADV.s.found[s.id]||(s.island&&!ADV.s.treasure);s.spark.material.opacity=.6+Math.sin(clock*3+s.p.x)*.4}
+    if(!near)continue;
+    if(s.island){if(!ADV.s.found.island)advDiscover(s);else if(advPieces()>=4&&!ADV.s.treasure)advOpenChest(s);else if(!ADV.s.treasure&&ADV.cool<=0){ADV.cool=7;advToast(`🔒 Sandık kilitli… haritanın parçaları: ${advPieces()}/4`,2.2)}}
+    else if(!ADV.s.found[s.id])advDiscover(s)}
+  const isl=advSpot('island');ADV.beam.visible=advPieces()>=4&&!ADV.s.treasure;
+  if(advPieces()>=4&&!ADV.s.treasure)state.target=isl.p;else if(state.target===isl.p)state.target=null;
+  /* sonsuzluk kapısı */
+  if(ADV.s.treasure||ADV_PREVIEW){const d=P.distanceTo(ADV.portal.position);if(d>30)ADV.gateArm=true;else if(d<13&&ADV.gateArm&&!ADV.gate)advOpenGate()}
+  advChipUpdate()}
+
+
+/* ================= SONSUZLUK KAPISI: puanla açılan 3 gizli harita ================= */
+const ADV_REALMS=[
+ {id:'cloud',name:'Bulut Adaları',icon:'☁️',need:0,desc:'Bulutların üstünde süzülen kristal adalar. 14 kristali topla.'},
+ {id:'temple',name:'Orman Tapınağı',icon:'🗿',need:0,desc:'Gece ormanında dört parlayan taş. Işık sırasını izle ve aynı sırayla dokun.'},
+ {id:'lights',name:'Işık Festivali Gecesi',icon:'🏮',need:0,desc:'Gökyüzünde binlerce fener. Sakin uç, 60 fener topla.'}];
+const RY=1500;
+const ADV_PREVIEW=true; /* ÖNİZLEME: kapı hikâye beklemeden yuvanın önünde görünür; puan şartı 0. Yayında false yap ve eşikleri geri yaz (1000/3000/8000) */ /* haritalar ana haritanın çok yukarısında, aynı sahnede */
+ADV.realm=null;ADV.R={};ADV.gate=false;ADV.gateArm=true;ADV.stars=null;ADV.fade=null;
+
+function advMakePortal(c1,c2){const g=new THREE.Group(),m1=new THREE.MeshBasicMaterial({color:c1,fog:false}),m2=new THREE.MeshBasicMaterial({color:c2,fog:false});
+  const a=new THREE.Mesh(new THREE.TorusGeometry(12,1.1,10,40),m1),b=new THREE.Mesh(new THREE.TorusGeometry(9,.8,10,40),m2);b.rotation.y=Math.PI/2;g.add(a);g.add(b);
+  const sp=new THREE.Sprite(advSpriteMat('160,200,255',false));sp.scale.set(46,46,1);g.add(sp);
+  const cv=document.createElement('canvas');cv.width=256;cv.height=128;const x=cv.getContext('2d');x.font='900 120px sans-serif';x.textAlign='center';x.textBaseline='middle';x.shadowColor='#8fd0ff';x.shadowBlur=18;x.fillStyle='#fff';x.fillText('∞',128,70);
+  const s2=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,fog:false}));s2.scale.set(18,9,1);g.add(s2);
+  g.userData.a=a;g.userData.b=b;return g}
+
+/* ---- kapı ekranı ---- */
+{const gate=document.createElement('div');gate.id='advGate';gate.className='screen';
+ gate.innerHTML='<div class="panel center"><h2>♾️ Sonsuzluk Kapısı</h2><p class="lead" id="advGateSub"></p><div id="advGateList" style="display:grid;gap:10px;text-align:left"></div><div class="row" style="justify-content:center;margin-top:12px"><button class="ghost" id="advGateClose">Kapat</button></div></div>';
+ $('#app').appendChild(gate);
+ const fd=document.createElement('div');fd.id='advFade';fd.style.cssText='position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9999;transition:opacity .7s';$('#app').appendChild(fd);ADV.fade=fd;
+ gate.addEventListener('click',e=>{const b=e.target.closest('[data-advgo]');if(b){advEnter(b.dataset.advgo);return}if(e.target.closest('#advGateClose'))advCloseGate(true)})}
+function advGateHtml(){const pts=PROF.total;$('#advGateSub').textContent=`Puanın: ⭐ ${pts}. Gitmek istediğin haritayı seç:`;
+  $('#advGateList').innerHTML=ADV_REALMS.map(r=>{const ok=pts>=r.need,done=ADV.s.realms[r.id]&&ADV.s.realms[r.id].done;
+    return ok?`<button class="big" data-advgo="${r.id}" style="text-align:left">${r.icon} ${r.name}${done?' ✔':''}<br><small style="font-weight:600">${r.desc}</small></button>`
+      :`<button class="ghost" disabled style="text-align:left;opacity:.75">🔒 ${r.name}<br><small>${r.need} puan gerekir · ${r.need-pts} puan kaldı</small></button>`}).join('')}
+function advOpenGate(){if(ADV.gate)return;ADV.gate=true;sfx(520,.2,'triangle',.1);setTimeout(()=>sfx(780,.3,'triangle',.1),120);setPause(true);$('#pauseScreen').classList.remove('show');advGateHtml();$('#advGate').classList.add('show')}
+function advCloseGate(resume){if(!ADV.gate)return;ADV.gate=false;$('#advGate').classList.remove('show');if(resume!==false){setPause(false);ADV.gateArm=false}}
+
+/* ---- geceyi aç/kapat ---- */
+function advNight(on){
+  if(on){scene.fog.color.setHex(0x0e1738);scene.fog.near=60;scene.fog.far=950;skyMat.color.setHex(0x2a3f86);hemi.intensity=.55;sun.intensity=.25;sunDisc.visible=false}else setStorm(0);
+  if(!ADV.stars){const sg=new THREE.BufferGeometry(),pa=[],R=mulberry32(99);for(let i=0;i<500;i++){const u=R()*2-1,a=R()*6.283,r=Math.sqrt(1-u*u);pa.push(Math.cos(a)*r*1500,Math.abs(u)*1350+100,Math.sin(a)*r*1500)}
+    sg.setAttribute('position',new THREE.Float32BufferAttribute(pa,3));ADV.stars=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:3,sizeAttenuation:false,fog:false,depthWrite:false}));ADV.stars.frustumCulled=false;scene.add(ADV.stars)}
+  ADV.stars.visible=!!on}
+
+/* ---- ödül ---- */
+function advRealmDone(id){const S=ADV.s;const first=!(S.realms[id]&&S.realms[id].done);S.realms[id]={done:true};
+  if(first){const rw={cloud:[2,25,null],temple:[3,40,null],lights:[3,50,['g','hand','lantern']]}[id];S.blue+=rw[0];feathers+=rw[1];let extra='';
+    if(rw[2]){const it=advWearItem(...rw[2]);if(it&&!owned.includes(it.id)){owned.push(it.id);extra=` · ${it.icon} ${it.name}`}}
+    saveShop();advSave();return `🔵 +${rw[0]} mavi tüy · +${rw[1]} 🪶${extra}`}
+  const t=advAward(10,0,true);return t}
+
+/* ---- ortak: portal çıkışı ve harita yönetimi ---- */
+function advRealmGroup(id){if(ADV.R[id])return ADV.R[id];const R=ADV.R[id]=(id==='cloud'?advBuildCloud:id==='temple'?advBuildTemple:advBuildLights)();
+  R.g.visible=false;scene.add(R.g);R.exit=advMakePortal(0x9be7ff,0xffe27a);R.exit.position.set(0,R.spawnY,200);R.g.add(R.exit);R.exitArm=false;return R}
+function advEnter(id){const d=ADV_REALMS.find(r=>r.id===id);if(!d||PROF.total<d.need)return;
+  advCloseGate(false);setPause(false);ADV.fade.style.transition='none';ADV.fade.style.opacity='1';
+  setTimeout(()=>{
+    try{const R=advRealmGroup(id);ADV.realm=id;for(const k in ADV.R)ADV.R[k].g.visible=(k===id);R.enter();advNight(id!=='cloud');
+      placeFlying(0,R.spawnY,170,0);camera.position.copy(player.pos).add(new V3(0,5,14));state.target=null;R.exitArm=false;
+      advToast(`${d.icon} ${d.name}`,2.6);ADV.tmr.push([2.8,()=>advToast(R.intro,3.4)])}catch(e){console.error('realm',e);ADV.realm=null}
+    ADV.fade.style.transition='opacity .8s';ADV.fade.style.opacity='0'},350)}
+function advLeaveRealm(teleport){const was=ADV.realm;ADV.realm=null;for(const k in ADV.R)ADV.R[k].g.visible=false;advNight(false);
+  if(teleport&&was){const isl=advSpot('island');ADV.fade.style.transition='none';ADV.fade.style.opacity='1';
+    placeFlying(ADV.portal.position.x,ADV.portal.position.y,ADV.portal.position.z+48,Math.PI);camera.position.copy(player.pos).add(new V3(0,5,-14));ADV.gateArm=false;
+    setTimeout(()=>{ADV.fade.style.transition='opacity .8s';ADV.fade.style.opacity='0'},60)}}
+function advRealmUpdate(dt,P){const R=ADV.R[ADV.realm];if(!R)return;energy=100;
+  const hr=Math.hypot(P.x,P.z);if(hr>480){const d=angDiff(Math.atan2(P.x,P.z),player.yaw);player.yaw+=Math.sign(d)*Math.min(Math.abs(d),1.3*dt)}
+  if(P.y<RY-230)player.pos.y=RY-230;if(P.y>RY+330)player.pos.y=RY+330;
+  if(ADV.stars&&ADV.stars.visible)ADV.stars.position.copy(camera.position);
+  R.exit.userData.a.rotation.y+=dt*.8;R.exit.userData.b.rotation.x+=dt*1.1;
+  R.update(dt,P);ADV.chip.textContent=R.chip();
+  const d=P.distanceTo(R.exit.position);if(d>26)R.exitArm=true;else if(d<13&&R.exitArm){advToast('↩️ Ana haritaya dönüyorsun',1.6);advLeaveRealm(true)}}
+
+/* ---- 1) Bulut Adaları: kristal avı ---- */
+function advBuildCloud(){const g=new THREE.Group(),R=mulberry32(4242),L=c=>new THREE.MeshLambertMaterial({color:c}),items=[];
+  const cm=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.93});
+  for(let i=0;i<70;i++){const a=R()*6.283,r=Math.sqrt(R())*620,c=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),cm);c.scale.set(40+R()*60,12+R()*8,40+R()*60);c.position.set(Math.cos(a)*r,RY-150-R()*30,Math.sin(a)*r);g.add(c)}
+  const cc=[0xff7ad9,0x7ae7ff,0xb58cff,0xffd86b],cs=['255,140,220','120,230,255','190,150,255','255,215,110'];
+  for(let i=0;i<14;i++){const a=i/14*6.283+R()*.4,r=70+R()*190,y=RY+(R()-.5)*120,s=1+R()*.9,isl=new THREE.Group();
+    const rk=new THREE.Mesh(new THREE.ConeGeometry(14*s,24*s,9),L(0x7a6a8a));rk.rotation.x=Math.PI;rk.position.y=-13*s;isl.add(rk);
+    const gr=new THREE.Mesh(new THREE.CylinderGeometry(15*s,14*s,2.6,14),L(0x66c24f));isl.add(gr);
+    const tr=new THREE.Mesh(new THREE.CylinderGeometry(.7,1,5*s,6),L(0x8a5a32));tr.position.set(6*s,3.5*s,-3*s);isl.add(tr);
+    const cr=new THREE.Mesh(new THREE.SphereGeometry(3.4*s,10,8),L(0x2f9e5c));cr.position.set(6*s,8*s,-3*s);isl.add(cr);
+    const col=cc[i%4],crys=new THREE.Group();
+    for(let k=0;k<3;k++){const o=new THREE.Mesh(new THREE.OctahedronGeometry((1.5+k*.2)*s),new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:.7}));o.scale.y=2;o.position.set((k-1)*2.2*s,3.2*s,(k%2)*1.5*s);crys.add(o)}
+    const sp=new THREE.Sprite(advSpriteMat(cs[i%4],false));sp.scale.set(16*s,16*s,1);sp.position.y=4*s;crys.add(sp);isl.add(crys);
+    isl.position.set(Math.cos(a)*r,y,Math.sin(a)*r);g.add(isl);items.push({g:crys,pos:new V3(isl.position.x,y+4*s,isl.position.z),on:true,ph:R()*6})}
+  const o={g,items,count:0,spawnY:RY+20,intro:'Kristallere yaklaşıp hepsini topla. Çıkış kapısı arkanda.',
+    enter(){this.count=0;items.forEach(it=>{it.on=true;it.g.visible=true})},
+    update(dt,P){for(const it of items){if(!it.on)continue;it.g.rotation.y+=dt*1.2;it.g.position.y=Math.sin(clock*1.6+it.ph)*.8;
+      if(P.distanceTo(it.pos)<13){it.on=false;it.g.visible=false;this.count++;sfx(700+this.count*45,.18,'triangle',.12);advFx(it.pos,'200,170,255',18,.8);
+        if(this.count===items.length){fanfare();advToast('💎 Tüm kristaller toplandı! '+advRealmDone('cloud'),4)}else advToast(`💎 ${this.count}/${items.length}`,.9)}}},
+    chip(){return `💎 ${this.count}/${items.length}  ·  ☁️ Bulut Adaları`}};return o}
+
+/* ---- 2) Orman Tapınağı: ışık sırası bulmacası ---- */
+function advBuildTemple(){const g=new THREE.Group(),R=mulberry32(777),L=c=>new THREE.MeshLambertMaterial({color:c});
+  const gr=new THREE.Mesh(new THREE.CircleGeometry(320,40),L(0x1d3a24));gr.rotation.x=-Math.PI/2;gr.position.y=RY;g.add(gr);
+  for(let i=0;i<80;i++){const a=R()*6.283,r=95+R()*205,h=25+R()*25,x=Math.cos(a)*r,z=Math.sin(a)*r;
+    const tk=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.8,h*.5,6),L(0x4a3322));tk.position.set(x,RY+h*.25,z);g.add(tk);
+    const cn=new THREE.Mesh(new THREE.ConeGeometry(8+R()*4,h*.85,8),L(0x153d2a));cn.position.set(x,RY+h*.5+h*.35,z);g.add(cn)}
+  const ob=new THREE.Mesh(new THREE.CylinderGeometry(4,7,60,4),L(0x7b8190));ob.rotation.y=Math.PI/4;ob.position.y=RY+30;g.add(ob);
+  const rm=new THREE.MeshBasicMaterial({color:0x6fe8ff,fog:false});
+  for(let k=0;k<4;k++){const st=new THREE.Mesh(new THREE.BoxGeometry(1.1,38,.4),rm);const a=k*Math.PI/2;st.position.set(Math.sin(a)*4.4,RY+32,Math.cos(a)*4.4);st.rotation.y=a;g.add(st)}
+  const orbM=new THREE.MeshBasicMaterial({color:0xffffff,fog:false}),orb=new THREE.Mesh(new THREE.SphereGeometry(3.2,14,10),orbM);orb.position.y=RY+66;g.add(orb);
+  const halo=new THREE.Sprite(advSpriteMat('255,255,255',false));halo.scale.set(36,36,1);halo.position.copy(orb.position);g.add(halo);
+  const cols=[0xff5d5d,0xffd23f,0x4de08a,0x5db5ff],rgb=['255,93,93','255,210,63','77,224,138','93,181,255'],stones=[];
+  for(let k=0;k<4;k++){const a=(k*90+45)*Math.PI/180,x=Math.cos(a)*58,z=Math.sin(a)*58;
+    const pl=new THREE.Mesh(new THREE.CylinderGeometry(3,4,16,8),L(0x6b7280));pl.position.set(x,RY+8,z);g.add(pl);
+    const cr=new THREE.Mesh(new THREE.SphereGeometry(4,12,10),new THREE.MeshBasicMaterial({color:cols[k],fog:false}));cr.position.set(x,RY+20,z);g.add(cr);
+    const sp=new THREE.Sprite(advSpriteMat(rgb[k],false));sp.scale.set(22,22,1);sp.position.copy(cr.position);g.add(sp);
+    stones.push({pos:cr.position.clone(),cr,sp,armed:true})}
+  const moon=new THREE.Mesh(new THREE.SphereGeometry(45,20,14),new THREE.MeshBasicMaterial({color:0xfff3c4,fog:false}));moon.position.set(260,RY+330,-600);g.add(moon);
+  const bm=beam(0xffe27a);bm.position.set(0,RY+250,0);bm.visible=false;g.add(bm);
+  const T={g,spawnY:RY+40,intro:'Obeliskin üstündeki ışığı izle; sonra taşlara aynı sırayla yaklaş.',round:0,step:0,seq:[],t:0,done:false,
+    newSeq(n){const s=[];let last=-1;for(let i=0;i<n;i++){let k;do{k=Math.floor(Math.random()*4)}while(k===last);s.push(k);last=k}return s},
+    enter(){this.round=0;this.step=0;this.done=false;this.t=0;this.seq=this.newSeq(3);bm.visible=false;stones.forEach(s=>s.armed=true)},
+    update(dt,P){this.t+=dt;const len=this.seq.length,tot=len*1.2+3,k=this.t%tot;let lit=-1;if(k<len*1.2){const i=Math.floor(k/1.2);if((k%1.2)<.85)lit=this.seq[i]}
+      orbM.color.setHex(lit>=0?cols[lit]:0x445066);halo.material.opacity=lit>=0?1:.25;
+      stones.forEach((s,i)=>{const on=lit===i;const z=on?44:22;s.sp.scale.set(z,z,1);s.cr.scale.setScalar(on?1.35:1)});
+      if(this.done)return;
+      for(let i=0;i<4;i++){const s=stones[i],d=P.distanceTo(s.pos);if(d>20)s.armed=true;if(d<10&&s.armed){s.armed=false;
+        if(i===this.seq[this.step]){this.step++;sfx(520+i*130,.2,'triangle',.14);advFx(s.pos,rgb[i],24,.7);
+          if(this.step>=this.seq.length){this.round++;this.step=0;
+            if(this.round>=3){this.done=true;bm.visible=true;fanfare();advToast('🗿 Tapınağın sırrını çözdün! '+advRealmDone('temple'),4.5)}
+            else{this.seq=this.newSeq(3+this.round);this.t=0;fanfare();advToast(`✨ Doğru! Sıradaki tur: ${this.round+1}/3`,2.6)}}}
+        else{this.step=0;this.t=0;sadTone();advToast('Yanlış taş. Işık sırasını yeniden izle',2.2)}}}},
+    chip(){return this.done?'🗿 Tapınak çözüldü ✔':`🗿 Tur ${this.round+1}/3 · ${this.step}/${this.seq.length}`}};return T}
+
+/* ---- 3) Işık Festivali Gecesi: sakin fener toplama ---- */
+function advBuildLights(){const g=new THREE.Group(),R=mulberry32(31337),items=[];
+  const cols=[0xffa24a,0xff7a9a,0xffd86b,0xff8a3a],rgb=['255,170,80','255,130,160','255,220,120','255,150,70'];
+  const bodies=cols.map(c=>new THREE.MeshBasicMaterial({color:c,fog:false})),glows=rgb.map(c=>advSpriteMat(c,false)),geo=new THREE.CylinderGeometry(1.6,1.3,2.8,8);
+  for(let i=0;i<130;i++){const a=R()*6.283,r=Math.sqrt(R())*330,k=i%4,f=new THREE.Group();f.add(new THREE.Mesh(geo,bodies[k]));const sp=new THREE.Sprite(glows[k]);sp.scale.set(14,14,1);f.add(sp);
+    f.position.set(Math.cos(a)*r,RY-100+R()*240,Math.sin(a)*r);g.add(f);items.push({g:f,k,vy:1.2+R()*1.4,on:true,ph:R()*6,fade:0})}
+  const L={g,items,count:0,spawnY:RY+10,intro:'Fenerlere dokun, ışıkları topla. Acele yok, sakin uç.',goal:60,
+    enter(){this.count=0;items.forEach(it=>{it.on=true;it.fade=0;it.g.visible=true;it.g.scale.setScalar(1)})},
+    update(dt,P){for(const it of items){const p=it.g.position;
+      if(it.fade>0){it.fade-=dt;p.y+=dt*30;it.g.scale.setScalar(Math.max(.01,it.fade/.6));if(it.fade<=0){it.g.visible=false}continue}
+      p.y+=it.vy*dt;p.x+=Math.sin(clock*.5+it.ph)*dt*1.5;if(p.y>RY+170){p.y=RY-110;if(!it.on){it.on=true;it.g.visible=true;it.g.scale.setScalar(1)}}
+      if(!it.on)continue;
+      if(P.distanceTo(p)<9){it.on=false;it.fade=.6;this.count++;sfx(600+(this.count%8)*70,.14,'triangle',.1);advFx(p,rgb[it.k],14,.7);
+        if(this.count===this.goal){fanfare();advToast('🏮 Işık festivali tamamlandı! '+advRealmDone('lights'),4.5);for(let q=0;q<6;q++)advFx(P.clone().add(new V3((Math.random()-.5)*60,Math.random()*30,(Math.random()-.5)*60)),rgb[q%4],40,1.4,q*.25)}
+        else if(this.count%20===0){for(let q=0;q<4;q++)advFx(P.clone().add(new V3((Math.random()-.5)*50,10+Math.random()*25,(Math.random()-.5)*50)),rgb[q%4],34,1.2,q*.2);advToast(`🎆 ${this.count} fener!`,1.8)}
+        else advToast(`🏮 ${this.count}`,.7)}}},
+    chip(){return `🏮 ${this.count}${this.count>=this.goal?' ✔':'/'+this.goal}  ·  Işık Festivali`}};return L}
+
+/* ---- defter: kapı bölümü ---- */
+function advRealmJournal(){const S=ADV.s;
+  if(!S.treasure&&!ADV_PREVIEW)return `<div class="sgroup"><h3>♾️ Sonsuzluk Kapısı</h3><p class="hint2">Gizli bir kapı var… Kayıp Harita'yı tamamlayınca hazine adasının üstünde belirir.</p><div class="jgrid">${jrow(advPic('portal',false),'Gizli kapı','Kayıp Harita tamamlanınca belirir','–',1)}</div></div>`;
+  const rows=ADV_REALMS.map(r=>{const ok=PROF.total>=r.need,dn=S.realms[r.id]&&S.realms[r.id].done;
+    return jrow(advPic(r.id,ok?undefined:false),r.name,ok?r.desc:r.need+' puan gerekir (şu an '+PROF.total+')',dn?'✔':ok?'Açık':'🔒',!ok)}).join('');
+  return `<div class="sgroup"><h3>♾️ Sonsuzluk Kapısı</h3><p class="hint2">Hazine adasının üstündeki kapıdan uç; puanın yeterse gizli haritalara ışınlanırsın. Haritalardan arkandaki kapıyla dönersin.</p><div class="jgrid">${rows}</div></div>`}
+
+
+/* ---- defter görselleri ve düzeni ---- */
+{const st=document.createElement('style');st.textContent=`.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.jrow{display:flex;align-items:center;gap:10px;border-radius:16px;padding:8px 10px;background:color-mix(in srgb,var(--line) 8%,transparent);min-width:0}
+.jrow.lock{opacity:.8}.jpic{flex:none;width:58px;height:58px;border-radius:14px;overflow:hidden;display:grid;place-items:center;font-size:1.9rem;background:color-mix(in srgb,var(--line) 12%,transparent)}
+.jpic svg,.jpic img{width:100%;height:100%;display:block;object-fit:contain}
+.jrow b{flex:1;min-width:0;font-size:.95rem;line-height:1.15}.jrow small{display:block;font-weight:700;color:var(--soft);white-space:normal;margin-top:2px;line-height:1.2}
+.jrow em{flex:none;font-style:normal;font-weight:900;color:#c77700;text-align:right;max-width:34%;font-size:.85rem;line-height:1.15}`;document.head.appendChild(st)}
+function advPic(id,known){
+  const W=(bg,inner)=>`<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="${bg}"/>${inner}</svg>`;
+  if(known===false)return `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#cfd6df"/><path d="M0 50 L18 30 L30 42 L44 24 L64 46 V64 H0Z" fill="#b3bcc8"/><text x="32" y="43" text-anchor="middle" font-size="34" font-weight="900" fill="#fff" stroke="#8d97a6" stroke-width="1.5" font-family="sans-serif">?</text></svg>`;
+  const sea='<rect y="40" width="64" height="24" fill="#2f8fc9"/><path d="M0 46 q8-4 16 0 t16 0 t16 0 t16 0" stroke="#8fd0ff" stroke-width="2" fill="none"/>';
+  const M={
+   nest:W('#9ed8ff','<path d="M0 50 Q32 36 64 50 V64 H0Z" fill="#5fae4a"/><ellipse cx="32" cy="46" rx="22" ry="9" fill="#9a6b3a"/><ellipse cx="32" cy="43" rx="17" ry="6" fill="#c89a5e"/><ellipse cx="25" cy="41" rx="4" ry="5" fill="#fff"/><ellipse cx="33" cy="40" rx="4" ry="5" fill="#fff"/><ellipse cx="40" cy="42" rx="4" ry="5" fill="#fffbe6"/>'),
+   light:W('#9ed8ff',sea+'<path d="M24 54 L28 20 H36 L40 54Z" fill="#fff"/><path d="M26 38 L27 30 H37 L38 38Z M25 50 L26 44 H38 L39 50Z" fill="#e2456b"/><rect x="26" y="14" width="12" height="7" rx="2" fill="#ffd23f"/><path d="M24 14 L32 6 L40 14Z" fill="#e2456b"/>'),
+   harbor:W('#9ed8ff',sea+'<rect x="4" y="38" width="56" height="6" fill="#8a5a32"/><rect x="10" y="44" width="3" height="10" fill="#6b4524"/><rect x="30" y="44" width="3" height="10" fill="#6b4524"/><rect x="50" y="44" width="3" height="10" fill="#6b4524"/><path d="M14 36 h16 l-3 7 h-10Z" fill="#fff" stroke="#2b4a8a" stroke-width="2"/><rect x="21" y="26" width="2" height="10" fill="#6b4524"/><path d="M23 26 l9 5 h-9Z" fill="#e2456b"/>'),
+   station:W('#9ed8ff','<rect y="46" width="64" height="18" fill="#6b6f78"/><rect x="8" y="24" width="30" height="22" fill="#e8dcc3"/><path d="M5 24 L23 12 L41 24Z" fill="#b5523b"/><rect x="18" y="32" width="10" height="14" fill="#7a5232"/><rect x="40" y="38" width="20" height="9" rx="2" fill="#2e86de"/><circle cx="46" cy="49" r="3" fill="#222"/><circle cx="55" cy="49" r="3" fill="#222"/>'),
+   cliff:W('#9ed8ff','<path d="M0 0 H34 V64 H0Z" fill="#8a847a"/><path d="M34 12 H44 V54 H34Z" fill="#e8f6ff"/><rect y="52" width="64" height="12" fill="#2f8fc9"/><ellipse cx="40" cy="54" rx="9" ry="3" fill="#fff"/>'),
+   summit:W('#6fb8ee','<path d="M-4 64 L32 12 L68 64Z" fill="#7f8b99"/><path d="M32 12 L44 29 L36 25 L32 31 L27 25 L20 29Z" fill="#fff"/><path d="M52 14 l2 5 5 2 -5 2 -2 5 -2-5 -5-2 5-2Z" fill="#ffe27a"/>'),
+   cave:W('#4a5568','<path d="M-4 64 L32 8 L68 64Z" fill="#7f8b99"/><path d="M20 64 Q20 36 32 36 Q44 36 44 64Z" fill="#141c2b"/><ellipse cx="32" cy="52" rx="7" ry="9" fill="#7ae7ff" opacity=".85"/><circle cx="32" cy="52" r="3" fill="#fff"/>'),
+   falls:W('#9ed8ff','<path d="M0 0 H64 V30 H0Z" fill="#8a847a"/><rect x="22" y="10" width="20" height="46" fill="#dff1ff"/><path d="M26 14 v38 M32 12 v42 M38 14 v38" stroke="#fff" stroke-width="2"/><ellipse cx="32" cy="56" rx="14" ry="5" fill="#fff"/><rect y="56" width="64" height="8" fill="#2f8fc9"/><circle cx="32" cy="46" r="4" fill="#ffe27a"/>'),
+   rail:W('#bfe3a8','<path d="M26 64 L30 20 M38 64 L34 20" stroke="#6b6f78" stroke-width="3"/><path d="M24 58 H40 M25 48 H39 M27 38 H37 M28 28 H36" stroke="#8a5a32" stroke-width="3"/><rect x="44" y="40" width="14" height="11" rx="2" fill="#a8794a"/><rect x="44" y="40" width="14" height="4" fill="#7a4a22"/><circle cx="51" cy="45" r="2" fill="#ffd23f"/>'),
+   island:W('#9ed8ff',sea+'<ellipse cx="32" cy="44" rx="20" ry="7" fill="#e6d29a"/><path d="M30 44 q-2-14 4-20" stroke="#8a5a32" stroke-width="3" fill="none"/><path d="M34 24 q-10-6-16 2 M34 24 q-2-10-12-9 M34 24 q8-8 15 0 M34 24 q10 0 12 8" stroke="#2f9e5c" stroke-width="3" fill="none"/><rect x="40" y="37" width="9" height="6" rx="1" fill="#7a4a22"/><rect x="40" y="39" width="9" height="1.5" fill="#ffd23f"/>'),
+   portal:W('#141c3d','<circle cx="32" cy="32" r="22" fill="#2a3f86" opacity=".6"/><ellipse cx="32" cy="32" rx="20" ry="9" fill="none" stroke="#ffe27a" stroke-width="3.5" transform="rotate(35 32 32)"/><ellipse cx="32" cy="32" rx="20" ry="9" fill="none" stroke="#9be7ff" stroke-width="3.5" transform="rotate(-35 32 32)"/><circle cx="32" cy="32" r="4" fill="#fff"/>'),
+   cloud:W('#7ec8f5','<ellipse cx="18" cy="52" rx="22" ry="8" fill="#fff"/><ellipse cx="50" cy="54" rx="18" ry="7" fill="#fff"/><path d="M14 36 h26 l-5 10 h-16Z" fill="#7a6a8a"/><rect x="14" y="32" width="26" height="5" rx="2" fill="#66c24f"/><path d="M27 31 l-4-10 4-5 4 5Z" fill="#ff7ad9"/><path d="M34 31 l-2-7 3-4 3 4Z" fill="#7ae7ff"/>'),
+   temple:W('#0e1738','<circle cx="50" cy="14" r="7" fill="#fff3c4"/><path d="M0 52 H64 V64 H0Z" fill="#1d3a24"/><path d="M26 52 L29 14 H35 L38 52Z" fill="#7b8190"/><rect x="31" y="20" width="2" height="26" fill="#6fe8ff"/><path d="M4 52 L10 34 L16 52Z M48 52 L54 32 L60 52Z" fill="#153d2a"/><circle cx="32" cy="10" r="3" fill="#ffd23f"/>'),
+   lights:W('#0e1738','<circle cx="14" cy="14" r="1.5" fill="#fff"/><circle cx="52" cy="10" r="1.5" fill="#fff"/><g fill="#ffa24a"><rect x="12" y="34" width="9" height="12" rx="3"/></g><rect x="30" y="16" width="10" height="13" rx="3" fill="#ffd86b"/><rect x="46" y="38" width="9" height="12" rx="3" fill="#ff7a9a"/><rect x="24" y="48" width="8" height="10" rx="3" fill="#ff8a3a"/><circle cx="35" cy="22" r="12" fill="#ffd86b" opacity=".25"/>'),
+   feather:W('#2a3f86','<path d="M16 52 Q18 20 48 12 Q46 40 16 52Z" fill="#ffd23f"/><path d="M16 52 L46 14" stroke="#fff3c4" stroke-width="2"/>')};
+  return M[id]||''}
+
+/* ---- Defter sekmesi ---- */
+function jrow(pic,nm,sm,em,lock){return `<div class="jrow${lock?' lock':''}"><span class="jpic">${pic}</span><b>${nm}<small>${sm}</small></b><em>${em}</em></div>`}
+function journalHtml(){const S=ADV.s,np=advPieces();
+  const places=ADV_LM.map(l=>S.seen[l.id]?jrow(advPic(l.id),l.name,'Uğradın','✔'):jrow(advPic(l.id,false),'???','Serbest uçuşta bul: bir mekân daha var','–',1)).join('')
+    +ADV_SP.map(s=>S.found[s.id]?jrow(advPic(s.id),s.name,'Gizli keşif','✔'):jrow(advPic(s.id,false),'Gizli yer',s.hint,'–',1)).join('');
+  const rew=ADV_REW.map(r=>{const v=advVal(r.cat),ok=v>=r.need,got=S.claimed[r.id];
+    const lbl={places:'yer',white:'beyaz tüy',blue:'mavi tüy',story:'hikâye'}[r.cat];
+    const act=got?'✔ Alındı':ok?`<button class="buy" data-advclaim="${r.id}">🎁 Al</button>`:`${Math.min(v,r.need)}/${r.need} ${lbl}`;
+    const it=r.items&&advWearItem(...r.items[0]),pic=it?`<span class="si" data-th="${it.id}" style="width:100%;height:100%;display:grid;place-items:center">${it.icon}</span>`:'🪶';
+    return jrow(pic,r.name,r.txt,act,!ok&&!got)}).join('');
+  if(!thumbT)thumbT=setTimeout(thumbPump,30);
+  const story=S.treasure?'🌈 Hazineyi buldun! Kayıp Harita tamamlandı.':np>=4?'🗺️ Harita tamam! Pusula seni hazine adasına götürüyor.':`🗺️ Haritanın ${np}/4 parçası bulundu. Gizli yerleri keşfettikçe parçalar birleşir; sonunda hazine adasındaki sandık açılır.`;
+  return `<div class="prof">${ADV.msg?`<div class="pnote" style="font-weight:800;font-size:1rem">${ADV.msg}</div>`:''}
+  <div class="pstats"><div><b>⚪ ${S.white}</b><span>Beyaz tüy</span></div><div><b>🔵 ${S.blue}</b><span>Mavi tüy</span></div><div><b>🪶 ${feathers}</b><span>Altın tüy</span></div><div><b>🌈 ${S.rainbow}</b><span>Gökkuşağı tüyü</span></div></div>
+  <div class="sgroup"><h3>🗺️ Kayıp Harita</h3><p class="hint2">${story}</p><div class="pbar"><i style="width:${S.treasure?100:np*25}%"></i></div></div>
+  <div class="sgroup"><h3>📍 Yerler (${advPlaces()}/${ADV_TOTAL_PLACES})</h3><p class="hint2">Serbest uçuşta dolaşarak keşfet. Gizli yerlerde ipucu yazar.</p><div class="jgrid">${places}</div></div>
+  ${advRealmJournal()}
+  <div class="sgroup"><h3>🎁 Ödüller</h3><p class="hint2">Tüy topla, yer keşfet; ödüller ücretsizdir. Beyaz tüy her yerde havada ve yerde bulunur, mavi tüy gizli yerlerde, altın tüy görevlerde.</p><div class="jgrid">${rew}</div></div></div>`}
+$('#hubBody').addEventListener('click',e=>{const b=e.target.closest('[data-advclaim]');if(!b)return;advClaim(b.dataset.advclaim);renderHub(true)});
+try{ADV_REW.forEach(r=>(r.items||[]).forEach(([w,t,k])=>{if(!advWearItem(w,t,k))console.warn('adv ödül öğesi yok',w,t,k)}))}catch(e){}
+
+/* ================= GÖRÜNÜMLER: kaz ve karakter koleksiyonu ================= */
+const LK_RAR=[null,{n:'Yaygın',c:'#5fb760'},{n:'Nadir',c:'#3f8fe0'},{n:'Destansı',c:'#9b5de5'},{n:'Efsanevi',c:'#f2a900'}];
+const lkRealm=id=>!!(ADV.s.realms[id]&&ADV.s.realms[id].done);
+const lkFound=()=>Object.keys(ADV.s.found).length;
+/* kaz görünümleri: renk + kıyafet + küçük özellik. un: [şimdiki, gereken] */
+const LOOKS_G=[
+ {id:'prof',name:'Bay Bilgin',title:'Gözlüklü dahi',r:1,bg:['#d6ecff','#8cc4ff'],deco:['📚','✏️','💡'],body:0xe9e6df,neck:0xf6f4ee,tip:0x9aa3b0,belly:0xffffff,beak:0xf4a03a,feet:0xf4a03a,st:[3,3,4],
+  out:{eyes:'round',neck:'bow'},hint:'10 beyaz tüy topla',un:()=>[ADV.s.whiteAll,10]},
+ {id:'pilot',name:'Pilot Pamuk',title:'Bulutların kaptanı',r:1,bg:['#ffe9b8','#ffb86b'],deco:['☁️','✈️','☀️'],body:0xd9c9a8,neck:0xf1e6cf,tip:0x8a6c4a,belly:0xfff6e2,beak:0xf28a2a,feet:0xf28a2a,st:[4,4,2],
+  out:{hat:'propeller',eyes:'goggles',neck:'scarf'},hint:'Haritada 3 yeri keşfet',un:()=>[advPlaces(),3]},
+ {id:'sailor',name:'Denizci Deniz',title:'Limanın neşesi',r:2,bg:['#bfe9ff','#4aa3d8'],deco:['⚓','🌊','⛵'],body:0xf7f5ef,neck:0xfbfaf6,tip:0x3b6ea8,belly:0xffffff,beak:0xf28a2a,feet:0xf28a2a,st:[3,3,5],
+  out:{hat:'sailor',top:'stripes',neck:'medal'},hint:'Haritada 5 yeri keşfet',un:()=>[advPlaces(),5]},
+ {id:'korsan',name:'Korsan Kara',title:'Yedi denizin korkusuz kazı',r:2,bg:['#d7c6a3','#6b4a2b'],deco:['🏴‍☠️','💰','🦜'],body:0x4a403a,neck:0x2e2723,tip:0x1c1714,belly:0x8a7d70,beak:0xe0a030,feet:0xc9822b,st:[4,3,3],
+  out:{hat:'pirate',neck:'bandana',back:'saddle'},hint:'50 beyaz tüy topla',un:()=>[ADV.s.whiteAll,50]},
+ {id:'kasif',name:'Kaşif Kuzey',title:'Sırlı yerlerin izcisi',r:2,bg:['#cdeccb','#6fb36b'],deco:['🧭','🗺️','🌲'],body:0xa88f6e,neck:0x6d5a43,tip:0x5a4733,belly:0xe0d0b4,beak:0xe48a3a,feet:0xe48a3a,st:[3,4,4],
+  out:{hat:'explorer',back:'pack_red',neck:'bandana',hand:'flag'},hint:'2 gizli keşif bul',un:()=>[lkFound(),2]},
+ {id:'kis',name:'Kar Kazı',title:'Kış masalının yıldızı',r:2,bg:['#e9f4ff','#a8c8ee'],deco:['❄️','⛄','🎄'],body:0xffffff,neck:0xf4fbff,tip:0xb6cde6,belly:0xffffff,beak:0xff8f3a,feet:0xff8f3a,st:[3,3,5],
+  out:{hat:'santa',neck:'scarf',hand:'lollipop'},hint:'100 beyaz tüy topla',un:()=>[ADV.s.whiteAll,100]},
+ {id:'buyucu',name:'Büyücü Bulut',title:'Mavi tüylerin efendisi',r:3,bg:['#c7b6ff','#5a3fb5'],deco:['✨','🔮','🌙'],body:0x9bb6ff,neck:0xc8d6ff,tip:0x4a5fc4,belly:0xeaf0ff,beak:0xffc24a,feet:0xffc24a,st:[3,5,3],
+  out:{hat:'wizard',back:'cape_blue',hand:'wand',eyes:'star'},hint:'2 mavi tüy bul',un:()=>[ADV.s.blue,2]},
+ {id:'peri',name:'Orman Perisi',title:'Tapınağın çiçek koruyucusu',r:3,bg:['#d8f5c2','#3f9a55'],deco:['🍃','🦋','🌸'],body:0x8fd28a,neck:0xc1eebb,tip:0x3f9a55,belly:0xf1ffe6,beak:0xff9ec2,feet:0xff9ec2,st:[3,5,3],
+  out:{hat:'flowercrown',neck:'lei',back:'butterfly',hand:'flower'},hint:'Orman Tapınağı’nı tamamla',un:()=>[lkRealm('temple')?1:0,1]},
+ {id:'melek',name:'Bulut Meleği',title:'Gökyüzü adalarının sakini',r:3,bg:['#fff1fb','#9fd3ff'],deco:['☁️','🌈','🕊️'],body:0xfdfcff,neck:0xffffff,tip:0xbcd9f5,belly:0xffffff,beak:0xffc0d8,feet:0xffc0d8,st:[4,4,3],
+  out:{back:'wings',neck:'pearls',hand:'balloon'},hint:'Bulut Adaları’nı tamamla',un:()=>[lkRealm('cloud')?1:0,1]},
+ {id:'yildiz',name:'Yıldız Kaz',title:'Festival gecesinin süsü',r:3,bg:['#3b2f7a','#10133a'],deco:['⭐','🎆','🌟'],body:0x2c3a7a,neck:0x3d4d9a,tip:0xffd24d,belly:0x8b9bd8,beak:0xffd24d,feet:0xffd24d,st:[4,4,3],
+  out:{hat:'tophat',eyes:'star',neck:'bow',hand:'lantern'},hint:'Işık Festivali Gecesi’ni tamamla',un:()=>[lkRealm('lights')?1:0,1]},
+ {id:'super',name:'Süper Kaz',title:'Haritanın kahramanı',r:3,bg:['#ffd0d0','#e0463f'],deco:['💥','⚡','🦸'],body:0xd7dde8,neck:0xeef2f8,tip:0x3b78d8,belly:0xffffff,beak:0xffb02e,feet:0xffb02e,st:[5,4,3],
+  out:{eyes:'goggles',back:'cape_red',top:'tee_red',feet:'sneaker_r'},hint:'Defterdeki tüm yerleri keşfet',un:()=>[advPlaces(),ADV_TOTAL_PLACES]},
+ {id:'kralice',name:'Altın Kraliçe',title:'Hazine adasının hükümdarı',r:4,bg:['#fff1b0','#f2a900'],deco:['👑','💎','✨'],body:0xf2c14e,neck:0xf8dc82,tip:0xb98418,belly:0xfff4c6,beak:0xe0691f,feet:0xe0691f,st:[4,4,5],
+  out:{hat:'crown',neck:'pearls',back:'cape_red',hand:'wand'},hint:'Kayıp Harita’yı tamamla, sandığı aç',un:()=>[ADV.s.treasure?1:0,1]},
+ {id:'gokkusagi',name:'Gökkuşağı Kaz',title:'Yedi rengin kazı',r:4,bg:['#ffd6f1','#8fd9ff'],deco:['🌈','🦄','💖'],body:0xff9ad0,neck:0x8fd3ff,tip:0xffd24d,belly:0xfff0fb,beak:0xff7aa8,feet:0xb18cff,st:[5,5,5],
+  out:{hat:'party',neck:'ribbon',hand:'umb_rainbow',top:'rainbow'},hint:'3 gökkuşağı tüyü topla',un:()=>[ADV.s.rainbow,3]}
+];
+/* karakter kostümleri (hangi karakterle olursa olsun giyilir) */
+const LOOKS_K=[
+ {id:'kasif',name:'Doğa Kaşifi',title:'Her patikanın dostu',r:1,bg:['#cdeccb','#6fb36b'],deco:['🌲','🧭','🍄'],out:{hat:'explorer',neck:'scout',top:'tee_green',bottom:'khaki',feet:'boots',back:'camp'},hint:'Baştan açık',un:()=>[1,1]},
+ {id:'pilot',name:'Küçük Pilot',title:'Gökyüzünün cesur sürücüsü',r:1,bg:['#ffe9b8','#ffb86b'],deco:['✈️','☁️','☀️'],out:{hat:'aviator',eyes:'aviator',neck:'scarf',top:'tee_blue',bottom:'khaki',feet:'boots'},hint:'Haritada 2 yeri keşfet',un:()=>[advPlaces(),2]},
+ {id:'denizci',name:'Denizci',title:'Dalgaların üstünde',r:1,bg:['#bfe9ff','#4aa3d8'],deco:['⚓','🌊','🐚'],out:{hat:'sailor',top:'stripes',bottom:'jeans',feet:'rain',neck:'medal'},hint:'10 beyaz tüy topla',un:()=>[ADV.s.whiteAll,10]},
+ {id:'kovboy',name:'Kovboy',title:'Çiftliğin yıldızı',r:2,bg:['#f4d9a8','#c98a4b'],deco:['🌵','🐴','⭐'],out:{hat:'cowboy',neck:'bandana',top:'tee_red',bottom:'plaid',feet:'boots'},hint:'Haritada 5 yeri keşfet',un:()=>[advPlaces(),5]},
+ {id:'uzay',name:'Uzay Yolcusu',title:'Yıldızlara yolculuk',r:2,bg:['#4b3f9a','#12123a'],deco:['🪐','🚀','⭐'],out:{hat:'helmet',eyes:'goggles',top:'space',bottom:'black',feet:'sneaker_w',back:'jet'},hint:'40 beyaz tüy topla',un:()=>[ADV.s.whiteAll,40]},
+ {id:'kis',name:'Kış Çocuğu',title:'Kar topu savaşçısı',r:2,bg:['#e9f4ff','#a8c8ee'],deco:['❄️','⛄','🧤'],out:{hat:'beanie',neck:'scarf',top:'snow',bottom:'jeans',feet:'boots'},hint:'100 beyaz tüy topla',un:()=>[ADV.s.whiteAll,100]},
+ {id:'buyucu',name:'Küçük Büyücü',title:'Mavi tüyün sırrı',r:3,bg:['#c7b6ff','#5a3fb5'],deco:['✨','🔮','🌙'],out:{hat:'wizard',top:'star',bottom:'pj',back:'cape_blue',hand:'wand'},hint:'1 mavi tüy bul',un:()=>[ADV.s.blue,1]},
+ {id:'super',name:'Süper Kahraman',title:'Gizli yerlerin kurtarıcısı',r:3,bg:['#ffd0d0','#e0463f'],deco:['💥','⚡','🌆'],out:{eyes:'star',top:'tee_red',bottom:'black',feet:'hitop',back:'cape_red'},hint:'3 gizli keşif bul',un:()=>[lkFound(),3]},
+ {id:'peri',name:'Orman Perisi',title:'Kelebeklerle dans',r:3,bg:['#d8f5c2','#3f9a55'],deco:['🍃','🦋','🌸'],out:{hat:'bunny',top:'tee_green',bottom:'green',feet:'slipper',back:'butterfly',hand:'flower'},hint:'Orman Tapınağı’nı tamamla',un:()=>[lkRealm('temple')?1:0,1]},
+ {id:'yildiz',name:'Yıldız Prens',title:'Işık festivalinin konuğu',r:3,bg:['#3b2f7a','#10133a'],deco:['🎆','⭐','🌟'],out:{hat:'headphones',eyes:'star',top:'star',bottom:'black',feet:'sneaker_w',hand:'lantern'},hint:'Işık Festivali Gecesi’ni tamamla',un:()=>[lkRealm('lights')?1:0,1]},
+ {id:'gokkusagi',name:'Gökkuşağı Çocuğu',title:'Rengârenk bir gün',r:3,bg:['#ffd6f1','#8fd9ff'],deco:['🌈','🦄','💖'],out:{hat:'propeller',top:'rainbow',bottom:'jeans',feet:'sneaker_r',hand:'umb_rainbow'},hint:'1 gökkuşağı tüyü topla',un:()=>[ADV.s.rainbow,1]},
+ {id:'kral',name:'Altın Prens',title:'Hazine adasının sahibi',r:4,bg:['#fff1b0','#f2a900'],deco:['👑','💎','✨'],out:{hat:'crown',neck:'pearls',top:'polo',bottom:'black',feet:'boots',back:'wings',hand:'wand'},hint:'Kayıp Harita’yı tamamla',un:()=>[ADV.s.treasure?1:0,1]}
+];
+/* kaz görünümlerini oyuna gerçek kaz olarak ekle (3B modelde de bu renkler görünür) */
+const LK_G0=GEESE.length;
+LOOKS_G.forEach((l,i)=>{l.gi=LK_G0+i;GEESE.push({id:'lk_'+l.id,name:l.name,desc:l.title,body:l.body,neck:l.neck,tip:l.tip,belly:l.belly,beak:l.beak,feet:l.feet,speed:l.st[0],agil:l.st[1],stam:l.st[2],look:l})});
+const lkState=l=>{const[c,n]=l.un();return{cur:Math.min(c,n),need:n,ok:c>=n}};
+const lkSave=()=>{};
+function lkOutItems(who,out){const r=[];for(const sl in out){const it=advWearItem(who,sl,out[sl]);if(it)r.push([sl,it])}return r}
+function lkApply(who,l){const slots=(who==='g'?SLOTS_G:SLOTS_K).map(s=>s[0]);const e=EQ[who]||(EQ[who]={});slots.forEach(s=>e[s]=null);
+  for(const[sl,it]of lkOutItems(who,l.out)){if(!owned.includes(it.id))owned.push(it.id);e[sl]=it.id}
+  if(who==='g'){sel.goose=l.gi;store.set('kz-goose',l.gi)}
+  saveShop();fanfare();menuGoose();renderHub(true)}
+function lkKidOn(l){const e=EQ.k||{};const its=lkOutItems('k',l.out);if(!its.length)return false;
+  for(const sl of['hat','eyes','neck','top','bottom','feet','back','hand']){const want=(its.find(x=>x[0]===sl)||[])[1];if((e[sl]||null)!==(want?want.id:null))return false}return true}
+
+/* ---- resimler ---- */
+const LK_EMO='font-family="Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif"';
+const lkE=(t,x,y,s,o)=>`<text x="${x}" y="${y}" font-size="${s}" text-anchor="middle" ${LK_EMO}${o?` opacity="${o}"`:''}>${t}</text>`;
+const lkBgSvg=(l,uid,locked)=>`<defs><linearGradient id="lb${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${l.bg[0]}"/><stop offset="1" stop-color="${l.bg[1]}"/></linearGradient></defs>
+ <rect width="160" height="128" fill="url(#lb${uid})"/>
+ <circle cx="130" cy="22" r="34" fill="#fff" opacity=".18"/><circle cx="20" cy="108" r="28" fill="#fff" opacity=".12"/>
+ ${locked?'':lkE(l.deco[0],20,26,19,.9)+lkE(l.deco[1],140,60,16,.85)+lkE(l.deco[2],128,112,17,.85)}
+ <path d="M0 112 Q40 100 80 110 T160 106 V128 H0Z" fill="#000" opacity=".12"/>`;
+function lkHat(k,who){/* baş merkezi (46,40) */
+  switch(k){
+   case'wizard':return `<path d="M32 30 L48 -4 L62 30Z" fill="#5a3fb5" stroke="#2b1c6b" stroke-width="2"/><ellipse cx="47" cy="30" rx="21" ry="5.5" fill="#6d4fd0" stroke="#2b1c6b" stroke-width="2"/>${lkE('⭐',46,18,9)}`;
+   case'sailor':return `<path d="M32 30 Q46 12 60 30Z" fill="#fff" stroke="#1f4e79" stroke-width="2"/><rect x="31" y="28" width="30" height="6" rx="3" fill="#2b4a8a"/>${lkE('⚓',46,27,8)}`;
+   case'pirate':return `<path d="M26 32 Q46 -2 66 32 Q46 26 26 32Z" fill="#1c1c24" stroke="#000" stroke-width="2"/>${lkE('☠️',46,24,10)}`;
+   case'crown':return `<path d="M32 32 L34 14 L40 24 L47 10 L54 24 L60 14 L62 32Z" fill="#ffd24d" stroke="#b97d08" stroke-width="2"/><circle cx="47" cy="22" r="2.4" fill="#e0463f"/>`;
+   case'tophat':return `<rect x="36" y="6" width="22" height="26" rx="2" fill="#23233a" stroke="#000" stroke-width="2"/><rect x="36" y="22" width="22" height="5" fill="#e0463f"/><ellipse cx="47" cy="32" rx="19" ry="4.5" fill="#23233a" stroke="#000" stroke-width="2"/>`;
+   case'party':return `<path d="M36 32 L47 2 L58 32Z" fill="#ff5fa2" stroke="#9c1f5a" stroke-width="2"/><circle cx="47" cy="3" r="3.5" fill="#ffd24d"/>${lkE('✨',46,24,8)}`;
+   case'explorer':return `<ellipse cx="47" cy="31" rx="24" ry="5.5" fill="#b08a55" stroke="#6b4a1f" stroke-width="2"/><path d="M34 31 Q35 12 47 12 Q59 12 60 31Z" fill="#c9a36a" stroke="#6b4a1f" stroke-width="2"/><rect x="35" y="25" width="25" height="4" fill="#6b4a1f"/>`;
+   case'santa':return `<path d="M33 32 Q36 8 54 12 Q66 16 62 32Z" fill="#e0463f" stroke="#8c1b17" stroke-width="2"/><rect x="31" y="29" width="32" height="7" rx="3.5" fill="#fff" stroke="#ddd"/><circle cx="56" cy="11" r="4.5" fill="#fff"/>`;
+   case'flowercrown':return `<path d="M30 33 Q47 22 64 33" stroke="#3f9a55" stroke-width="4" fill="none"/>${lkE('🌸',36,32,11)}${lkE('🌼',47,25,11)}${lkE('🌺',58,32,11)}`;
+   case'straw':return `<ellipse cx="47" cy="32" rx="25" ry="5.5" fill="#e6c477" stroke="#8a6b25" stroke-width="2"/><path d="M35 32 Q36 14 47 14 Q58 14 59 32Z" fill="#f0d78c" stroke="#8a6b25" stroke-width="2"/><rect x="35" y="26" width="24" height="4" fill="#e0463f"/>`;
+   case'chef':return `<rect x="36" y="22" width="22" height="11" fill="#fff" stroke="#bbb" stroke-width="1.5"/><circle cx="38" cy="18" r="8" fill="#fff" stroke="#bbb" stroke-width="1.5"/><circle cx="47" cy="13" r="9" fill="#fff" stroke="#bbb" stroke-width="1.5"/><circle cx="56" cy="18" r="8" fill="#fff" stroke="#bbb" stroke-width="1.5"/>`;
+   case'propeller':return `<path d="M34 32 Q47 12 60 32Z" fill="#3b78d8" stroke="#1f4e79" stroke-width="2"/><rect x="45" y="8" width="3" height="8" fill="#555"/><ellipse cx="47" cy="7" rx="14" ry="2.4" fill="#e0463f"/>`;
+   case'cap':return `<path d="M34 32 Q36 14 47 14 Q58 14 60 32Z" fill="#e0463f" stroke="#8c1b17" stroke-width="2"/><rect x="24" y="29" width="26" height="5" rx="2.5" fill="#e0463f" stroke="#8c1b17" stroke-width="1.5"/>`;
+   case'beanie':return `<path d="M33 33 Q34 12 47 12 Q60 12 61 33Z" fill="#e0463f" stroke="#8c1b17" stroke-width="2"/><rect x="32" y="29" width="30" height="7" rx="3" fill="#fff" opacity=".85"/><circle cx="47" cy="10" r="5" fill="#fff"/>`;
+   case'cowboy':return `<path d="M22 33 Q34 38 47 33 Q60 38 72 33 Q62 28 60 26 Q58 10 47 14 Q36 10 34 26 Q32 28 22 33Z" fill="#a8743a" stroke="#5a3a14" stroke-width="2"/>`;
+   case'helmet':return `<path d="M32 36 Q32 8 47 8 Q62 8 62 36Z" fill="#e8eef8" stroke="#6a7a96" stroke-width="2"/><path d="M40 12 Q47 8 54 12 L52 22 L42 22Z" fill="#fff" opacity=".7"/>`;
+   case'aviator':return `<path d="M32 40 Q30 14 47 14 Q64 14 62 40Z" fill="#8a5a2b" stroke="#4a2f12" stroke-width="2"/><circle cx="36" cy="26" r="3" fill="#d9a05b"/><circle cx="58" cy="26" r="3" fill="#d9a05b"/>`;
+   case'headphones':return `<path d="M32 40 Q32 12 47 12 Q62 12 62 40" stroke="#2a2a3a" stroke-width="4" fill="none"/><rect x="28" y="34" width="8" height="12" rx="4" fill="#e0463f"/><rect x="58" y="34" width="8" height="12" rx="4" fill="#e0463f"/>`;
+   case'bunny':return `<ellipse cx="40" cy="12" rx="5" ry="14" fill="#fff" stroke="#c9c9d6" stroke-width="2"/><ellipse cx="54" cy="12" rx="5" ry="14" fill="#fff" stroke="#c9c9d6" stroke-width="2"/><ellipse cx="40" cy="14" rx="2.3" ry="9" fill="#ffb3cf"/><ellipse cx="54" cy="14" rx="2.3" ry="9" fill="#ffb3cf"/>`;
+   default:return lkE('🎩',46,32,22);
+  }}
+function lkEyes(k,ex,ey){/* göz merkezi */
+  switch(k){
+   case'round':return `<circle cx="${ex}" cy="${ey}" r="7.5" fill="#fff" fill-opacity=".35" stroke="#2a2a3a" stroke-width="2.2"/><path d="M${ex+7.5} ${ey} L${ex+16} ${ey-2}" stroke="#2a2a3a" stroke-width="2"/>`;
+   case'sun':case'aviator':return `<ellipse cx="${ex}" cy="${ey}" rx="8" ry="6.5" fill="#1b1b28" stroke="#000" stroke-width="1.5"/><path d="M${ex+8} ${ey} L${ex+16} ${ey-2}" stroke="#1b1b28" stroke-width="2"/><path d="M${ex-4} ${ey-3} l4 -1" stroke="#fff" stroke-width="1.5" opacity=".6"/>`;
+   case'goggles':return `<circle cx="${ex}" cy="${ey}" r="8.5" fill="#8fd9ff" fill-opacity=".7" stroke="#6b4528" stroke-width="3.2"/><path d="M${ex+8.5} ${ey} Q${ex+22} ${ey-3} ${ex+30} ${ey+4}" stroke="#6b4528" stroke-width="3" fill="none"/>`;
+   case'star':return lkE('🤩',ex,ey+8,20);case'heart':return lkE('😍',ex,ey+8,20);
+   case'monocle':return `<circle cx="${ex}" cy="${ey}" r="7" fill="none" stroke="#c9962b" stroke-width="2.2"/><path d="M${ex} ${ey+7} Q${ex+4} ${ey+18} ${ex+10} ${ey+24}" stroke="#c9962b" stroke-width="1.4" fill="none"/>`;
+   case'nerd':return `<rect x="${ex-8}" y="${ey-6}" width="16" height="12" rx="3" fill="#fff" fill-opacity=".35" stroke="#222" stroke-width="2.6"/>`;
+   default:return '';}}
+function lkNeck(k,x,y){/* boyun noktası */
+  switch(k){
+   case'scarf':return `<path d="M${x-11} ${y-4} Q${x} ${y+6} ${x+12} ${y-3} L${x+12} ${y+5} Q${x} ${y+14} ${x-11} ${y+4}Z" fill="#e0463f" stroke="#8c1b17" stroke-width="1.8"/><path d="M${x+6} ${y+7} L${x+4} ${y+22} L${x+14} ${y+20} L${x+14} ${y+6}Z" fill="#e0463f" stroke="#8c1b17" stroke-width="1.8"/><path d="M${x+6} ${y+14} H${x+14}" stroke="#fff" stroke-width="2"/>`;
+   case'bow':return `<path d="M${x} ${y+2} L${x-12} ${y-5} L${x-12} ${y+9}Z M${x} ${y+2} L${x+12} ${y-5} L${x+12} ${y+9}Z" fill="#e0463f" stroke="#8c1b17" stroke-width="1.8"/><circle cx="${x}" cy="${y+2}" r="3.4" fill="#ff8a80" stroke="#8c1b17" stroke-width="1.5"/>`;
+   case'bandana':return `<path d="M${x-12} ${y-3} Q${x} ${y+4} ${x+12} ${y-3} L${x} ${y+17}Z" fill="#e0463f" stroke="#8c1b17" stroke-width="1.8"/><circle cx="${x-2}" cy="${y+3}" r="1.4" fill="#fff"/><circle cx="${x+4}" cy="${y+6}" r="1.4" fill="#fff"/>`;
+   case'medal':return `<path d="M${x-8} ${y-3} L${x} ${y+12} L${x+8} ${y-3}" stroke="#3b78d8" stroke-width="3" fill="none"/><circle cx="${x}" cy="${y+14}" r="5.5" fill="#ffd24d" stroke="#b97d08" stroke-width="1.8"/>`;
+   case'pearls':return [0,1,2,3,4,5].map(i=>`<circle cx="${x-11+i*4.4}" cy="${y+(i===0||i===5?-1:i===1||i===4?3:5)}" r="2.8" fill="#fff" stroke="#c9c9d6" stroke-width="1"/>`).join('');
+   case'lei':return [0,1,2,3,4].map(i=>`<circle cx="${x-10+i*5}" cy="${y+(i%4===0?-1:i%2?5:3)+1}" r="3.6" fill="${['#ff6fa8','#ffb02e','#ff6fa8','#ffb02e','#ff6fa8'][i]}"/>`).join('');
+   case'ribbon':return `<path d="M${x-12} ${y-2} Q${x} ${y+7} ${x+12} ${y-2}" stroke="#ff5fa2" stroke-width="4" fill="none"/>${lkE('🎀',x,y+9,13)}`;
+   case'scout':return `<path d="M${x-11} ${y-3} Q${x} ${y+4} ${x+11} ${y-3} L${x+2} ${y+12} L${x-2} ${y+12}Z" fill="#3f8fe0" stroke="#1f4e79" stroke-width="1.6"/><circle cx="${x}" cy="${y+6}" r="2.4" fill="#ffd24d"/>`;
+   case'tie':return `<path d="M${x-3} ${y} L${x+3} ${y} L${x+5} ${y+16} L${x} ${y+20} L${x-5} ${y+16}Z" fill="#3b78d8" stroke="#1f4e79" stroke-width="1.6"/>`;
+   default:return lkE('🎀',x,y+8,14);}}
+function lkBack(k,x,y,sc){/* sırt: gövde üstü (x,y) */
+  switch(k){
+   case'cape_red':case'cape_blue':{const c=k==='cape_red'?['#e0463f','#8c1b17']:['#3f6fe0','#1f2f8c'];return `<path d="M${x} ${y} Q${x+40} ${y-6} ${x+58} ${y+30} Q${x+40} ${y+20} ${x+12} ${y+22}Z" fill="${c[0]}" stroke="${c[1]}" stroke-width="2"/>`}
+   case'wings':return `<path d="M${x+6} ${y+2} Q${x+30} ${y-40} ${x+56} ${y-30} Q${x+48} ${y-12} ${x+40} ${y-2} Q${x+30} ${y+2} ${x+6} ${y+6}Z" fill="#fff" stroke="#c9d6f0" stroke-width="2"/><path d="M${x+18} ${y-10} Q${x+36} ${y-24} ${x+50} ${y-24}" stroke="#d8e2f8" stroke-width="2" fill="none"/>`;
+   case'butterfly':return `<path d="M${x+6} ${y} Q${x+26} ${y-46} ${x+52} ${y-34} Q${x+50} ${y-6} ${x+10} ${y+4}Z" fill="#ff8ad0" stroke="#a02a78" stroke-width="2"/><path d="M${x+10} ${y+2} Q${x+34} ${y+10} ${x+44} ${y+30} Q${x+16} ${y+30} ${x+6} ${y+6}Z" fill="#8fd3ff" stroke="#2a6aa8" stroke-width="2"/>`;
+   case'jet':return `<rect x="${x+8}" y="${y-6}" width="14" height="30" rx="6" fill="#c9d0dc" stroke="#555" stroke-width="2"/><rect x="${x+26}" y="${y-6}" width="14" height="30" rx="6" fill="#c9d0dc" stroke="#555" stroke-width="2"/><path d="M${x+11} ${y+24} l4 14 l4 -14Z M${x+29} ${y+24} l4 14 l4 -14Z" fill="#ff9a2e"/>`;
+   case'school':case'camp':case'pack_red':case'pack_blue':case'pack_green':{const c=k==='pack_blue'?'#3f6fe0':k==='pack_green'?'#3fa34d':k==='camp'?'#c9822b':'#e0463f';return `<rect x="${x+4}" y="${y-8}" width="30" height="34" rx="9" fill="${c}" stroke="#222" stroke-width="2"/><rect x="${x+10}" y="${y+6}" width="18" height="12" rx="4" fill="#fff" opacity=".35"/>`}
+   case'saddle':return `<path d="M${x+2} ${y+2} Q${x+22} ${y-14} ${x+42} ${y+2} L${x+38} ${y+22} L${x+6} ${y+22}Z" fill="#a8743a" stroke="#5a3a14" stroke-width="2"/><rect x="${x+14}" y="${y+6}" width="12" height="8" rx="2" fill="#6b4528"/>`;
+   default:return lkE('🧺',x+22,y+14,28);}}
+function lkFeetSvg(k,x1,x2,y){const c={sneaker_w:'#fff',sneaker_r:'#e0463f',hitop:'#3b78d8',rain:'#f2c14e',flippers:'#2fb0c8',slipper:'#f5a8c8',flip:'#4aa8e0',boots:'#6b4528',skate:'#2a2a30'}[k]||'#fff';
+  return [x1,x2].map(x=>`<ellipse cx="${x-3}" cy="${y}" rx="9" ry="4.2" fill="${c}" stroke="#333" stroke-width="1.6"/>`).join('')}
+function lkTopSvg(k,clipId,col,pat){/* gövde üstü kıyafet: clip'li */
+  const c='#'+(col||0xd23a3a).toString(16).padStart(6,'0');let ov='';
+  if(pat==='stripes')ov=[0,1,2,3,4,5].map(i=>`<rect x="40" y="${52+i*8}" width="100" height="4" fill="#fff" opacity=".9"/>`).join('');
+  else if(pat==='jersey')ov=`<rect x="40" y="60" width="100" height="5" fill="#fff"/>`;
+  else if(pat==='hawaii')ov=lkE('🌺',74,84,12)+lkE('🌴',100,92,12)+lkE('🌺',118,80,12);
+  else if(pat==='knit')ov=[0,1,2,3,4].map(i=>`<path d="M${44+i*20} 56 q6 14 0 28 q6 12 0 24" stroke="#fff" stroke-width="2" fill="none" opacity=".4"/>`).join('');
+  return `<g clip-path="url(#${clipId})"><rect x="60" y="48" width="70" height="60" fill="${c}"/>${ov}</g>`}
+function lkTopFlat(k,it){return it?lkTopSvg(k,'',it.col,it.pat):''}
+
+function lkGooseSvg(g,l,uid,locked,nobg){
+  const hx=hex,B=hx(g.body),N=hx(g.neck),T=hx(g.tip),BL=hx(g.belly),BK=hx(g.beak),FT=hx(g.feet||g.beak);
+  const o=(l&&l.out)||{};const itm=sl=>o[sl]?advWearItem('g',sl,o[sl]):null;
+  const top=itm('top');
+  let s=`<svg viewBox="0 0 160 128" class="lksvg" aria-hidden="true">`+(nobg?'':l?lkBgSvg(l,uid,locked):`<defs><linearGradient id="lb${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff1ff"/><stop offset="1" stop-color="#a9d4f5"/></linearGradient></defs><rect width="160" height="128" fill="url(#lb${uid})"/><circle cx="130" cy="24" r="30" fill="#fff" opacity=".2"/>`);
+  s+=`<g${locked?' class="lkdark"':''}>`;
+  s+=`<defs><clipPath id="bc${uid}"><ellipse cx="94" cy="84" rx="46" ry="26"/></clipPath></defs>`;
+  if(o.back&&['cape_red','cape_blue','wings','butterfly'].includes(o.back))s+=lkBack(o.back,92,62);
+  /* ayaklar */
+  s+=`<path d="M82 106 L80 118 M104 106 L106 118" stroke="${FT}" stroke-width="5" stroke-linecap="round"/><ellipse cx="78" cy="119" rx="9" ry="3.4" fill="${FT}"/><ellipse cx="108" cy="119" rx="9" ry="3.4" fill="${FT}"/>`;
+  if(o.feet)s+=lkFeetSvg(o.feet,87,117,118);
+  /* kuyruk + gövde */
+  s+=`<path d="M136 78 L158 66 L152 92 L138 94Z" fill="${T}" stroke="#2a3b5a" stroke-width="1.6"/>`;
+  s+=`<ellipse cx="94" cy="84" rx="46" ry="26" fill="${B}" stroke="#2a3b5a" stroke-width="2"/>`;
+  s+=`<ellipse cx="86" cy="96" rx="30" ry="12" fill="${BL}" opacity=".85" clip-path="url(#bc${uid})"/>`;
+  if(top)s+=`<g clip-path="url(#bc${uid})">${lkTopSvg(top.key,'bc'+uid,top.col,top.pat).replace(/<g clip-path="url\(#[^)]*\)">/,'<g>')}</g>`;
+  if(o.back&&['pack_red','pack_blue','saddle','basket','jet','guitar'].includes(o.back))s+=lkBack(o.back,96,64);
+  /* kanat */
+  s+=`<path d="M70 72 Q100 52 140 66 Q122 96 82 94 Q66 88 70 72Z" fill="${T}" stroke="#2a3b5a" stroke-width="2"/><path d="M84 76 Q110 66 132 70 M84 84 Q108 78 128 80 M88 91 Q108 88 120 88" stroke="#fff" stroke-width="1.6" fill="none" opacity=".45"/>`;
+  /* boyun + kafa */
+  s+=`<path d="M66 78 Q50 66 50 50 Q48 38 46 36" stroke="#2a3b5a" stroke-width="17" fill="none" stroke-linecap="round"/><path d="M66 78 Q50 66 50 50 Q48 38 46 36" stroke="${N}" stroke-width="13" fill="none" stroke-linecap="round"/>`;
+  s+=`<circle cx="44" cy="35" r="13" fill="${N}" stroke="#2a3b5a" stroke-width="2"/>`;
+  if(o.neck)s+=lkNeck(o.neck,54,58);
+  s+=`<path d="M33 34 L12 41 L33 46Z" fill="${BK}" stroke="#9a5a12" stroke-width="1.6"/><path d="M33 40 H18" stroke="#9a5a12" stroke-width="1.2"/>`;
+  s+=`<circle cx="39" cy="31" r="3.6" fill="#fff"/><circle cx="38.4" cy="31" r="2.3" fill="#15110e"/><circle cx="37.6" cy="30.2" r=".9" fill="#fff"/><ellipse cx="45" cy="41" rx="4" ry="2.4" fill="#ff8aa8" opacity=".55"/>`;
+  if(o.eyes)s+=lkEyes(o.eyes,40,31);
+  if(o.hat)s+=`<g transform="translate(-2 -6)">${lkHat(o.hat,'g')}</g>`;
+  /* elde */
+  if(o.hand){const m={balloon:'🎈',flag:'🚩',lantern:'🏮',flower:'🌻',wand:'🪄',lollipop:'🍭',umb_red:'☂️',umb_rainbow:'🌈'};s+=lkE(m[o.hand]||'🎁',24,92,26)}
+  s+=`</g>`;
+  if(locked)s+=`<rect width="160" height="128" fill="#1b1b2e" opacity=".42"/>`+lkE('🔒',80,76,34);
+  return s+`</svg>`}
+
+/* karakter resmi: yüz/ten rengi karaktere göre, kostüm üstüne */
+function lkKidSvg(r,l,uid,locked,nobg){
+  const o=(l&&l.out)||{};const itm=sl=>o[sl]?advWearItem('k',sl,o[sl]):null;
+  const top=itm('top'),bot=itm('bottom'),feet=itm('feet');
+  const SH=r.shirt,PA=r.pants;
+  const tc=top?'#'+top.col.toString(16).padStart(6,'0'):hex(SH),bc=bot?'#'+bot.col.toString(16).padStart(6,'0'):hex(PA);
+  const skin=hex(r.skin),hair=hex(r.hair);
+  let s=`<svg viewBox="0 0 160 128" class="lksvg" aria-hidden="true">`+(nobg?'':l?lkBgSvg(l,uid,locked):`<defs><linearGradient id="lb${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff1ff"/><stop offset="1" stop-color="#a9d4f5"/></linearGradient></defs><rect width="160" height="128" fill="url(#lb${uid})"/>`);
+  s+=`<g${locked?' class="lkdark"':''}>`;
+  if(o.back&&['cape_red','cape_blue','wings','butterfly'].includes(o.back))s+=`<g transform="translate(-20 6) scale(1)">${lkBack(o.back,80,46)}</g>`.replace('translate(-20 6) scale(1)','translate(-12 4)');
+  s+=`<rect x="64" y="86" width="14" height="30" rx="5" fill="${bc}" stroke="#2a3b5a" stroke-width="2"/><rect x="82" y="86" width="14" height="30" rx="5" fill="${bc}" stroke="#2a3b5a" stroke-width="2"/>`;
+  if(bot&&bot.pat==='plaid')s+=`<rect x="64" y="90" width="32" height="3" fill="#fff" opacity=".4"/><rect x="64" y="100" width="32" height="3" fill="#fff" opacity=".4"/>`;
+  const fc={sneaker_w:'#fff',sneaker_r:'#e0463f',hitop:'#3b78d8',rain:'#f2c14e',flippers:'#2fb0c8',slipper:'#f5a8c8',flip:'#4aa8e0',boots:'#6b4528',skate:'#2a2a30'}[o.feet]||'#4a3b2b';
+  s+=`<ellipse cx="68" cy="118" rx="11" ry="5" fill="${fc}" stroke="#222" stroke-width="1.6"/><ellipse cx="92" cy="118" rx="11" ry="5" fill="${fc}" stroke="#222" stroke-width="1.6"/>`;
+  /* üst */
+  s+=`<defs><clipPath id="tc${uid}"><rect x="54" y="56" width="52" height="38" rx="14"/></clipPath></defs>`;
+  s+=`<rect x="54" y="56" width="52" height="38" rx="14" fill="${tc}" stroke="#2a3b5a" stroke-width="2"/>`;
+  if(top){let pt='';const p=top.pat;
+    if(p==='stripes')pt=[0,1,2,3,4].map(i=>`<rect x="54" y="${58+i*8}" width="52" height="4" fill="#fff" opacity=".9"/>`).join('');
+    else if(p==='star')pt=lkE('⭐',80,80,22);else if(p==='hearts')pt=lkE('💕',80,80,22);else if(p==='space')pt=lkE('🚀',80,80,22);
+    else if(p==='rainbow')pt=['#e0463f','#ff9a2e','#ffd24d','#4caf50','#3f8fe0','#9b5de5'].map((c,i)=>`<rect x="54" y="${58+i*6}" width="52" height="6" fill="${c}"/>`).join('');
+    else if(top.key==='snow')pt=lkE('❄️',80,80,20);
+    if(pt)s+=`<g clip-path="url(#tc${uid})">${pt}</g>`}
+  if(o.back&&['school','camp','pack_red','pack_blue','pack_green','jet'].includes(o.back))s+=`<rect x="100" y="58" width="12" height="30" rx="5" fill="${o.back==='camp'?'#c9822b':o.back==='pack_blue'?'#3f6fe0':'#e0463f'}" stroke="#222" stroke-width="1.8"/>`;
+  /* kollar */
+  s+=`<rect x="44" y="58" width="12" height="30" rx="6" fill="${tc}" stroke="#2a3b5a" stroke-width="2"/><rect x="104" y="58" width="12" height="30" rx="6" fill="${tc}" stroke="#2a3b5a" stroke-width="2"/><circle cx="50" cy="90" r="5" fill="${skin}"/><circle cx="110" cy="90" r="5" fill="${skin}"/>`;
+  /* boyun / kafa */
+  s+=`<rect x="73" y="48" width="14" height="12" fill="${skin}"/>`;
+  s+=`<circle cx="80" cy="34" r="22" fill="${hair}"/><circle cx="80" cy="37" r="19" fill="${skin}" stroke="#2a3b5a" stroke-width="2"/>`;
+  if(r.braids)s+=`<circle cx="57" cy="52" r="5" fill="${hair}"/><circle cx="103" cy="52" r="5" fill="${hair}"/>`;
+  s+=`<path d="M62 30 Q80 14 98 30 Q80 24 62 30Z" fill="${hair}"/>`;
+  s+=`<circle cx="73" cy="38" r="2.6" fill="#222"/><circle cx="87" cy="38" r="2.6" fill="#222"/><circle cx="72.4" cy="37.2" r=".9" fill="#fff"/><circle cx="86.4" cy="37.2" r=".9" fill="#fff"/><path d="M73 46 Q80 52 87 46" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="68" cy="44" r="3.2" fill="#ff8aa8" opacity=".5"/><circle cx="92" cy="44" r="3.2" fill="#ff8aa8" opacity=".5"/>`;
+  if(o.eyes){const k=o.eyes;s+=k==='goggles'?`<circle cx="73" cy="38" r="8" fill="#8fd9ff" fill-opacity=".7" stroke="#6b4528" stroke-width="3"/><circle cx="87" cy="38" r="8" fill="#8fd9ff" fill-opacity=".7" stroke="#6b4528" stroke-width="3"/><path d="M65 38 H58 M95 38 H102" stroke="#6b4528" stroke-width="3"/>`:
+    (k==='star'||k==='heart')?lkE(k==='star'?'🤩':'😍',80,46,26):
+    `<rect x="64" y="31" width="14" height="11" rx="4" fill="#1b1b28" stroke="#000" stroke-width="1.5"/><rect x="82" y="31" width="14" height="11" rx="4" fill="#1b1b28" stroke="#000" stroke-width="1.5"/><path d="M78 36 H82" stroke="#000" stroke-width="1.6"/>`}
+  if(o.neck){s+=lkNeck(o.neck,80,57)}
+  if(o.hat){const h=lkHat(o.hat,'k');s+=`<g transform="translate(34 -5)">${h}</g>`}
+  if(o.hand){const m={net:'🥅',icecream:'🍦',lollipop:'🍭',balloon:'🎈',flag:'🚩',lantern:'🏮',flower:'🌻',wand:'🪄',umb_red:'☂️',umb_blue:'☂️',umb_rainbow:'🌈',umb_dots:'☔'};s+=lkE(m[o.hand]||'🎁',122,92,28)}
+  s+=`</g>`;
+  if(locked)s+=`<rect width="160" height="128" fill="#1b1b2e" opacity=".42"/>`+lkE('🔒',80,76,34);
+  return s+`</svg>`}
+
+/* ---- kartlar ---- */
+let _lkU=0;
+function lkCard(kind,l,idx,selected){/* kind g|k */
+  const st=lkState(l),R=LK_RAR[l.r],locked=!st.ok,uid=++_lkU;
+  const art=kind==='g'?lkGooseSvg(GEESE[l.gi],l,uid,locked):lkKidSvg(RIDERS[sel.rider]||RIDERS[0],l,uid,locked);
+  const bar=(lb,v)=>`<div class="sbar"><span>${lb}</span><i><u style="width:${v*20}%"></u></i></div>`;
+  const stats=kind==='g'?`<div class="lkst">${bar('Hız',l.st[0])}${bar('Çeviklik',l.st[1])}${bar('Dayanıklılık',l.st[2])}</div>`:'';
+  const foot=locked?`<div class="lkun">🔒 ${l.hint}<div class="lkpb"><u style="width:${Math.round(st.cur/st.need*100)}%"></u></div><small>${st.cur} / ${st.need}</small></div>`:`<div class="lkon">${selected?'✓ Giyiyor':'Giymek için dokun'}</div>`;
+  return `<div class="lkc${locked?' lock':''}${selected?' on':''}" style="--rc:${R.c}" role="button" tabindex="0" data-look="${kind}:${l.id}">
+   <div class="lkart">${art}<span class="lkrar">${'★'.repeat(l.r)} ${R.n}</span></div>
+   <b>${l.name}</b><em>${l.title}</em>${locked?'':stats}${foot}</div>`}
+const lkCount=kind=>{const L=kind==='g'?LOOKS_G:LOOKS_K;return[L.filter(l=>lkState(l).ok).length,L.length]};
+function lkHead(kind){const[a,b]=lkCount(kind);return `<div class="lkhead"><b>🎴 ${kind==='g'?'Kaz':'Kostüm'} koleksiyonu</b><span>${a} / ${b}</span><div class="lkpb big"><u style="width:${Math.round(a/b*100)}%"></u></div><small>Tüy toplayıp, yerleri keşfedip, adaları tamamlayarak yeni görünümler aç. Hepsi ücretsiz!</small></div>`}
+
+/* Kaz sekmesi */
+gooseHtml=function(){
+  const base=GEESE.slice(0,LK_G0).map((g,i)=>{const bar=(l,v)=>`<div class="sbar"><span>${l}</span><i><u style="width:${v*20}%"></u></i></div>`;
+    const pal=[['#dff1ff','#a9d4f5'],['#e9ffe0','#9fd98a'],['#ffeccf','#f2b46b'],['#f6e4ff','#c9a2ec']][i%4];
+    const l={bg:pal,deco:['🌿','☁️','🪶']};
+    return `<div class="lkc base${i===sel.goose?' on':''}" style="--rc:#7aa6c9" role="button" tabindex="0" data-goose="${i}"><div class="lkart">${lkGooseSvg(g,l,'b'+i,false)}<span class="lkrar">Sürü kazı</span></div><b>${g.name}</b><em>${g.desc}</em><div class="lkst">${bar('Hız',g.speed)}${bar('Çeviklik',g.agil)}${bar('Dayanıklılık',g.stam)}</div><div class="lkon">${i===sel.goose?'✓ Seçili':'Seçmek için dokun'}</div></div>`}).join('');
+  return `<button class="chip2" data-wardrobe="goose" style="margin-bottom:10px">👗 Giydir ve mağaza</button>${lkHead('g')}<div class="lkgrid">${base}${LOOKS_G.map(l=>lkCard('g',l,l.gi,sel.goose===l.gi)).join('')}</div>`};
+/* Karakter sekmesi */
+ridersHtml=function(){
+  const base=RIDERS.map((r,i)=>`<div class="lkc base${i===sel.rider?' on':''}" style="--rc:#7aa6c9" role="button" tabindex="0" data-rider="${i}"><div class="lkart">${lkKidSvg(r,{bg:['#dff1ff','#a9d4f5'],deco:['🌿','☁️','🍀'],out:{}},'r'+i,false)}</div><b>${r.custom?`<span id="heroLabel">${escapeHtml(heroName)}</span>`:r.name}</b><em>${r.desc}</em><p class="perk">⭐ ${r.perk}</p>${r.custom?`<input id="heroName" maxlength="14" aria-label="Kahramanın adı" placeholder="Adını yaz" value="${heroName==='Ben'?'':escapeHtml(heroName)}">`:''}<div class="lkon">${i===sel.rider?'✓ Seçili':'Seçmek için dokun'}</div></div>`).join('');
+  return `<button class="chip2" data-wardrobe="kid" style="margin-bottom:10px">👗 Giydir ve mağaza</button><div class="lkh2">Karakterini seç</div><div class="lkgrid">${base}</div>${lkHead('k')}<div class="lkgrid">${LOOKS_K.map(l=>lkCard('k',l,0,lkKidOn(l))).join('')}</div>`};
+$('#hubBody').addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-look]');if(!b)return;
+  const[kind,id]=b.dataset.look.split(':'),l=(kind==='g'?LOOKS_G:LOOKS_K).find(x=>x.id===id);if(!l)return;
+  const st=lkState(l);if(!st.ok){sadTone();advNote('🔒 '+l.name+': '+l.hint+' ('+st.cur+'/'+st.need+')',2.6);return}
+  lkApply(kind,l);advNote('✨ '+l.name+' giyildi!',2)});
+{const st=document.createElement('style');st.textContent=`
+.lkhead{margin:4px 0 10px;padding:10px 12px;border-radius:16px;background:color-mix(in srgb,var(--sky) 40%,transparent);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.lkhead b{font-size:1.1rem}.lkhead span{font-weight:800;color:var(--berry)}.lkhead small{flex-basis:100%;color:var(--soft);line-height:1.25}
+.lkpb{height:8px;border-radius:6px;background:rgba(0,0,0,.14);overflow:hidden;margin:5px 0 2px}.lkpb.big{flex:1;min-width:90px;height:10px;margin:0}.lkpb u{display:block;height:100%;background:linear-gradient(90deg,#ffd24d,#ff8a3d);border-radius:6px;text-decoration:none}
+.lkh2{font-weight:800;margin:4px 2px 8px}
+.lkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.lkc{position:relative;display:flex;flex-direction:column;gap:3px;border:3px solid var(--rc);border-radius:20px;padding:6px 6px 9px;cursor:pointer;background:var(--panel);box-shadow:0 3px 0 color-mix(in srgb,var(--rc) 55%,#000 0%);overflow:hidden;min-width:0}
+.lkc.on{outline:4px solid var(--berry);outline-offset:-1px;box-shadow:0 0 14px color-mix(in srgb,var(--berry) 55%,transparent)}
+.lkart{position:relative;border-radius:14px;overflow:hidden;line-height:0}
+.lksvg{width:100%;height:auto;display:block}
+.lkdark{filter:brightness(0) opacity(.55)}
+.lkrar{position:absolute;left:6px;bottom:5px;font-size:.68rem;line-height:1;font-weight:800;color:#fff;background:var(--rc);padding:3px 7px;border-radius:10px;letter-spacing:.2px}
+.lkc b{font-size:1.05rem;line-height:1.1;padding:0 3px;overflow-wrap:anywhere}
+.lkc em{font-style:normal;font-size:.8rem;color:var(--soft);line-height:1.2;padding:0 3px}
+.lkc .perk{margin:0;font-size:.82rem;font-weight:600;padding:0 3px}
+.lkc input{font:inherit;font-size:1rem;border:2px solid var(--line);border-radius:10px;padding:2px 8px;width:calc(100% - 6px);margin:3px;background:var(--panel);color:var(--ink)}
+.lkst{padding:0 3px}.lkon{margin:3px 3px 0;text-align:center;font-weight:800;font-size:.85rem;color:var(--rc);border-top:1px dashed color-mix(in srgb,var(--rc) 45%,transparent);padding-top:4px}
+.lkc.on .lkon{color:var(--berry)}
+.lkun{margin:3px 3px 0;font-size:.8rem;font-weight:700;color:var(--ink);line-height:1.2}.lkun small{color:var(--soft);font-weight:600}
+.lkc.lock{opacity:.97}
+`;document.head.appendChild(st)}
+
+/* ================= GÖREV ZİNCİRLERİ, HAYVANLAR, FOTOĞRAFLAR, YUVAM, TREN SÜRPRİZİ ================= */
+{const S=ADV.s;S.q=S.q||{};S.animals=S.animals||{};S.nest=S.nest||0;S.trainHits=S.trainHits||0;S.track=S.track||'river';S.jtab=S.jtab||'main'}
+const _emoTex={};
+function advEmoTex(e){return _emoTex[e]||(_emoTex[e]=(()=>{const cv=document.createElement('canvas');cv.width=cv.height=96;const x=cv.getContext('2d');x.font='64px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,48,52);return new THREE.CanvasTexture(cv)})())}
+function advMark(e,p,sc){const g=new THREE.Group();const gl=new THREE.Sprite(advSpriteMat('255,226,122',true));gl.scale.set(sc*1.9,sc*1.9,1);g.add(gl);
+  const m=new THREE.Sprite(new THREE.SpriteMaterial({map:advEmoTex(e),transparent:true,depthWrite:false,fog:false}));m.scale.set(sc,sc,1);g.add(m);g.position.copy(p);return g}
+const gpt=(x,z,dy)=>new V3(x,Math.max(height(x,z),0.3)+(dy==null?3.2:dy),z);
+
+/* ---- görev zincirleri ---- */
+let ADVQ=null;
+function advQDefs(){if(ADVQ)return ADVQ;ADVQ=[];
+  const fm=(i,lx,lz)=>{if(!FARMS.length)return gpt(HOME.x+40,HOME.z+60);const w=farmWorld(FARMS[i%FARMS.length],lx,lz);return new V3(w.x,Math.max(w.y,.3)+3.2,w.z)};
+  /* NEHİR */
+  {const leaves=[];const cols=['🍂','🍁','🍃','🌿','🍀'];for(let i=0;i<10;i++){const x=-480+i*92;leaves.push(gpt(x,riverZ(x),3.6))}
+   let mx=600;for(let x=0;x<780;x+=10){if(height(x,riverZ(x))<-2){mx=x;break}}
+   let top=null,bh=-1e9;for(let a=0;a<24;a++)for(const rr of[18,34,52]){const x=CAVE.x+Math.cos(a/24*6.283)*rr,z=CAVE.z+Math.sin(a/24*6.283)*rr,h=height(x,z);if(h>bh){bh=h;top=new V3(x,h+4,z)}}
+   ADVQ.push({id:'river',icon:'🌊',name:'Nehir ve Köprü',pic:'river',
+    steps:[{t:'collect',icon:'🍂',txt:'Nehrin üstünde süzülen 10 renkli yaprağı topla (alçak uç!)',pts:leaves},
+           {t:'carry',iconA:'🥬',iconB:'🐢',txt:'Çiftlikten marul al, nehir kıyısındaki aç kaplumbağaya götür',a:fm(0,0,-10),b:gpt(-150,riverZ(-150)-17,3.4)},
+           {t:'visit',icon:'⛵',txt:'Nehrin denize aktığı yerde kaybolmuş oyuncak tekneyi bul',p:gpt(mx-25,riverZ(mx-25),3)},
+           {t:'visit',icon:'🏞️',txt:'Şelalenin üstündeki gizli göleti keşfet',p:top}]});}
+  /* ÇİFTLİK */
+  {ADVQ.push({id:'farm',icon:'🧺',name:'Çiftlik Günü',pic:'farm',
+    steps:[{t:'collect',icon:'🐑',txt:'Kaçan 3 kuzuyu bul',pts:[fm(0,-22,40),fm(1,20,52),fm(2,-8,64)]},
+           {t:'carry',iconA:'🥕',iconB:'🐄',txt:'Havuç al, inek Alaca\'ya götür',a:fm(0,16,-6),b:fm(1,-10,22)},
+           {t:'visit',icon:'🎩',txt:'Korkuluğa şapkasını geri ver',p:fm(FARMS.length-1,-14,50)}]})}
+  /* TREN */
+  {if(STATION){const t1=railAt(RAIL.len*.25);
+   ADVQ.push({id:'train',icon:'🚂',name:'Tren Yolculuğu',pic:'train',
+    steps:[{t:'visit',icon:'🚉',txt:'Tren istasyonuna git',p:new V3(STATION.x,Math.max(STATION.y||0,height(STATION.x,STATION.z))+5,STATION.z)},
+           {t:'collect',icon:'🎫',txt:'Rayların kenarındaki bileti bul',pts:[new V3(t1.x+4,t1.y+3.5,t1.z)]},
+           {t:'visit',icon:'👋',txt:'Kırmızı lokomotifi selamla (yanına uç!)',dyn:()=>TRAINS[0].cars[0].position,dy:4},
+           {t:'visit',icon:'🏮',txt:'Yeşil trenin son vagonuna ulaş',dyn:()=>TRAINS[1].cars[TRAINS[1].cars.length-1].position,dy:4}]})}}
+  /* LİMAN */
+  {const fish=[];for(let k=0;k<3;k++){const a=k*2.1+.5;fish.push(new V3(HAR.x+Math.cos(a)*22,3,HAR.z+Math.sin(a)*22))}
+   ADVQ.push({id:'harbor',icon:'⚓',name:'Liman Işıkları',pic:'harbor',
+    steps:[{t:'collect',icon:'🐟',txt:'Limanda dağılan 3 balık sandığını topla',pts:fish},
+           {t:'visit',icon:'🗼',txt:'Deniz fenerine uç',p:new V3(LH.x,LH.y+14,LH.z)},
+           {t:'visit',icon:'🧓',txt:'Fener bekçisine selam ver',p:new V3(KEEPER.x,KEEPER.y+4,KEEPER.z)}]})}
+  return ADVQ}
+const advQState=id=>ADV.s.q[id]||(ADV.s.q[id]={s:0,c:[],k:0,done:false});
+const advQCurChain=()=>{const D=advQDefs();return D.find(c=>c.id===ADV.ChainTrack)||D.find(c=>!advQState(c.id).done)||null};
+function advQLabel(c){const st=advQState(c.id),sp=c.steps[st.s];if(!sp)return '';let extra='';if(sp.t==='collect')extra=` (${st.c.length}/${sp.pts.length})`;if(sp.t==='carry')extra=st.k?' (götür!)':' (al)';return `${c.icon} ${c.name}: ${sp.txt}${extra}`}
+function advQMarkers(){/* görünür işaretleri yeniden kur */
+  const G=ADV.qg;while(G.children.length)G.remove(G.children[0]);ADV.qm=[];
+  const c=advQCurChain();ADV.qcur=c?c.id:null;ADV.qkey=null;if(!c)return;const st=advQState(c.id);if(st.done)return;const sp=c.steps[st.s];if(!sp)return;ADV.qkey=c.id+':'+st.s+':'+st.k+':'+st.c.length;
+  const add=(e,p,idx,dyn,dy)=>{const m=advMark(e,p,6.5);G.add(m);ADV.qm.push({g:m,p,idx,dyn,dy:dy||0,ph:Math.random()*6})};
+  if(sp.t==='collect')sp.pts.forEach((p,i)=>{if(!st.c.includes(i))add(sp.icon,p,i)});
+  else if(sp.t==='visit')add(sp.icon,sp.p||new V3(),0,sp.dyn,sp.dy);
+  else if(sp.t==='carry')add(st.k?sp.iconB:sp.iconA,st.k?sp.b:sp.a,0)}
+function advQTrack(id){ADV.s.track=id;ADV.ChainTrack=id;advSave();if(ADV.qg)advQMarkers()}
+function advQAdvance(c){const st=advQState(c.id);st.s++;st.c=[];st.k=0;
+  if(st.s>=c.steps.length){st.done=true;feathers+=10;saveShop();fanfare();
+    const D=advQDefs();if(D.every(x=>advQState(x.id).done)&&!ADV.s.q._all){ADV.s.q._all=true;ADV.s.rainbow++;advNote(`🏆 ${c.name} bitti! +10 🪶 · Tüm görevler tamam: 🌈 gökkuşağı tüyü!`,4)}
+    else advNote(`🏆 ${c.name} tamamlandı! +10 altın tüy 🪶`,3.4);
+    ADV.ChainTrack=null;const nx=D.find(x=>!advQState(x.id).done);ADV.s.track=nx?nx.id:c.id;ADV.ChainTrack=ADV.s.track}
+  else{chime();advNote('✅ Sıradaki: '+c.steps[st.s].txt,3)}
+  advSave();advQMarkers();advChipUpdate()}
+
+/* ---- hayvanlar ---- */
+const ADV_AN=[
+ {id:'deer',icon:'🦌',name:'Geyik',hint:'Yeşil tepelerde, ormanın kıyısında otluyor.',ok:(h,x,z)=>h>5&&h<26},
+ {id:'fox',icon:'🦊',name:'Tilki',hint:'Çalılıkların arasında, düşük tepelerde saklanıyor.',ok:(h,x,z)=>h>3&&h<18},
+ {id:'beaver',icon:'🦫',name:'Kunduz',hint:'Nehrin kıyısında bir yerde baraj yapıyor.',riv:true},
+ {id:'seal',icon:'🦭',name:'Fok',hint:'Kumsalda, dalgaların hemen yanında güneşleniyor.',ok:(h,x,z)=>h>.5&&h<2.2&&(height(x+30,z)<-1.5||height(x-30,z)<-1.5||height(x,z+30)<-1.5||height(x,z-30)<-1.5)},
+ {id:'owl',icon:'🦉',name:'Baykuş',hint:'En yüksek tepelerin birinde, gündüz bile uyanık.',ok:(h,x,z)=>h>30&&Math.hypot(x-CONE.x,z-CONE.z)>60}];
+function advAnPlace(){const R=mulberry32(90210),used=[];
+  for(const a of ADV_AN){let p=null;
+    for(let k=0;k<6000&&!p;k++){let x=(R()*2-1)*650,z=(R()*2-1)*650;if(a.riv){x=(R()*2-1)*480;z=riverZ(x)-17+(R()<.5?34:0)}
+      if(Math.hypot(x-HOME.x,z-HOME.z)<80)continue;const h=height(x,z);if(a.riv?h<.5:!a.ok(h,x,z))continue;if(used.some(u=>Math.hypot(u.x-x,u.z-z)<140))continue;p=new V3(x,h+3.2,z)}
+    if(!p){for(let k=0;k<3000&&!p;k++){const x=(R()*2-1)*600,z=(R()*2-1)*600,h=height(x,z);if(h>3&&Math.hypot(x-HOME.x,z-HOME.z)>90&&!used.some(u=>Math.hypot(u.x-x,u.z-z)<100))p=new V3(x,h+3.2,z)}}
+    a.p=p||new V3(HOME.x+100,HOME.y+4,HOME.z+60);used.push(a.p)}}
+const advAnCount=()=>ADV_AN.filter(a=>ADV.s.animals[a.id]).length;
+
+/* ---- fotoğraf ---- */
+let ADV_PH=[];try{ADV_PH=store.get('kz-photos',[])||[]}catch(e){}
+function advSnap(){try{renderer.render(scene,camera);const cv=renderer.domElement,w=360,h=Math.max(1,Math.round(w*cv.height/cv.width));
+  const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(cv,0,0,w,h);const url=c.toDataURL('image/jpeg',.62);
+  ADV_PH.unshift({u:url,t:Date.now()});ADV_PH=ADV_PH.slice(0,12);try{store.set('kz-photos',ADV_PH)}catch(e){}
+  const f=document.createElement('div');f.style.cssText='position:fixed;inset:0;background:#fff;opacity:.9;z-index:99;pointer-events:none;transition:opacity .35s';document.body.appendChild(f);requestAnimationFrame(()=>{f.style.opacity='0'});setTimeout(()=>f.remove(),420);
+  sfx(1200,.05,'square',.08);setTimeout(()=>sfx(800,.07,'square',.08),70);try{advRQEvent('photo')}catch(e){}advNote('📸 Fotoğraf Defter\'e eklendi! ('+ADV_PH.length+'/12)',2)}catch(e){console.error('snap',e)}}
+
+/* ---- yuvam ---- */
+const ADV_NEST=[{n:'Bayrak girlandası',icon:'🎏',cost:30,txt:'Yuvanın etrafına renkli bayrak dizisi'},{n:'Sihirli fenerler',icon:'🏮',cost:60,txt:'Parıldayan fenerler asılır'},{n:'Yıldız direği',icon:'🌟',cost:100,txt:'Ağaç evin yanında dönen altın yıldız'},{n:'Gökkuşağı kemeri',icon:'🌈',cost:150,txt:'Yuvanın üstünde dev bir gökkuşağı'}];
+let ADVNEST=null;
+function advNestBuild(){try{if(ADVNEST){scene.remove(ADVNEST.g)}const g=new THREE.Group(),lv=ADV.s.nest,cx=CAMP.x+NEST_L.x,cz=CAMP.z+NEST_L.z;ADVNEST={g,star:null};scene.add(g);
+  const L=c=>new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide}),B=c=>new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide});
+  const ring=[];for(let k=0;k<8;k++){const a=k/8*Math.PI*2+.4,x=cx+Math.cos(a)*19,z=cz+Math.sin(a)*19;ring.push(new V3(x,height(x,z),z))}
+  if(lv>=1){ring.forEach((p,i)=>{const po=new THREE.Mesh(new THREE.CylinderGeometry(.12,.15,5,6),L(0x8a5a32));po.position.set(p.x,p.y+2.5,p.z);g.add(po)});
+    ring.forEach((p,i)=>{const q=ring[(i+1)%8];for(let k=1;k<=6;k++){const t=k/7,x=p.x+(q.x-p.x)*t,z=p.z+(q.z-p.z)*t,y=Math.max(p.y,q.y)+4.9-Math.sin(t*Math.PI)*1.1;
+      const fl=new THREE.Mesh(new THREE.ConeGeometry(.55,1.2,3),L([0xe2456b,0xf2c14e,0x3fa6d8,0x5fae4a,0xb77cff][(i+k)%5]));fl.position.set(x,y-.5,z);fl.rotation.x=Math.PI;g.add(fl)}})}
+  if(lv>=2){ring.forEach((p,i)=>{const q=ring[(i+1)%8];const x=(p.x+q.x)/2,z=(p.z+q.z)/2,y=Math.max(p.y,q.y)+3.2;const s=new THREE.Mesh(new THREE.SphereGeometry(.5,10,8),B(0xffd27a));s.position.set(x,y,z);g.add(s);const gl=new THREE.Sprite(advSpriteMat('255,200,110',false));gl.scale.set(5,5,1);gl.position.set(x,y,z);g.add(gl)})}
+  if(lv>=3){const x=cx-8,z=cz+14,h=height(x,z);const po=new THREE.Mesh(new THREE.CylinderGeometry(.18,.25,11,6),L(0xdddddd));po.position.set(x,h+5.5,z);g.add(po);
+    const st=new THREE.Mesh(new THREE.OctahedronGeometry(1.5,0),new THREE.MeshLambertMaterial({color:0xffd23f,emissive:0x8a6000}));st.scale.y=1.4;st.position.set(x,h+12.5,z);g.add(st);ADVNEST.star=st;
+    const gl=new THREE.Sprite(advSpriteMat('255,226,122',false));gl.scale.set(9,9,1);gl.position.copy(st.position);g.add(gl)}
+  if(lv>=4){const cols=[0xe2456b,0xff9a2e,0xffd23f,0x5fc450,0x3fa6d8,0x6a6ae0,0xb77cff],y0=height(cx,cz-26);
+    cols.forEach((c,i)=>{const t=new THREE.Mesh(new THREE.TorusGeometry(26-i*1.5,.8,6,40,Math.PI),B(c));t.position.set(cx,y0-2,cz-26);g.add(t)})}
+ }catch(e){console.error('nest',e)}}
+ANIM.push(dt=>{if(ADVNEST&&ADVNEST.star)ADVNEST.star.rotation.y+=dt*1.2});
+function advNestBuy(){const S=ADV.s,l=ADV_NEST[S.nest];if(!l||feathers<l.cost){sadTone();advNote('Yeterli altın tüy yok 🪶',1.8);return}
+  feathers-=l.cost;S.nest++;saveShop();advSave();advNestBuild();fanfare();ADV.msg=`🏡 Yuvan büyüdü: ${l.icon} ${l.n}!`}
+
+/* ---- zamanlı tren sürprizi ---- */
+const ADVT={t:0,on:false,left:0,mk:null,tr:0};
+function advTrainTail(){const tr=TRAINS[ADVT.tr%TRAINS.length],s=tr.s-(tr.cars.length-1)*10.4-15,p=railAt(s);return new V3(p.x,p.y+4.5,p.z)}
+function advTrainUpdate(dt,P){ADVT.t+=dt;
+  if(!ADVT.on){if(ADVT.t>110){ADVT.on=true;ADVT.left=45;ADVT.tr=(ADVT.tr+1)%TRAINS.length;ADVT.mk=advMark('🎁',advTrainTail(),7);scene.add(ADVT.mk);advNote('🚂 Trenin arkasında bir ışıltı belirdi! 45 saniyen var!',3.2);chime()}return}
+  ADVT.left-=dt;const p=advTrainTail();ADVT.mk.position.set(p.x,p.y+Math.sin(ADVT.left*3)*.4,p.z);
+  if(P.distanceTo(ADVT.mk.position)<13){advTrainEnd(true)}else if(ADVT.left<=0)advTrainEnd(false)}
+function advTrainEnd(ok){if(ADVT.mk){scene.remove(ADVT.mk);ADVT.mk=null}ADVT.on=false;ADVT.t=0;
+  if(ok){const S=ADV.s;S.blue++;S.trainHits++;feathers+=5;saveShop();advSave();fanfare();advNote('🎁 Tren sürprizini yakaladın! 🔵 +1 mavi tüy · +5 🪶',3.4);advChipUpdate()}
+  else advNote('💨 Işıltı kayboldu… tren yine bir sürpriz bırakacak.',2.6)}
+
+/* ---- ana güncelleme ---- */
+function advQInit(){if(ADV.qg)return;ADV.qg=new THREE.Group();scene.add(ADV.qg);ADV.qm=[];ADV.ChainTrack=ADV.s.track;
+  ADV.qbeam=beam(0x7ae7ff);ADV.qbeam.visible=false;ADV.qg.add(ADV.qbeam);
+  advAnPlace();ADV.ang=new THREE.Group();scene.add(ADV.ang);ADV.anm=ADV_AN.map(a=>{const m=advMark(a.icon,a.p,7.5);m.visible=!ADV.s.animals[a.id];ADV.ang.add(m);return m});
+  advPanelInit();
+  const b=document.createElement('button');b.id='advCam';b.textContent='📷';b.setAttribute('aria-label','Fotoğraf çek');b.style.display='none';$('#topright').appendChild(b);ADV.cam=b;
+  ['pointerdown','pointerup','touchstart'].forEach(t=>b.addEventListener(t,e=>e.stopPropagation()));b.addEventListener('click',e=>{e.stopPropagation();advSnap()});
+  advQMarkers()}
+function advQHide(){try{advRQHide()}catch(e){}if(!ADV.qg)return;ADV.qg.visible=false;ADV.ang.visible=false;advPanelHide();ADV.cam.style.display='none';if(ADVT.mk)ADVT.mk.visible=false}
+function advQUpdate(dt,P){advQInit();
+  ADV.qg.visible=true;ADV.ang.visible=true;ADV.cam.style.display='';if(ADVT.mk)ADVT.mk.visible=true;
+  const c=advQCurChain();
+  if(c&&!advQState(c.id).done){const st=advQState(c.id),key=c.id+':'+st.s+':'+st.k+':'+st.c.length;if(key!==ADV.qkey)advQMarkers()}else if(ADV.qkey)advQMarkers();
+  const tt=performance.now()/1000;let nearest=null,nd=1e9;
+  for(const m of ADV.qm){if(m.dyn){m.p=m.dyn();m.g.position.set(m.p.x,m.p.y+m.dy+Math.sin(tt*2+m.ph)*.5,m.p.z)}else m.g.position.set(m.p.x,m.p.y+Math.sin(tt*2+m.ph)*.5,m.p.z);const d=P.distanceTo(m.g.position);if(d<nd){nd=d;nearest=m}}
+  ADV.qbeam.visible=!!nearest&&nd>25;if(nearest){ADV.qbeam.position.set(nearest.g.position.x,250,nearest.g.position.z)}
+  if(nearest&&nd<(state.mode==='walk'?7:13)&&c){const st=advQState(c.id),sp=c.steps[st.s];
+    if(sp.t==='collect'){st.c.push(nearest.idx);sfx(900+st.c.length*60,.12,'triangle',.1);advNote(`${sp.icon} ${st.c.length}/${sp.pts.length}`,1);advSave();if(st.c.length>=sp.pts.length)advQAdvance(c);else advQMarkers()}
+    else if(sp.t==='visit'){advQAdvance(c)}
+    else if(sp.t==='carry'){if(!st.k){st.k=1;chime();advNote(`${sp.iconA} Aldın! Şimdi ${sp.iconB} yanına götür`,2.4);advSave();advQMarkers()}else advQAdvance(c)}}
+  /* hayvanlar */
+  ADV_AN.forEach((a,i)=>{const m=ADV.anm[i];if(ADV.s.animals[a.id]){m.visible=false;return}m.position.set(a.p.x,a.p.y+Math.sin(tt*1.6+i)*.4,a.p.z);
+    if(P.distanceTo(a.p)<14){ADV.s.animals[a.id]=true;m.visible=false;const n=advAnCount();advSave();chime();advFx(a.p,'255,226,122',16,1.2);
+      advNote(n>=ADV_AN.length?`${a.icon} ${a.name} ile tanıştın! Tüm hayvanlar tamam, Defter'den çantanı al 🎒`:`${a.icon} ${a.name} ile tanıştın! (${n}/${ADV_AN.length})`,3);advAward(5,0,true);advChipUpdate()}});
+  advTrainUpdate(dt,P);try{advRQUpdate(dt,P)}catch(e){if(!ADV.rqErr){ADV.rqErr=1;console.error('rq',e)}}try{advPanelUpdate(dt)}catch(e){if(!ADV.pnErr){ADV.pnErr=1;console.error('pn',e)}}}
+
+/* ---- Defter bölümleri ---- */
+const ADV_JT=[['main','📖 Genel'],['quests','🧭 Görevler'],['animals','🐾 Hayvanlar'],['photos','📸 Fotoğraflar']];
+function advQPic(id){const W=(bg,i)=>`<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="${bg}"/>${i}</svg>`;
+  return {river:W('#9ed8ff','<rect y="38" width="64" height="26" fill="#2f8fc9"/><path d="M0 46 q8-4 16 0 t16 0 t16 0 t16 0" stroke="#8fd0ff" stroke-width="2" fill="none"/><path d="M8 30 h48 v5 h-48z" fill="#8a5a32"/><path d="M14 35 v7 M32 35 v7 M50 35 v7" stroke="#6b4524" stroke-width="3"/><path d="M20 26 q4-8 10 0 q-4 4-10 0z" fill="#e2802b"/>'),
+   farm:W('#cfeeb0','<rect y="44" width="64" height="20" fill="#7fc15a"/><rect x="10" y="24" width="30" height="22" fill="#c8321f"/><path d="M6 24 L25 10 L44 24Z" fill="#8a2a1a"/><rect x="20" y="32" width="10" height="14" fill="#f0e6d0"/><ellipse cx="50" cy="48" rx="8" ry="5" fill="#fff"/><circle cx="46" cy="44" r="3.4" fill="#444"/>'),
+   train:W('#bfe3a8','<rect y="46" width="64" height="18" fill="#6b6f78"/><rect x="6" y="26" width="34" height="18" rx="3" fill="#c0392b"/><rect x="30" y="16" width="12" height="12" fill="#a82d20"/><rect x="12" y="16" width="5" height="10" fill="#444"/><circle cx="14" cy="46" r="5" fill="#222"/><circle cx="32" cy="46" r="5" fill="#222"/><rect x="44" y="30" width="16" height="14" rx="2" fill="#2e86de"/>'),
+   harbor:advPic('harbor')}[id]||''}
+function journalQuests(){const D=advQDefs(),S=ADV.s;
+  const rows=D.map(c=>{const st=advQState(c.id),on=ADV.ChainTrack===c.id||(!ADV.ChainTrack&&S.track===c.id);
+    const steps=c.steps.map((sp,i)=>`<div style="display:flex;gap:6px;align-items:flex-start;opacity:${i>st.s&&!st.done?.55:1}"><span>${st.done||i<st.s?'✅':i===st.s?'👉':'⬜'}</span><span>${sp.icon||sp.iconA} ${sp.txt}</span></div>`).join('');
+    const act=st.done?'<em>🏆 Bitti</em>':`<button class="buy" data-advtrack="${c.id}">${on?'📌 Takipte':'📌 Takip et'}</button>`;
+    return `<div class="jrow" style="align-items:flex-start;flex-wrap:wrap"><span class="jpic">${advQPic(c.pic)}</span><b style="min-width:140px">${c.icon} ${c.name}<small style="font-weight:600">${steps}</small></b>${act}</div>`}).join('');
+  const done=D.filter(c=>advQState(c.id).done).length;
+  return `<div class="sgroup"><h3>🧭 Bölge görevleri (${done}/${D.length})</h3><p class="hint2">Bir zinciri bitirince 🪶 10 altın tüy kazanırsın. Hepsini bitirince 🌈 gökkuşağı tüyü! Takip ettiğin görevin işaretleri serbest uçuşta parlar, bir ışık sütunu da yolu gösterir.</p><div class="jgrid" style="grid-template-columns:1fr">${rows}</div></div>
+   <div class="sgroup"><h3>🚂 Tren sürprizi</h3><p class="hint2">Serbest uçarken bir süre sonra trenlerden birinin arkasında 🎁 ışıltısı belirir. Kaybolmadan yetiş: 🔵 mavi tüy + 🪶 5 altın tüy. Yakaladığın: <b>${S.trainHits}</b></p></div>`}
+function journalAnimals(){const S=ADV.s,n=advAnCount(),got=S.claimed.animals;
+  const rows=ADV_AN.map(a=>S.animals[a.id]?jrow(`<span style="font-size:2rem">${a.icon}</span>`,a.name,'Tanıştınız!','✔'):jrow(`<span style="font-size:2rem;filter:grayscale(1) brightness(.5)">${a.icon}</span>`,'???',a.hint,'–',1)).join('');
+  const act=got?'✔ Çantayı aldın':n>=ADV_AN.length?'<button class="buy" data-advanclaim="1">🎒 Çantayı al</button>':n+'/'+ADV_AN.length;
+  return `<div class="sgroup"><h3>🐾 Hayvan dostlar (${n}/${ADV_AN.length})</h3><p class="hint2">Serbest uçuşta hayvanları bul, yanlarına yaklaşınca tanışırsın (her biri ⚪ +5 beyaz tüy). Beşi de bitince özel çanta hediye!</p><div class="jgrid">${rows}</div><div class="jgrid" style="margin-top:8px">${jrow('<span style="font-size:2rem">🎒</span>','Hayvan Dostu çantası','Kaz heybesi + karakter kamp çantası + 🪶 10',act,!got&&n<ADV_AN.length)}</div></div>`}
+function journalPhotos(){const P=ADV_PH;
+  return `<div class="sgroup"><h3>📸 Fotoğraflar (${P.length}/12)</h3><p class="hint2">Serbest uçuşta sağ üstteki 📷 düğmesine bas; o anki manzarayı çeker. En fazla 12 fotoğraf saklanır, yenisi eskisinin yerine geçer. Büyütmek için dokun.</p>${P.length?`<div class="jgrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${P.map((p,i)=>`<img class="advph" data-advpic="${i}" src="${p.u}" alt="Fotoğraf ${i+1}" style="width:100%;border-radius:12px;border:3px solid var(--line);cursor:pointer;display:block">`).join('')}</div>`:'<p class="hint2">Henüz fotoğraf yok. Uç ve çek!</p>'}</div>`}
+function journalNest(){const S=ADV.s;
+  const rows=ADV_NEST.map((l,i)=>{const dn=S.nest>i,nx=S.nest===i;const act=dn?'✔ Hazır':nx?`<button class="buy" data-advnest="1">${l.cost} 🪶 Yükselt</button>`:`${l.cost} 🪶`;
+    return jrow(`<span style="font-size:2rem">${l.icon}</span>`,`${i+1}. ${l.n}`,l.txt,act,!dn&&!nx)}).join('');
+  return `<div class="sgroup"><h3>🏡 Yuvam (seviye ${S.nest}/${ADV_NEST.length})</h3><p class="hint2">Altın tüylerinle yuvanı ve ağaç evini süsle. Elinde: <b>🪶 ${feathers}</b>. Seviyeler sırayla açılır; yuvana bakınca görürsün.</p><div class="jgrid">${rows}</div></div>`}
+const journalMain=journalHtml;
+journalHtml=function(){const S=ADV.s,tab=S.jtab||'main';
+  const nav=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${ADV_JT.map(([k,l])=>`<button class="chip2" data-jtab="${k}" style="${tab===k?'background:var(--berry);color:#fff':''}">${l}</button>`).join('')}</div>`;
+  let body;
+  if(tab==='quests')body=`<div class="prof">${ADV.msg?`<div class="pnote" style="font-weight:800">${ADV.msg}</div>`:''}${journalQuests()}</div>`;
+  else if(tab==='animals')body=`<div class="prof">${journalAnimals()}</div>`;
+  else if(tab==='photos')body=`<div class="prof">${journalPhotos()}</div>`;
+  else if(tab==='nest')body=`<div class="prof">${ADV.msg?`<div class="pnote" style="font-weight:800">${ADV.msg}</div>`:''}${journalNest()}</div>`;
+  else body=journalMain();
+  return nav+body};
+$('#hubBody').addEventListener('click',e=>{const t=e.target;let b;
+  if(b=t.closest('[data-jtab]')){ADV.s.jtab=b.dataset.jtab;ADV.msg='';advSave();renderHub(true);return}
+  if(b=t.closest('[data-advtrack]')){advQTrack(b.dataset.advtrack);chime();renderHub(true);return}
+  if(b=t.closest('[data-advnest]')){advNestBuy();renderHub(true);return}
+  if(b=t.closest('[data-advanclaim]')){const S=ADV.s;if(!S.claimed.animals&&advAnCount()>=ADV_AN.length){S.claimed.animals=true;feathers+=10;
+      for(const[w,ty,k]of[['g','back','basket'],['k','back','camp']]){const it=advWearItem(w,ty,k);if(it&&!owned.includes(it.id))owned.push(it.id)}saveShop();advSave();fanfare();advNote('🎒 Hayvan Dostu çantası senin!',2.6)}renderHub(true);return}
+  if(b=t.closest('[data-advpic]')){const p=ADV_PH[+b.dataset.advpic];if(!p)return;const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:100;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;padding:14px';
+    o.innerHTML=`<img src="${p.u}" style="max-width:100%;max-height:75%;border-radius:14px;border:4px solid #fff"><div style="display:flex;gap:10px"><button class="chip2" id="phX">Kapat</button><button class="chip2" id="phD">🗑️ Sil</button></div>`;document.body.appendChild(o);
+    o.querySelector('#phX').onclick=()=>o.remove();o.querySelector('#phD').onclick=()=>{ADV_PH.splice(+b.dataset.advpic,1);try{store.set('kz-photos',ADV_PH)}catch(e){}o.remove();renderHub(true)};return}});
+{const st=document.createElement('style');st.textContent=`#advCam{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:3px solid var(--line);background:var(--panel);font-size:1rem;padding:0;line-height:1}`;document.head.appendChild(st)}
+
+/* ================= AKILLI RASTGELE GÖREV ÜRETECİ (12 saatte bir yenilenir) ================= */
+const RQ_MS=12*3600*1000;
+{const S=ADV.s;S.rq=S.rq||null;S.rqHist=S.rqHist||[]}
+const rqPick=a=>a[Math.floor(Math.random()*a.length)];
+const rqInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const rqShuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let _RQB=null;
+function rqBridges(){if(_RQB)return _RQB;_RQB=[];try{for(const run of viaductRuns()){if(run.b-run.a<24)continue;const p=railAt((run.a+run.b)/2),g=Math.max(height(p.x,p.z),0);if(p.y-g>6)_RQB.push({x:p.x,y:p.y,z:p.z,g})}}catch(e){}return _RQB}
+const rqPuzBase=()=>{const s=advSpot('falls');return s?s.p:new V3(CAVE.x,CAVE.y+1,CAVE.z)};
+const RQ_COL=['🔴','🔵','🟡'];const RQ_OFF=[[-5,1,3],[0,3.5,-4],[5,0,3]];
+const RQ_MIS=()=>MISSIONS.filter(m=>m.id!=='free');
+const wrapA=d=>{while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
+/* malzeme kütüphanesi: her tür kendi metnini, ilerlemesini, hedef konumunu ve kontrolünü bilir */
+const RQA={
+ bridge:{av:()=>rqBridges().length>0,
+  mk(){const n=rqInt(3,6),i=rqInt(0,rqBridges().length-1);return{k:'bridge',n,bi:i,c:0,out:1,t:rqPick([`Demiryolu köprüsünün altından ${n} kez geç`,`Köprü kemerlerinin altından ${n} defa uç`,`Köprünün altına dal, ${n} kez geçip çık`])}},
+  pr:a=>`${a.c}/${a.n}`,pos:a=>{const b=rqBridges()[a.bi];return b?new V3(b.x,(b.y+b.g)/2,b.z):null},
+  up(a,P){const b=rqBridges()[a.bi];if(!b)return true;const d=Math.hypot(P.x-b.x,P.z-b.z);
+   if(d<13&&P.y<b.y-2.5&&P.y>b.g-1&&a.out){a.c++;a.out=0;sfx(700+a.c*70,.12,'triangle',.1);advNote(`🌉 ${a.c}/${a.n}`,1)}else if(d>28)a.out=1;return a.c>=a.n}},
+ lh:{av:()=>true,
+  mk(){const n=rqInt(2,4);return{k:'lh',n,sum:0,last:null,lp:0,t:rqPick([`Deniz feneri etrafında ${n} tur at`,`Feneri ortaya al, çevresinde ${n} kez dön`])}},
+  pr:a=>`${Math.min(a.n,Math.floor(Math.abs(a.sum)/6.2832))}/${a.n} tur`,pos:a=>new V3(LH.x,LH.y+20,LH.z),
+  up(a,P){const d=Math.hypot(P.x-LH.x,P.z-LH.z);if(d>22&&d<130){const an=Math.atan2(P.z-LH.z,P.x-LH.x);if(a.last!=null)a.sum+=wrapA(an-a.last);a.last=an}else a.last=null;
+   const l=Math.floor(Math.abs(a.sum)/6.2832);if(l>a.lp){a.lp=l;if(l<a.n){chime();advNote(`🗼 ${l}. tur tamam!`,1.4)}}return l>=a.n}},
+ farm:{av:()=>FARMS.length>0,
+  mk(){const i=rqInt(0,FARMS.length-1);return{k:'farm',fi:i,t:rqPick([`${i+1}. çiftliğin bahçesine in ve yürü`,`${i+1}. çiftliğin bahçesine konup bir tur at`])}},
+  pr:()=>'in!',pos:a=>{const w=farmWorld(FARMS[a.fi],0,40);return new V3(w.x,Math.max(w.y,.3)+6,w.z)},
+  up(a,P){const w=farmWorld(FARMS[a.fi],0,40);return state.mode==='walk'&&Math.hypot(P.x-w.x,P.z-w.z)<48}},
+ puz:{av:()=>true,
+  mk(){const o=rqShuf([0,1,2]);return{k:'puz',o,st:0,t:`Şelale mağarasındaki renk bulmacasını çöz: ${o.map(i=>RQ_COL[i]).join(' → ')}`}},
+  pr:a=>`${a.st}/3`,pos:a=>rqPuzBase(),
+  up(a,P){const b=rqPuzBase();for(let i=0;i<3;i++){const c=new V3(b.x+RQ_OFF[i][0],b.y+RQ_OFF[i][1],b.z+RQ_OFF[i][2]);if(P.distanceTo(c)<4.5){
+     if(i===a.o[a.st]){if(a.cd!==i){a.cd=i;a.st++;chime();advNote(`${RQ_COL[i]} Doğru! ${a.st}/3`,1.2)}}else if(a.cd!==i){a.cd=i;a.st=0;sadTone();advNote('✖ Yanlış sıra, baştan başla!',1.6)}}else if(a.cd===i&&P.distanceTo(c)>8)a.cd=null}
+   return a.st>=3}},
+ mis:{av:()=>RQ_MIS().length>0,
+  mk(){const m=rqPick(RQ_MIS());return{k:'mis',id:m.id,done:0,t:rqPick([`Bir ${m.name} görevi tamamla`,`${m.icon} ${m.name} görevini bitir`])}},
+  pr:()=>'görev',pos:()=>null,up:a=>!!a.done},
+ white:{av:()=>true,
+  mk(){const n=rqInt(6,18);return{k:'white',n,b:null,t:rqPick([`${n} beyaz tüy topla`,`Gökyüzünden ${n} beyaz tüy topla`])}},
+  pr:a=>`${Math.max(0,ADV.s.whiteAll-(a.b==null?ADV.s.whiteAll:a.b))}/${a.n}`,pos:()=>null,
+  up(a){if(a.b==null)a.b=ADV.s.whiteAll;return ADV.s.whiteAll-a.b>=a.n}},
+ photo:{av:()=>true,
+  mk(){const n=rqInt(2,4);return{k:'photo',n,c:0,t:rqPick([`${n} fotoğraf çek`,`Manzaradan ${n} fotoğraf çek (📷)`])}},
+  pr:a=>`${a.c}/${a.n}`,pos:()=>null,up:a=>a.c>=a.n},
+ visit:{av:()=>true,
+  mk(){const L=ADV_LM.filter(l=>l.id!=='nest'),l=rqPick(L.length?L:ADV_LM);return{k:'visit',id:l.id,t:rqPick([`${l.icon} ${l.name} yerine uç`,`${l.name} üstünden geç`])}},
+  pr:()=>'git',pos:a=>{const l=ADV_LM.find(x=>x.id===a.id);return l?new V3(l.p.x,Math.max(l.p.y,height(l.p.x,l.p.z))+8,l.p.z):null},
+  up(a,P){const l=ADV_LM.find(x=>x.id===a.id);return !l||Math.hypot(P.x-l.p.x,P.z-l.p.z)<Math.max(40,l.r)}},
+ summit:{av:()=>!!advSpot('summit'),
+  mk(){return{k:'summit',t:rqPick(['Buz Dağı’nın zirvesine ulaş','Karlı zirvenin tepesine çık'])}},
+  pr:()=>'çık',pos:()=>advSpot('summit').p,up:(a,P)=>P.distanceTo(advSpot('summit').p)<24},
+ rivlow:{av:()=>true,
+  mk(){const s=rqInt(15,35);return{k:'rivlow',s,c:0,t:rqPick([`Nehrin hemen üstünde ${s} saniye alçak uç`,`Nehri takip et: ${s} saniye suya yakın uç`])}},
+  pr:a=>`${Math.floor(a.c)}/${a.s} sn`,pos:()=>null,
+  up(a,P,dt){if(Math.abs(P.z-riverZ(P.x))<24&&P.y<Math.max(height(P.x,P.z),0)+10)a.c+=dt;return a.c>=a.s}},
+ train:{av:()=>typeof TRAINS!=='undefined'&&TRAINS.length>0,
+  mk(){const s=rqInt(8,20);return{k:'train',s,c:0,t:rqPick([`Bir trenin yanında ${s} saniye uç`,`Trenle yarış: ${s} saniye yanında kal`])}},
+  pr:a=>`${Math.floor(a.c)}/${a.s} sn`,pos:()=>null,
+  up(a,P,dt){if(TRAINS.some(t=>t.cars.some(c=>P.distanceTo(c.position)<30)))a.c+=dt;return a.c>=a.s}},
+ alt:{av:()=>true,
+  mk(){const y=rqInt(8,19)*10+60;return{k:'alt',y,t:rqPick([`${y} metre yüksekliğe çık`,`Bulutlara doğru yüksel: ${y} m`])}},
+  pr:a=>`${a.y} m`,pos:()=>null,up:(a,P)=>P.y>=a.y},
+ animal:{av:()=>typeof ADV_AN!=='undefined'&&ADV_AN.some(a=>a.p),
+  mk(){const a=rqPick(ADV_AN);return{k:'animal',id:a.id,t:rqPick([`${a.icon} ${a.name} dostumuzu yeniden ziyaret et`,`${a.icon} ${a.name} yanına git ve selam ver`])}},
+  pr:()=>'git',pos:a=>{const n=ADV_AN.find(x=>x.id===a.id);return n&&n.p?n.p:null},up:(a,P)=>{const n=ADV_AN.find(x=>x.id===a.id);return !n||!n.p||P.distanceTo(n.p)<16}}};
+const RQ_ADJ=['Cesur','Meraklı','Hızlı','Gizemli','Neşeli','Sabırlı','Şanslı','Parlak','Maceracı','Uyanık'];
+const RQ_NOUN=['Kanat','Pusula','Rüzgâr','Tüy','Yolcu','Işık','Bulut','Kaşif','Sır','Yıldız'];
+function rqSig(q){return q.atoms.map(a=>{const{t,...r}=a;return JSON.stringify(r,(k,v)=>k==='sum'||k==='last'||k==='lp'||k==='c'||k==='b'||k==='cd'||k==='st'||k==='out'||k==='done'?undefined:v)}).join('>')}
+function rqGenOne(avoid){/* avoid: kullanılan atom türleri */
+  const two=avoid.two,kinds=Object.keys(RQA).filter(k=>RQA[k].av()&&!avoid.used.includes(k));
+  const n=two?2:1,atoms=[];const ks=rqShuf(kinds).slice(0,n);ks.forEach(k=>{atoms.push(RQA[k].mk());avoid.used.push(k)});
+  const q={id:Math.random().toString(36).slice(2,8),atoms,i:0,done:false,name:rqPick(RQ_ADJ)+' '+rqPick(RQ_NOUN),gold:5+atoms.length*3};return q}
+function advRQGenerate(){const S=ADV.s;let best=null;
+  for(let tr=0;tr<40;tr++){const av={used:[],two:false},list=[];for(let i=0;i<3;i++){av.two=i===2;list.push(rqGenOne(av))}
+    const sigs=list.map(rqSig);if(sigs.some(s=>S.rqHist.includes(s)))continue;best=list;break}
+  if(!best){const av={used:[],two:false};best=[];for(let i=0;i<3;i++){av.two=i===2;best.push(rqGenOne(av))}}
+  S.rqHist=S.rqHist.concat(best.map(rqSig)).slice(-120);S.rq={t:Date.now(),list:best};advSave();ADV.rqTxt=null;return S.rq}
+function advRQCheck(){const S=ADV.s,now=Date.now();if(!S.rq||now-S.rq.t>=RQ_MS||S.rq.t>now+RQ_MS){const first=!!S.rq;advRQGenerate();if(first&&ADV.vis)advNote('🎲 Yeni rastgele görevler geldi!',2.4)}return S.rq}
+const rqLeft=()=>{const l=Math.max(0,ADV.s.rq.t+RQ_MS-Date.now()),h=Math.floor(l/3600000),m=Math.floor(l%3600000/60000);return `${h} sa ${m} dk`};
+function rqDone(q){q.done=true;const S=ADV.s;feathers+=q.gold;saveShop();fanfare();let extra='';
+  S.rq.list.every(x=>x.done)&&(S.blue++,extra=' · 3/3 tamam: 🔵 +1 mavi tüy!');
+  advAward(10,0,true);advNote(`🎲 ${q.name} tamam! +${q.gold} 🪶 +10 ⚪${extra}`,3.4);advSave();advChipUpdate()}
+function advRQEvent(type,id){const S=ADV.s;if(!S.rq)return;let ch=false;
+  for(const q of S.rq.list){if(q.done)continue;const a=q.atoms[q.i];if(!a)continue;
+    if(type==='mission'&&a.k==='mis'&&a.id===id){a.done=1;ch=true}
+    if(type==='photo'&&a.k==='photo'){a.c++;ch=true}
+    if(ch)rqStep(q,null,0)}
+  if(ch)advSave()}
+function rqStep(q,P,dt){const a=q.atoms[q.i];if(!a)return;const A=RQA[a.k];
+  const ok=P?A.up(a,P,dt):(a.k==='mis'?!!a.done:a.k==='photo'?a.c>=a.n:false);
+  if(ok){q.i++;if(q.i>=q.atoms.length)rqDone(q);else{chime();advNote('🎲 Sıradaki: '+q.atoms[q.i].t,2.6);advSave()}}}
+function advRQUpdate(dt,P){const rq=advRQCheck();ADV.rqT=(ADV.rqT||0)+dt;
+  for(const q of rq.list){if(!q.done)rqStep(q,P,dt)}
+  if(ADV.rqT>6){ADV.rqT=0;advSave()}
+  /* işaretler */
+  if(!ADV.rg){ADV.rg=new THREE.Group();scene.add(ADV.rg);ADV.rbeam=beam(0xff9a2e);ADV.rbeam.visible=false;ADV.rg.add(ADV.rbeam);ADV.rm=[];ADV.rkey=''}
+  ADV.rg.visible=true;
+  const key=rq.t+':'+rq.list.map(q=>q.done?'d':q.i+(q.atoms[q.i]&&q.atoms[q.i].k==='puz'?'p'+q.atoms[q.i].st:'')).join('');
+  if(key!==ADV.rkey){ADV.rkey=key;while(ADV.rg.children.length>1)ADV.rg.remove(ADV.rg.children[1]);ADV.rm=[];
+    for(const q of rq.list){if(q.done)continue;const a=q.atoms[q.i];if(!a)continue;
+      if(a.k==='puz'){const b=rqPuzBase();for(let i=0;i<3;i++){const m=advMark(RQ_COL[i],new V3(b.x+RQ_OFF[i][0],b.y+RQ_OFF[i][1],b.z+RQ_OFF[i][2]),4.5);ADV.rg.add(m);ADV.rm.push({g:m,p:m.position.clone(),ph:i})}}
+      else{const p=RQA[a.k].pos(a);if(p){const m=advMark('🎲',p,6);ADV.rg.add(m);ADV.rm.push({g:m,p:p.clone(),ph:1,b:1})}}}}
+  const tt=performance.now()/1000;let nb=null,nd=1e9;
+  for(const m of ADV.rm){m.g.position.set(m.p.x,m.p.y+Math.sin(tt*2+m.ph)*.4,m.p.z);if(m.b){const d=P.distanceTo(m.g.position);if(d<nd){nd=d;nb=m}}}
+  ADV.rbeam.visible=!!nb&&nd>30;if(nb)ADV.rbeam.position.set(nb.p.x,250,nb.p.z);
+}
+function advRQHide(){if(ADV.rg)ADV.rg.visible=false}
+
+/* ---- Defter sekmesi ---- */
+function journalRand(){const rq=advRQCheck();
+  const rows=rq.list.map(q=>{const steps=q.atoms.map((a,i)=>`<div>${q.done||i<q.i?'✅':i===q.i?'👉':'⬜'} ${a.t}${i===q.i&&!q.done?` <b>(${RQA[a.k].pr(a)})</b>`:''}</div>`).join('');
+    return jrow(`<span style="font-size:2rem">${q.done?'🏆':'🎲'}</span>`,q.name,`<span style="font-weight:600">${steps}</span>`,q.done?'✔':`+${q.gold} 🪶`,q.done)}).join('');
+  return `<div class="sgroup"><h3>🎲 Rastgele görevler</h3><p class="hint2">Her görev, daha önce hiç olmamış bir birleşimle sana özel üretilir. Yenilenmesine: <b>${rqLeft()}</b>. Her görev 🪶 altın tüy + ⚪ 10 beyaz tüy verir; üçünü de bitirirsen 🔵 mavi tüy! Turuncu işaretler serbest uçuşta yolu gösterir.</p><div class="jgrid" style="grid-template-columns:1fr">${rows}</div></div>`}
+ADV_JT.splice(2,0,['rand','🎲 Rastgele']);
+{const old=journalHtml;journalHtml=function(){if((ADV.s.jtab||'main')==='rand'){const nav=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${ADV_JT.map(([k,l])=>`<button class="chip2" data-jtab="${k}" style="${k==='rand'?'background:var(--berry);color:#fff':''}">${l}</button>`).join('')}</div>`;return nav+`<div class="prof">${journalRand()}</div>`}return old()}}
+
+/* ================= SADELEŞTİRİLMİŞ EKRAN: bildirim kutusu + görev penceresi ================= */
+const ADV_N={el:null,q:[],tm:0,on:false};
+function advNoteEl(){if(!ADV_N.el){const e=document.createElement('div');e.id='advNote';e.setAttribute('role','status');document.body.appendChild(e);ADV_N.el=e}return ADV_N.el}
+function advNoteShow(m,d){const e=advNoteEl();e.textContent=m;e.classList.add('on');ADV_N.on=true;clearTimeout(ADV_N.tm);
+  ADV_N.tm=setTimeout(()=>{e.classList.remove('on');ADV_N.on=false;setTimeout(()=>{if(!ADV_N.on&&ADV_N.q.length){const n=ADV_N.q.shift();advNoteShow(n[0],n[1])}},260)},Math.max(900,d*1000))}
+function advNote(msg,d){d=Math.min(d||2.4,3.4);if(!ADV_N.on)advNoteShow(msg,d);else if(d<=1.5)advNoteShow(msg,d);else{ADV_N.q.push([msg,d]);if(ADV_N.q.length>3)ADV_N.q.shift()}}
+
+function advQShort(c){const st=advQState(c.id),sp=c.steps[st.s];let e='';if(sp.t==='collect')e=`${st.c.length}/${sp.pts.length}`;else if(sp.t==='carry')e=st.k?'götür':'al';else e='git';return e}
+function advPanelHtml(){const S=ADV.s;let h='';
+  if(ADVT.on)h+=`<div class="pqi pqhot"><b>🎁 Tren sürprizi</b><em>${Math.ceil(ADVT.left)} sn kaldı</em></div>`;
+  const c=advQCurChain();h+='<div class="pqt">Bölge görevi</div>';
+  if(c&&!advQState(c.id).done){const sp=c.steps[advQState(c.id).s];h+=`<div class="pqi"><b>${c.icon} ${c.name}</b><span>${sp.txt}</span><em>${advQShort(c)}</em></div>`}
+  else h+='<div class="pqi ok"><b>🏆 Hepsi tamam!</b></div>';
+  const rq=advRQCheck();h+=`<div class="pqt">Rastgele · ${rqLeft()}</div>`;
+  for(const q of rq.list){if(q.done){h+=`<div class="pqi ok"><b>✅ ${q.name}</b></div>`;continue}const a=q.atoms[q.i];h+=`<div class="pqi"><b>🎲 ${q.name}</b><span>${a.t}</span><em>${RQA[a.k].pr(a)}</em></div>`}
+  return h}
+function advPanelInit(){if(ADV.pn)return;
+  let sv={};try{sv=store.get('kz-qpanel',{})||{}}catch(e){}
+  const btn=document.createElement('button');btn.id='advQBtn';btn.textContent='🧭';btn.setAttribute('aria-label','Görevler');$('#topright').appendChild(btn);
+  const p=document.createElement('div');p.id='advQPanel';p.innerHTML='<div class="pqh"><span>🧭 Görevler</span><button aria-label="Kapat">✕</button></div><div class="pqb"></div>';$('#hud').appendChild(p);
+  const head=p.firstChild,body=p.lastChild;ADV.pn={btn,p,body,open:!!sv.open,x:sv.x==null?10:sv.x,y:sv.y==null?110:sv.y,html:''};
+  const place=()=>{const W=window.innerWidth,H=window.innerHeight,N=ADV.pn;N.x=Math.max(0,Math.min(W-172,N.x));N.y=Math.max(0,Math.min(H-60,N.y));p.style.left=N.x+'px';p.style.top=N.y+'px'};
+  const save=()=>{try{store.set('kz-qpanel',{open:ADV.pn.open,x:ADV.pn.x,y:ADV.pn.y})}catch(e){}};
+  const setOpen=v=>{ADV.pn.open=v;p.classList.toggle('on',v);btn.classList.toggle('act',v);if(v){place();ADV.pn.html='';advPanelUpdate(9)}save()};
+  ['pointerdown','pointerup','touchstart','mousedown'].forEach(t=>{p.addEventListener(t,e=>e.stopPropagation());btn.addEventListener(t,e=>e.stopPropagation())});
+  btn.addEventListener('click',e=>{e.stopPropagation();setOpen(!ADV.pn.open)});head.lastChild.addEventListener('click',e=>{e.stopPropagation();setOpen(false)});
+  let dr=null;head.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;dr={dx:e.clientX-ADV.pn.x,dy:e.clientY-ADV.pn.y};try{head.setPointerCapture(e.pointerId)}catch(_){}});
+  head.addEventListener('pointermove',e=>{if(!dr)return;ADV.pn.x=e.clientX-dr.dx;ADV.pn.y=e.clientY-dr.dy;place()});
+  const end=()=>{if(dr){dr=null;save()}};head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
+  setOpen(ADV.pn.open)}
+function advPanelUpdate(dt){if(!ADV.pn)return;ADV.pn.btn.style.display='';ADV.pn.p.style.visibility='';ADV.pnT=(ADV.pnT||0)+dt;if(!ADV.pn.open||ADV.pnT<.4)return;ADV.pnT=0;
+  const h=advPanelHtml();if(h!==ADV.pn.html){ADV.pn.html=h;ADV.pn.body.innerHTML=h}}
+function advPanelHide(){if(!ADV.pn)return;ADV.pn.btn.style.display='none';ADV.pn.p.style.visibility='hidden'}
+{const st=document.createElement('style');st.textContent=`
+#advChip{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-100%);margin-left:-10px;font-size:.76rem;padding:3px 10px;white-space:nowrap;pointer-events:none;background:color-mix(in srgb,var(--panel) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-width:2px;border-radius:14px}
+#advCam,#advQBtn{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:3px solid var(--line);background:var(--panel);font-size:1rem;padding:0;line-height:1}
+#advQBtn.act{background:var(--wheat)}
+#advQPanel{position:absolute;left:10px;top:110px;width:172px;max-height:52vh;display:none;pointer-events:auto;background:color-mix(in srgb,var(--panel) 78%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:2px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:.7rem;line-height:1.25;color:var(--ink);overflow:hidden;z-index:12}
+#advQPanel.on{display:block}
+.pqh{display:flex;justify-content:space-between;align-items:center;padding:3px 5px 3px 10px;font-weight:800;font-size:.76rem;cursor:grab;touch-action:none;background:color-mix(in srgb,var(--line) 14%,transparent)}
+.pqh button{width:22px;height:22px;border-radius:50%;border:0;background:color-mix(in srgb,var(--line) 20%,transparent);color:var(--ink);font-size:.7rem;padding:0;line-height:1}
+.pqb{padding:2px 8px 7px;overflow:auto;max-height:calc(52vh - 30px)}
+.pqt{font-weight:800;font-size:.6rem;letter-spacing:.4px;text-transform:uppercase;color:var(--soft);margin:6px 0 2px}
+.pqi{display:flex;flex-direction:column;gap:1px;padding:4px 7px;border-radius:10px;background:color-mix(in srgb,var(--line) 9%,transparent);margin-bottom:3px}
+.pqi b{font-size:.72rem}.pqi span{color:var(--soft)}.pqi em{font-style:normal;font-weight:800;color:#c77700}
+.pqi.ok{opacity:.6}.pqhot{background:color-mix(in srgb,var(--wheat) 45%,transparent)}
+#advNote{position:fixed;left:50%;top:calc(52px + env(safe-area-inset-top,0px));transform:translate(-50%,-14px);opacity:0;pointer-events:none;z-index:60;max-width:min(88vw,380px);padding:6px 14px;border-radius:14px;background:rgba(18,34,52,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:.82rem;font-weight:700;text-align:center;line-height:1.25;text-shadow:0 1px 2px rgba(0,0,0,.4);transition:opacity .25s,transform .25s}
+#advNote.on{opacity:1;transform:translate(-50%,0)}`;document.head.appendChild(st)}
+
+/* ================= TUŞ DÜZENİ: uçuş tuşlarını kullanıcı yerleştirir ================= */
+const KL_DEF={actBtn:{r:19.6,b:22.1,d:21},brakeBtn:{r:46.5,b:13.2,d:17.5},bankL:{r:40.1,b:29.9,d:15},bankR:{r:10.7,b:49,d:15},
+ slalomBtn:{r:53,b:47.6,d:14},rocketBtn:{r:27.4,b:42.6,d:16},spBtn:{r:28,b:65.8,d:14},inBinBtn:{r:66.6,b:19.8,d:14.5}};
+const KL_INFO={actBtn:['⚡','Turbo','#ffd36b'],brakeBtn:['🛑','Yavaşla','#ffe1e1'],bankL:['↶','Sola yat','#d9f0ff'],bankR:['↷','Sağa yat','#d9f0ff'],
+ slalomBtn:['🌀','Slalom','#ffe9a6'],rocketBtn:['🚀','Roket','#16305e'],spBtn:['✨','Görev tuşu','#c9f5d6'],inBinBtn:['🪿','Kaza in/bin','#cfeeff']};
+const KL={saved:store.get('kz-keylayout',{})||{},work:null,tab:'main',sel:null,dirty:false,msg:''};
+const klGet=(L,id)=>Object.assign({},KL_DEF[id],(L&&L[id])||{});
+function klApply(){for(const id in KL_DEF){const el=document.getElementById(id);if(!el)continue;const o=KL.saved[id];
+  if(o){el.style.setProperty('--r',o.r,'important');el.style.setProperty('--b',o.b,'important');el.style.setProperty('--d',o.d,'important')}
+  else{el.style.removeProperty('--r');el.style.removeProperty('--b');el.style.removeProperty('--d')}}}
+klApply();
+const klDims=()=>{const lw=(window.ORI&&ORI.lw)||innerWidth,lh=(window.ORI&&ORI.lh)||innerHeight;return{lw,lh}};
+function klEditorHtml(){if(!KL.work){KL.work={};for(const id in KL_DEF)KL.work[id]=klGet(KL.saved,id)}
+  const{lw,lh}=klDims(),asp=lw/lh,u=100;/* birim: 100 yükseklik */
+  const btns=Object.keys(KL_DEF).map(id=>{const i=KL_INFO[id];return `<div class="klb${KL.sel===id?' sel':''}" data-klb="${id}" style="--bg:${i[2]}"><span class="kli">${i[0]}</span><small>${i[1]}</small><i class="klh" data-klh="${id}"></i></div>`}).join('');
+  const sid=KL.sel,sv=sid?KL.work[sid]:null;
+  return `<div class="cmp"><div class="sgroup"><h3>🎛️ Tuş düzeni</h3><p class="hint2">Tuşa dokunup sürükleyerek yerini değiştir. Seçili tuşun köşesindeki yuvarlak tutamaçla ya da kaydırıcıyla boyunu ayarla. Kırmızı çerçeve = iki tuş üst üste biniyor. Bitince <b>Kaydet</b>'e bas.</p>
+  <div class="klwrap"><div class="klscr" id="klScr" style="aspect-ratio:${asp}"><div class="klhud"><span>Serbest uçuş</span><span>❤️ 94</span></div><div class="kljoy">sol başparmak<br>alanı</div>${btns}</div></div>
+  <div class="klctl"><label>Boyut <input type="range" id="klSize" min="9" max="30" step="0.5" value="${sv?sv.d:15}" ${sid?'':'disabled'}> <b id="klSizeV">${sid?KL_INFO[sid][1]:'Bir tuş seç'}</b></label></div>
+  <div class="optrow"><button class="opt" data-klsave><b>💾</b><span>Kaydet</span></button><button class="opt" data-klreset><b>↺</b><span>Sıfırla</span></button></div>
+  <p class="hint2" id="klMsg">${KL.msg||''}</p></div></div>`}
+function klLayout(n){const scr=document.getElementById('klScr');if(!scr)return;const H=scr.clientHeight,W=scr.clientWidth,u=H/100;if(H<20){if((n||0)<30)requestAnimationFrame(()=>klLayout((n||0)+1));return}
+  const els={};scr.querySelectorAll('.klb').forEach(e=>{const id=e.dataset.klb,o=KL.work[id];els[id]=e;const d=o.d*u;
+    e.style.width=e.style.height=d+'px';e.style.left=(W-o.r*u-d/2)+'px';e.style.top=(H-o.b*u-d/2)+'px';e.style.fontSize=Math.max(8,d*.34)+'px'});
+  const ids=Object.keys(KL.work);for(const a of ids){let bad=false;for(const b of ids){if(a===b)continue;const A=KL.work[a],B=KL.work[b];
+    const ax=A.r,ay=A.b,bx=B.r,by=B.b;if(Math.hypot(ax-bx,ay-by)<(A.d+B.d)/2*.9)bad=true}els[a].classList.toggle('bad',bad)}}
+function klRender(){const body=$('#hubBody');body.innerHTML=settingsHtml();klLayout()}
+const klSettingsOld=settingsHtml;
+settingsHtml=function(){const nav=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="chip2" data-kltab="main" style="${KL.tab==='main'?'background:var(--berry);color:#fff':''}">⚙️ Genel</button><button class="chip2" data-kltab="keys" style="${KL.tab==='keys'?'background:var(--berry);color:#fff':''}">🎛️ Tuş Düzeni</button></div>`;
+  return nav+(KL.tab==='keys'?klEditorHtml():klSettingsOld())};
+{new MutationObserver(()=>{const sc=document.getElementById('klScr');if(sc&&!sc.dataset.laid){sc.dataset.laid=1;klLayout()}}).observe($('#hubBody'),{childList:true,subtree:true});addEventListener('resize',()=>klLayout());
+ /* sürükleme */
+ const body=$('#hubBody');let drag=null;
+ body.addEventListener('click',e=>{let b;
+  if(b=e.target.closest('[data-kltab]')){KL.tab=b.dataset.kltab;KL.work=null;KL.sel=null;KL.msg='';renderHub(true);setTimeout(klLayout,0);return}
+  if(e.target.closest('[data-klsave]')){KL.saved={};for(const id in KL_DEF){const w=KL.work[id],d=KL_DEF[id];if(Math.abs(w.r-d.r)>.01||Math.abs(w.b-d.b)>.01||Math.abs(w.d-d.d)>.01)KL.saved[id]={r:+w.r.toFixed(2),b:+w.b.toFixed(2),d:+w.d.toFixed(2)}}
+    store.set('kz-keylayout',KL.saved);klApply();KL.msg='✔ Kaydedildi! Uçuşta yeni düzen kullanılır.';const m=$('#klMsg');if(m)m.textContent=KL.msg;chime();return}
+  if(e.target.closest('[data-klreset]')){KL.saved={};store.set('kz-keylayout',{});KL.work=null;KL.sel=null;klApply();KL.msg='↺ Varsayılan düzene dönüldü.';renderHub(true);setTimeout(klLayout,0);return}});
+ body.addEventListener('pointerdown',e=>{const scr=e.target.closest&&e.target.closest('#klScr');if(!scr)return;const h=e.target.closest('[data-klh]'),b=e.target.closest('[data-klb]');if(!b)return;e.preventDefault();
+  const id=b.dataset.klb,u=scr.clientHeight/100,rc=scr.getBoundingClientRect();
+  if(KL.sel!==id){KL.sel=id;scr.querySelectorAll('.klb').forEach(x=>x.classList.toggle('sel',x.dataset.klb===id));const s=$('#klSize');if(s){s.disabled=false;s.value=KL.work[id].d}const v=$('#klSizeV');if(v)v.textContent=KL_INFO[id][1]}
+  drag={id,mode:h?'size':'move',x:e.clientX,y:e.clientY,o:Object.assign({},KL.work[id]),u,rc};try{b.setPointerCapture(e.pointerId)}catch(_){}});
+ body.addEventListener('pointermove',e=>{if(!drag)return;const W=drag.rc.width/drag.u,o=KL.work[drag.id];
+  if(drag.mode==='move'){o.r=Math.max(o.d/2,Math.min(W-o.d/2,drag.o.r-(e.clientX-drag.x)/drag.u));o.b=Math.max(o.d/2,Math.min(100-o.d/2,drag.o.b-(e.clientY-drag.y)/drag.u))}
+  else{const cx=drag.rc.right-o.r*drag.u,cy=drag.rc.bottom-o.b*drag.u,dist=Math.hypot(e.clientX-cx,e.clientY-cy)/drag.u;o.d=Math.max(9,Math.min(30,dist*2/1.414));
+   o.r=Math.max(o.d/2,Math.min(W-o.d/2,o.r));o.b=Math.max(o.d/2,Math.min(100-o.d/2,o.b));const s=$('#klSize');if(s)s.value=o.d}
+  klLayout()});
+ const end=()=>{drag=null};body.addEventListener('pointerup',end);body.addEventListener('pointercancel',end);
+ body.addEventListener('input',e=>{if(e.target.id!=='klSize'||!KL.sel)return;const o=KL.work[KL.sel],W=$('#klScr').clientWidth/($('#klScr').clientHeight/100);o.d=+e.target.value;o.r=Math.max(o.d/2,Math.min(W-o.d/2,o.r));o.b=Math.max(o.d/2,Math.min(100-o.d/2,o.b));klLayout()})}
+{const st=document.createElement('style');st.textContent=`
+.klwrap{display:flex;justify-content:center;margin:6px 0 8px}
+.klscr{position:relative;width:100%;max-width:680px;border-radius:14px;border:3px solid var(--line);overflow:hidden;background:linear-gradient(#8fd0ff,#bfe6ff 55%,#7fc15a 56%,#5fae4a);touch-action:none;user-select:none;-webkit-user-select:none}
+.klhud{position:absolute;left:2%;top:3%;display:flex;gap:4px;font-size:.62rem;font-weight:800}.klhud span{background:rgba(255,255,255,.8);border:2px solid var(--line);border-radius:10px;padding:1px 7px;color:#1f3348}
+.kljoy{position:absolute;left:3%;bottom:6%;width:34%;height:44%;border:2px dashed rgba(31,51,72,.35);border-radius:16px;font-size:.6rem;color:rgba(31,51,72,.6);display:grid;place-items:center;text-align:center;font-weight:700}
+.klb{position:absolute;border-radius:50%;background:var(--bg);border:3px solid #1f4e79;box-shadow:0 3px 0 #1f4e79;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;cursor:grab;touch-action:none;color:#1f3348;font-weight:800;box-sizing:border-box}
+#klScr .klb[style*="--bg:#16305e"]{color:#ffd21f}
+.klb .kli{font-size:1.35em}.klb small{font-size:.62em;font-weight:800;margin-top:1px;white-space:nowrap}
+.klb.sel{outline:3px solid var(--berry);outline-offset:2px;z-index:2}.klb.bad{border-color:#e0302f;box-shadow:0 3px 0 #e0302f}
+.klh{display:none;position:absolute;right:-9%;bottom:-9%;width:26%;min-width:18px;aspect-ratio:1;border-radius:50%;background:var(--berry);border:3px solid #fff;cursor:nwse-resize;touch-action:none}
+.klb.sel .klh{display:block}
+.klctl{margin:4px 0 8px;font-weight:700;font-size:.9rem}.klctl label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.klctl input{flex:1;min-width:120px}`;document.head.appendChild(st)}
+
+/* ================= YUVAM: AHIR — ürün listesi ve resimleri ================= */
+const HMHW='#a8743a',HMHWD='#6b4528',HMHWL='#c99a5e';
+const hmEmo=(e,s)=>`<ellipse cx="50" cy="94" rx="30" ry="5" fill="#000" opacity=".15"/><text x="50" y="86" font-size="${s||72}" text-anchor="middle" font-family="Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif">${e}</text>`;
+const hmFrame=(col,ex)=>{const ph=ex&&ex.ph&&ADV_PH.find(p=>p.t===ex.ph);
+  const pic=ph?`<image href="${ph.u}" x="21" y="23" width="58" height="54" preserveAspectRatio="xMidYMid slice"/>`:`<rect x="21" y="23" width="58" height="54" fill="#bfe6ff"/><circle cx="64" cy="38" r="7" fill="#ffe27a"/><path d="M21 77 L40 52 L55 66 L66 56 L79 77Z" fill="#6fae5a"/>`;
+  return `<rect x="12" y="14" width="76" height="72" rx="4" fill="${col}" stroke="#4a2f12" stroke-width="2"/><rect x="19" y="21" width="62" height="58" fill="#fff"/>${pic}`};
+const hmCup=(x,y,on)=>`<g opacity="${on?1:.28}" transform="translate(${x} ${y})"><path d="M-9 -16 h18 v9 q0 11 -9 11 q-9 0 -9 -11z" fill="${on?'#f2c14e':'#999'}" stroke="#8a6400" stroke-width="1.5"/><path d="M-9 -13 q-8 0 -8 7 q0 6 8 6 M9 -13 q8 0 8 7 q0 6 -8 6" fill="none" stroke="#8a6400" stroke-width="1.8"/><rect x="-2" y="4" width="4" height="7" fill="#8a6400"/><rect x="-8" y="11" width="16" height="5" rx="1.5" fill="#6b4528"/></g>`;
+function hmStars(){try{return Object.values(bestStars||{}).filter(v=>v>=3).length}catch(e){return 0}}
+const HI=[];
+const hi=(id,cat,name,price,art,x)=>HI.push(Object.assign({id,cat,name,price,art},x||{}));
+/* — mobilya (kat eşyaları) — */
+hi('bed_hay','furn','Saman yuva yatağı',60,()=>`<ellipse cx="50" cy="88" rx="46" ry="12" fill="#c99a3a"/><ellipse cx="50" cy="84" rx="36" ry="9" fill="#e8cc7a"/><path d="M20 86 l10-6 M40 90 l12-7 M62 88 l14-6 M30 80 l8 6" stroke="#b5832a" stroke-width="2"/>`,{sound:'zzz'});
+hi('bed_wood','furn','Ahşap yatak',160,()=>`<rect x="8" y="40" width="10" height="56" rx="2" fill="${HMHWD}"/><rect x="82" y="58" width="9" height="38" rx="2" fill="${HMHWD}"/><rect x="8" y="62" width="84" height="22" rx="4" fill="${HMHW}" stroke="${HMHWD}"/><rect x="14" y="52" width="76" height="16" rx="6" fill="#f6f1e6"/><rect x="38" y="50" width="52" height="20" rx="5" fill="#e2456b"/><ellipse cx="27" cy="55" rx="10" ry="6" fill="#fff" stroke="#ddd"/>`,{sound:'zzz'});
+hi('bed_bunk','furn','Ranza',300,()=>`<rect x="8" y="8" width="7" height="90" fill="${HMHWD}"/><rect x="85" y="8" width="7" height="90" fill="${HMHWD}"/><rect x="10" y="30" width="80" height="12" rx="3" fill="#f6f1e6" stroke="${HMHWD}"/><rect x="40" y="28" width="50" height="14" rx="4" fill="#3f8fe0"/><rect x="10" y="66" width="80" height="12" rx="3" fill="#f6f1e6" stroke="${HMHWD}"/><rect x="40" y="64" width="50" height="14" rx="4" fill="#5fae4a"/><rect x="14" y="86" width="72" height="4" fill="${HMHWD}"/>`,{sound:'zzz'});
+hi('chair_wood','furn','Sandalye',50,()=>`<rect x="30" y="20" width="6" height="76" fill="${HMHWD}"/><rect x="64" y="52" width="6" height="44" fill="${HMHWD}"/><rect x="28" y="18" width="42" height="30" rx="3" fill="${HMHW}" stroke="${HMHWD}"/><rect x="24" y="52" width="50" height="9" rx="2" fill="${HMHWL}" stroke="${HMHWD}"/>`);
+hi('stool','furn','Tabure',30,()=>`<rect x="26" y="56" width="48" height="9" rx="4" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="32" y="65" width="5" height="30" fill="${HMHWD}"/><rect x="63" y="65" width="5" height="30" fill="${HMHWD}"/>`);
+hi('armchair','furn','Koltuk',180,()=>`<rect x="16" y="34" width="68" height="46" rx="14" fill="#c0504a"/><rect x="10" y="50" width="16" height="34" rx="8" fill="#a8403a"/><rect x="74" y="50" width="16" height="34" rx="8" fill="#a8403a"/><rect x="24" y="58" width="52" height="22" rx="6" fill="#d96a63"/><rect x="18" y="84" width="6" height="12" fill="${HMHWD}"/><rect x="76" y="84" width="6" height="12" fill="${HMHWD}"/>`);
+hi('sofa','furn','Kanepe',280,()=>`<rect x="6" y="36" width="88" height="40" rx="12" fill="#3f8fe0"/><rect x="2" y="50" width="16" height="34" rx="8" fill="#2f6fba"/><rect x="82" y="50" width="16" height="34" rx="8" fill="#2f6fba"/><rect x="18" y="56" width="30" height="22" rx="6" fill="#5aa6f0"/><rect x="52" y="56" width="30" height="22" rx="6" fill="#5aa6f0"/><rect x="10" y="84" width="6" height="12" fill="${HMHWD}"/><rect x="84" y="84" width="6" height="12" fill="${HMHWD}"/>`);
+hi('rocker','furn','Sallanan sandalye',140,()=>`<rect x="30" y="16" width="6" height="64" fill="${HMHWD}"/><rect x="64" y="50" width="6" height="30" fill="${HMHWD}"/><rect x="28" y="14" width="42" height="34" rx="3" fill="${HMHW}" stroke="${HMHWD}"/><rect x="24" y="50" width="50" height="9" rx="2" fill="${HMHWL}" stroke="${HMHWD}"/><path d="M16 92 Q50 104 84 92" fill="none" stroke="${HMHWD}" stroke-width="5" stroke-linecap="round"/>`);
+hi('table_wood','furn','Masa',110,()=>`<rect x="6" y="46" width="88" height="9" rx="3" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="14" y="55" width="7" height="40" fill="${HMHWD}"/><rect x="79" y="55" width="7" height="40" fill="${HMHWD}"/><ellipse cx="50" cy="44" rx="14" ry="4" fill="#fff" stroke="#ccc"/>`);
+hi('desk','furn','Çalışma masası',170,()=>`<rect x="6" y="44" width="88" height="8" rx="3" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="10" y="52" width="26" height="42" fill="${HMHW}" stroke="${HMHWD}"/><rect x="14" y="58" width="18" height="10" fill="${HMHWL}"/><rect x="14" y="72" width="18" height="10" fill="${HMHWL}"/><rect x="84" y="52" width="6" height="42" fill="${HMHWD}"/><rect x="52" y="34" width="22" height="10" fill="#e2456b"/><rect x="56" y="26" width="16" height="8" fill="#3f8fe0"/>`);
+hi('bookcase','furn','Kitaplık',200,()=>`<rect x="14" y="6" width="72" height="90" rx="3" fill="${HMHW}" stroke="${HMHWD}" stroke-width="2"/>`+[0,1,2].map(r=>`<rect x="18" y="${12+r*28}" width="64" height="24" fill="#4a2f12"/>`+['#e2456b','#3f8fe0','#f2c14e','#5fae4a','#9b5de5','#ff9a2e','#3fb0a8'].map((c,i)=>`<rect x="${20+i*8.6}" y="${(16+r*28)+(i%3)}" width="6.4" height="${20-(i%3)}" fill="${c}"/>`).join('')).join(''));
+hi('wardrobe','furn','Giysi dolabı',250,()=>`<rect x="16" y="6" width="68" height="90" rx="4" fill="${HMHW}" stroke="${HMHWD}" stroke-width="2"/><rect x="22" y="12" width="26" height="78" rx="2" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="52" y="12" width="26" height="78" rx="2" fill="${HMHWL}" stroke="${HMHWD}"/><circle cx="44" cy="52" r="2.6" fill="#f2c14e"/><circle cx="56" cy="52" r="2.6" fill="#f2c14e"/><text x="35" y="36" font-size="16" text-anchor="middle">👕</text><text x="65" y="36" font-size="16" text-anchor="middle">🎩</text><rect x="20" y="94" width="8" height="5" fill="${HMHWD}"/><rect x="72" y="94" width="8" height="5" fill="${HMHWD}"/>`,{act:'wardrobe'});
+hi('chest','furn','Sandık',90,()=>`<rect x="14" y="52" width="72" height="40" rx="3" fill="${HMHWD}" stroke="#3a2410"/><path d="M14 52 Q50 24 86 52Z" fill="${HMHW}" stroke="#3a2410"/><rect x="44" y="52" width="12" height="14" rx="2" fill="#f2c14e" stroke="#8a6400"/><rect x="14" y="62" width="72" height="4" fill="#3a2410" opacity=".4"/>`);
+hi('fireplace','furn','Şömine',350,()=>`<rect x="10" y="22" width="80" height="74" fill="#8d8a84" stroke="#5a5852"/><rect x="6" y="18" width="88" height="8" fill="${HMHWD}"/><path d="M28 96 V56 Q50 36 72 56 V96Z" fill="#2b2220"/><text x="50" y="92" font-size="34" text-anchor="middle">🔥</text>`,{sound:'fire'});
+hi('stove','furn','Soba',170,()=>`<rect x="26" y="40" width="48" height="52" rx="8" fill="#3a3a44" stroke="#1c1c24"/><rect x="40" y="6" width="9" height="34" fill="#555"/><rect x="34" y="58" width="32" height="20" rx="4" fill="#1c1c24"/><text x="50" y="76" font-size="18" text-anchor="middle">🔥</text>`);
+hi('lamp_floor','furn','Ayaklı lamba',70,()=>`<rect x="48" y="32" width="4" height="62" fill="#444"/><ellipse cx="50" cy="95" rx="16" ry="4" fill="#444"/><ellipse cx="50" cy="30" rx="26" ry="22" fill="#fff3b0" opacity=".3"/><path d="M30 34 L38 10 H62 L70 34Z" fill="#ffd86b" stroke="#c9962b"/>`);
+hi('plant','furn','Saksı çiçeği',40,()=>`<path d="M32 66 H68 L63 96 H37Z" fill="#c9622b" stroke="#8a3f12"/><circle cx="50" cy="48" r="16" fill="#4caf50"/><circle cx="36" cy="58" r="12" fill="#5fc450"/><circle cx="64" cy="56" r="13" fill="#3f9a43"/><circle cx="52" cy="38" r="5" fill="#ff6fa8"/>`);
+hi('trough','furn','Yem teknesi',70,()=>`<path d="M8 60 H92 L84 92 H16Z" fill="${HMHW}" stroke="${HMHWD}"/><rect x="14" y="54" width="72" height="10" rx="5" fill="#e8cc7a"/><path d="M24 58 l4 -2 M46 58 l4 -3 M66 58 l4 -2" stroke="#b5832a" stroke-width="2"/>`,{act:'feed'});
+hi('water','furn','Su kabı',40,()=>`<path d="M22 64 H78 Q74 94 50 94 Q26 94 22 64Z" fill="#cfe8ff" stroke="#5a8fc0" stroke-width="2"/><ellipse cx="50" cy="64" rx="28" ry="7" fill="#7ec3ff" stroke="#5a8fc0"/>`,{act:'drink'});
+hi('dining','furn','Yemek masası',200,()=>`<rect x="6" y="46" width="88" height="9" rx="3" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="14" y="55" width="7" height="40" fill="${HMHWD}"/><rect x="79" y="55" width="7" height="40" fill="${HMHWD}"/><text x="30" y="46" font-size="20" text-anchor="middle">🍲</text><text x="52" y="46" font-size="20" text-anchor="middle">🍞</text><text x="74" y="46" font-size="20" text-anchor="middle">🥛</text>`,{act:'eat'});
+hi('kitchen','furn','Mutfak tezgâhı',260,()=>`<rect x="6" y="46" width="88" height="48" rx="3" fill="#f0e6d0" stroke="${HMHWD}"/><rect x="2" y="42" width="96" height="8" rx="3" fill="#8d8a84"/><rect x="12" y="56" width="34" height="34" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="54" y="56" width="34" height="34" fill="${HMHWL}" stroke="${HMHWD}"/><text x="30" y="40" font-size="22" text-anchor="middle">🍳</text><text x="70" y="40" font-size="22" text-anchor="middle">🫖</text>`,{act:'eat'});
+hi('pantry','furn','Kiler dolabı',150,()=>`<rect x="16" y="8" width="68" height="88" rx="3" fill="${HMHW}" stroke="${HMHWD}" stroke-width="2"/><rect x="20" y="14" width="60" height="22" fill="#4a2f12"/><rect x="20" y="40" width="60" height="22" fill="#4a2f12"/><rect x="20" y="66" width="60" height="22" fill="#4a2f12"/><text x="50" y="32" font-size="18" text-anchor="middle">🫙🍯🥫</text><text x="50" y="58" font-size="18" text-anchor="middle">🍎🥕🍐</text><text x="50" y="84" font-size="18" text-anchor="middle">🌽🥔🧅</text>`,{act:'eat'});
+hi('fruit','furn','Meyve sepeti',50,()=>hmEmo('🧺',60)+`<text x="50" y="72" font-size="26" text-anchor="middle">🍎🍐</text>`,{act:'eat'});
+hi('piano','furn','Piyano',420,()=>`<rect x="8" y="30" width="84" height="60" rx="4" fill="#23233a" stroke="#000"/><rect x="12" y="62" width="76" height="14" fill="#fff"/>`+[0,1,2,3,4,5,6,7].map(i=>`<rect x="${12+i*9.5}" y="62" width="1.6" height="14" fill="#555"/>`).join('')+`<rect x="22" y="62" width="5" height="9" fill="#111"/><rect x="41" y="62" width="5" height="9" fill="#111"/><rect x="60" y="62" width="5" height="9" fill="#111"/><rect x="14" y="88" width="6" height="9" fill="#000"/><rect x="80" y="88" width="6" height="9" fill="#000"/>`,{act:'piano'});
+hi('globe','furn','Dünya küresi',80,()=>hmEmo('🌍',56)+`<rect x="48" y="78" width="4" height="12" fill="${HMHWD}"/>`);
+hi('aquarium','furn','Akvaryum',190,()=>`<rect x="10" y="40" width="80" height="48" rx="5" fill="#a8e0ff" stroke="#3a6a90" stroke-width="3"/><rect x="14" y="44" width="72" height="12" fill="#fff" opacity=".35"/><text x="34" y="74" font-size="20">🐠</text><text x="58" y="66" font-size="18">🐟</text><rect x="10" y="88" width="80" height="8" fill="${HMHWD}"/>`);
+hi('hay','furn','Saman balyası',30,()=>`<rect x="10" y="50" width="80" height="44" rx="6" fill="#e0b84a" stroke="#a8841f"/><path d="M10 64 H90 M10 78 H90 M30 50 V94 M60 50 V94" stroke="#a8841f" stroke-width="2"/>`);
+hi('toybox','furn','Oyuncak kutusu',90,()=>`<rect x="18" y="52" width="64" height="40" rx="5" fill="#e2456b" stroke="#8c1b17"/><rect x="14" y="46" width="72" height="10" rx="3" fill="#ff7a9a" stroke="#8c1b17"/><text x="50" y="82" font-size="22" text-anchor="middle">🧸</text><text x="34" y="44" font-size="20">🪁</text>`);
+/* — duvar süsleri — */
+hi('frame_wood','wall','Ahşap çerçeve',50,(ex)=>hmFrame('#a8743a',ex),{act:'frame'});
+hi('frame_gold','wall','Altın çerçeve',110,(ex)=>hmFrame('#e6b422',ex),{act:'frame'});
+hi('frame_color','wall','Renkli çerçeve',70,(ex)=>hmFrame('#e2456b',ex),{act:'frame'});
+hi('award_board','wall','Ödül panosu',200,()=>{const S=ADV.s,n=Math.min(8,Object.keys(S.claimed||{}).length),C=['#e2456b','#f2c14e','#3f8fe0','#5fae4a','#9b5de5','#ff9a2e','#3fb0a8','#d94a4a'];
+  return `<rect x="8" y="12" width="84" height="76" rx="4" fill="#8a5a32" stroke="${HMHWD}" stroke-width="2"/><rect x="13" y="17" width="74" height="66" fill="#c9a06a"/><text x="50" y="30" font-size="9" font-weight="800" text-anchor="middle" fill="#4a2f12" font-family="sans-serif">ÖDÜLLER</text>`+
+   Array.from({length:8},(_,i)=>{const x=24+(i%4)*17,y=46+Math.floor(i/4)*24,on=i<n;return on?`<path d="M${x-3} ${y+4} l-3 12 l6-3 l6 3 l-3-12" fill="${C[i]}"/><circle cx="${x}" cy="${y}" r="7" fill="${C[i]}" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y+3}" font-size="8" text-anchor="middle">★</text>`:`<circle cx="${x}" cy="${y}" r="7" fill="none" stroke="#7a5a30" stroke-dasharray="2 2"/>`}).join('')},{act:'journal'});
+hi('trophy_shelf','wall','Kupa rafı',220,()=>{const n=hmStars();return `<rect x="6" y="70" width="88" height="8" rx="2" fill="${HMHW}" stroke="${HMHWD}"/><rect x="14" y="78" width="6" height="8" fill="${HMHWD}"/><rect x="80" y="78" width="6" height="8" fill="${HMHWD}"/>`+[0,1,2,3].map(i=>hmCup(20+i*20,64,i<n)).join('')+`<text x="50" y="96" font-size="7" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">${n} ALTIN KUPA</text>`},{act:'journal'});
+hi('medal_rack','wall','Madalya askısı',160,()=>{const S=ADV.s,M=[[advPlaces()>=5,'#3fb0a8','🧭'],[S.whiteAll>=50,'#bfc7d4','⚪'],[S.blue>=2,'#3f8fe0','🔵'],[S.rainbow>=1,'#e2456b','🌈'],[!!S.treasure,'#f2c14e','🏴‍☠️'],[advAnCount()>=5,'#8a5a32','🐾']];
+  return `<rect x="8" y="16" width="84" height="8" rx="3" fill="${HMHW}" stroke="${HMHWD}"/>`+M.map((m,i)=>{const x=18+i*13.2;return `<path d="M${x-3} 24 L${x} 48 L${x+3} 24" fill="${m[0]?m[1]:'#bbb'}" opacity="${m[0]?1:.4}"/><circle cx="${x}" cy="54" r="6" fill="${m[0]?'#f2c14e':'#ccc'}" stroke="#8a6400" opacity="${m[0]?1:.45}"/><text x="${x}" y="57" font-size="7" text-anchor="middle" opacity="${m[0]?1:.35}">${m[2]}</text>`}).join('')+`<text x="50" y="82" font-size="8" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">MADALYALAR</text>`},{act:'journal'});
+hi('map_wall','wall','Kayıp Harita',130,()=>{const n=advPieces(),done=ADV.s.treasure;return `<rect x="10" y="14" width="80" height="72" rx="3" fill="#e8d3a0" stroke="#8a6b25" stroke-width="2"/>`+[[14,18],[52,18],[14,52],[52,52]].map((p,i)=>`<rect x="${p[0]}" y="${p[1]}" width="34" height="30" fill="${i<n?'#cfe8b0':'#d9c690'}" stroke="#8a6b25" stroke-dasharray="${i<n?0:3}"/>${i<n?`<path d="M${p[0]+6} ${p[1]+22} q8-14 14-4 t12-8" stroke="#3f7a2a" stroke-width="2" fill="none"/>`:`<text x="${p[0]+17}" y="${p[1]+20}" font-size="14" text-anchor="middle" fill="#8a6b25">?</text>`}`).join('')+(done?`<text x="50" y="58" font-size="20" text-anchor="middle" fill="#c0392b" font-weight="800">✖</text>`:'')},{act:'journal'});
+hi('clock','wall','Duvar saati',60,()=>{const d=new Date,m=d.getMinutes()*6,h=(d.getHours()%12)*30+d.getMinutes()/2;return `<circle cx="50" cy="50" r="36" fill="#fffdf6" stroke="${HMHW}" stroke-width="6"/>`+[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<rect x="49" y="18" width="2" height="${i%3?4:7}" fill="#333" transform="rotate(${i*30} 50 50)"/>`).join('')+`<rect x="48.8" y="28" width="2.4" height="24" rx="1" fill="#222" transform="rotate(${h} 50 50)"/><rect x="49.2" y="20" width="1.6" height="32" rx="1" fill="#e2456b" transform="rotate(${m} 50 50)"/><circle cx="50" cy="50" r="3" fill="#222"/>`});
+hi('mirror','wall','Ayna',90,()=>`<ellipse cx="50" cy="50" rx="26" ry="38" fill="#d8eefa" stroke="#c9962b" stroke-width="5"/><path d="M38 36 q4-10 10-12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/>`);
+hi('shelf','wall','Raf',60,()=>`<rect x="6" y="64" width="88" height="7" rx="2" fill="${HMHW}" stroke="${HMHWD}"/><rect x="14" y="71" width="5" height="9" fill="${HMHWD}"/><rect x="81" y="71" width="5" height="9" fill="${HMHWD}"/><text x="26" y="62" font-size="24" text-anchor="middle">🏺</text><text x="52" y="62" font-size="22" text-anchor="middle">📖</text><text x="76" y="62" font-size="22" text-anchor="middle">🪴</text>`);
+hi('sconce','wall','Duvar lambası',55,()=>`<rect x="44" y="30" width="12" height="40" rx="3" fill="#444"/><path d="M34 34 L40 14 H60 L66 34Z" fill="#ffd86b" stroke="#c9962b"/><ellipse cx="50" cy="40" rx="26" ry="26" fill="#fff3b0" opacity=".28"/>`);
+hi('horseshoe','wall','At nalı',30,()=>`<path d="M30 80 V40 a20 20 0 0 1 40 0 V80" fill="none" stroke="#9a9ca4" stroke-width="10" stroke-linecap="round"/>`+[34,46,58].map(y=>`<circle cx="30" cy="${y+8}" r="1.8" fill="#333"/><circle cx="70" cy="${y+8}" r="1.8" fill="#333"/>`).join(''));
+hi('banner','wall','Bayrak girlandası',50,()=>`<path d="M8 28 Q50 52 92 28" fill="none" stroke="#6b4528" stroke-width="2"/>`+['#e2456b','#f2c14e','#3f8fe0','#5fae4a','#9b5de5'].map((c,i)=>{const x=18+i*16,y=28+Math.sin((x-8)/84*Math.PI)*14;return `<path d="M${x-6} ${y} H${x+6} L${x} ${y+16}Z" fill="${c}"/>`}).join(''));
+hi('wreath','wall','Çelenk',60,()=>`<circle cx="50" cy="50" r="28" fill="none" stroke="#3f9a43" stroke-width="12"/>`+[0,1,2,3,4,5,6,7].map(i=>`<circle cx="${50+Math.cos(i*.785)*28}" cy="${50+Math.sin(i*.785)*28}" r="${i%2?3:4}" fill="${i%2?'#e2456b':'#5fc450'}"/>`).join('')+`<path d="M50 78 l-8 10 l8-4 l8 4z" fill="#e2456b"/>`);
+hi('poster','wall','Kaz posteri',40,()=>`<rect x="18" y="10" width="64" height="80" fill="#fff6d8" stroke="#8a6b25" stroke-width="2"/><rect x="24" y="16" width="52" height="46" fill="#9ed8ff"/><text x="50" y="52" font-size="34" text-anchor="middle">🪿</text><text x="50" y="76" font-size="8" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">KAZLARLA</text><text x="50" y="85" font-size="8" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">YOLCULUK</text>`);
+/* — halılar (200x50 kutu) — */
+hi('rug_straw','rug','Hasır paspas',50,()=>`<rect x="6" y="6" width="188" height="38" rx="8" fill="#d9b86a" stroke="#a8841f"/>`+Array.from({length:12},(_,i)=>`<path d="M${14+i*15} 8 V42" stroke="#b5922f" stroke-width="2"/>`).join(''));
+hi('rug_round','rug','Yuvarlak kilim',90,()=>`<ellipse cx="100" cy="25" rx="94" ry="21" fill="#c9622b" stroke="#8a3f12"/><ellipse cx="100" cy="25" rx="70" ry="15" fill="#f2c14e"/><ellipse cx="100" cy="25" rx="46" ry="10" fill="#c9622b"/><ellipse cx="100" cy="25" rx="22" ry="5" fill="#fff3c4"/>`);
+hi('rug_stripe','rug','Çizgili halı',110,()=>`<rect x="6" y="6" width="188" height="38" rx="6" fill="#3f8fe0" stroke="#1f4e79"/>`+['#fff','#e2456b','#fff','#f2c14e','#fff','#e2456b','#fff'].map((c,i)=>`<rect x="${20+i*25}" y="6" width="9" height="38" fill="${c}" opacity=".9"/>`).join(''));
+hi('rug_persian','rug','Desenli halı',180,()=>`<rect x="6" y="6" width="188" height="38" rx="5" fill="#8c1b17" stroke="#4a0d0b" stroke-width="2"/><rect x="14" y="12" width="172" height="26" rx="3" fill="none" stroke="#f2c14e" stroke-width="2"/><path d="M100 14 L128 25 L100 36 L72 25Z" fill="#f2c14e"/><path d="M100 18 L118 25 L100 32 L82 25Z" fill="#3f8fe0"/><circle cx="34" cy="25" r="6" fill="#f2c14e"/><circle cx="166" cy="25" r="6" fill="#f2c14e"/>`);
+hi('rug_fur','rug','Tüylü halı',150,()=>`<ellipse cx="100" cy="25" rx="94" ry="21" fill="#f6f1e6" stroke="#d6cdb8" stroke-width="3" stroke-dasharray="3 3"/><ellipse cx="100" cy="25" rx="84" ry="17" fill="#fffdf6"/>`);
+hi('rug_rainbow','rug','Gökkuşağı halı',220,()=>['#e0463f','#ff9a2e','#ffd24d','#5fc450','#3f8fe0','#9b5de5'].map((c,i)=>`<ellipse cx="100" cy="25" rx="${94-i*14}" ry="${21-i*3.2}" fill="${c}"/>`).join(''));
+/* — bahçe eşyaları (100x100, taban 100) — */
+hi('g_tree','garden','Ağaç',120,()=>`<rect x="44" y="52" width="12" height="46" fill="${HMHWD}"/><circle cx="50" cy="38" r="26" fill="#3f9a43"/><circle cx="32" cy="50" r="16" fill="#4caf50"/><circle cx="68" cy="48" r="17" fill="#5fc450"/><circle cx="56" cy="26" r="6" fill="#e2456b"/><circle cx="38" cy="40" r="4" fill="#e2456b"/>`);
+hi('g_flower','garden','Çiçek tarhı',60,()=>`<ellipse cx="50" cy="86" rx="42" ry="12" fill="#7a4a22"/><ellipse cx="50" cy="82" rx="38" ry="9" fill="#5a3818"/>`+['🌷','🌻','🌸','🌼','🌺'].map((e,i)=>`<text x="${22+i*14}" y="${80-(i%2)*8}" font-size="20" text-anchor="middle">${e}</text>`).join(''));
+hi('g_swing','garden','Salıncak',260,()=>`<path d="M14 98 L40 8 M86 98 L60 8" stroke="${HMHWD}" stroke-width="6" stroke-linecap="round"/><rect x="34" y="6" width="32" height="6" rx="2" fill="${HMHW}"/><g class="hm-sway" style="transform-origin:50px 10px"><path d="M40 12 V70 M60 12 V70" stroke="#444" stroke-width="2"/><rect x="34" y="68" width="32" height="7" rx="3" fill="#e2456b" stroke="#8c1b17"/></g>`);
+hi('g_hammock','garden','Hamak',240,()=>`<rect x="8" y="22" width="7" height="76" rx="3" fill="${HMHWD}"/><rect x="85" y="22" width="7" height="76" rx="3" fill="${HMHWD}"/><path d="M14 30 Q50 84 86 30 Z" fill="#3fb0a8" stroke="#1f6a66" stroke-width="2"/><path d="M22 36 Q50 70 78 36" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="4 4"/>`);
+hi('g_feeder','garden','Yemlik',90,()=>`<rect x="46" y="44" width="8" height="54" fill="${HMHWD}"/><path d="M26 40 L50 20 L74 40Z" fill="#c9622b" stroke="#8a3f12"/><rect x="30" y="40" width="40" height="14" fill="${HMHWL}" stroke="${HMHWD}"/><circle cx="50" cy="47" r="4" fill="#3a2410"/><text x="22" y="34" font-size="14">🐦</text><text x="70" y="64" font-size="12">🌾</text>`,{act:'feed'});
+hi('g_pond','garden','Gölet',200,()=>`<ellipse cx="50" cy="82" rx="46" ry="16" fill="#8a847a"/><ellipse cx="50" cy="80" rx="40" ry="12" fill="#5ab4ea"/><ellipse cx="40" cy="80" rx="8" ry="3" fill="#4caf50"/><circle cx="40" cy="78" r="2" fill="#ff6fa8"/><text x="66" y="82" font-size="14">🦆</text>`);
+hi('g_bench','garden','Bahçe bankı',100,()=>`<rect x="10" y="50" width="80" height="8" rx="3" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="10" y="32" width="80" height="6" rx="3" fill="${HMHW}" stroke="${HMHWD}"/><rect x="10" y="42" width="80" height="6" rx="3" fill="${HMHW}" stroke="${HMHWD}"/><rect x="16" y="38" width="6" height="58" fill="${HMHWD}"/><rect x="78" y="38" width="6" height="58" fill="${HMHWD}"/>`);
+hi('g_lamp','garden','Bahçe feneri',70,()=>`<rect x="47" y="30" width="6" height="68" fill="#333"/><rect x="38" y="12" width="24" height="22" rx="4" fill="#ffd86b" stroke="#333" stroke-width="3"/><ellipse cx="50" cy="24" rx="30" ry="26" fill="#fff3b0" opacity=".28"/>`);
+hi('g_lights','garden','Işık zinciri',110,()=>`<rect x="8" y="14" width="6" height="84" fill="${HMHWD}"/><rect x="86" y="14" width="6" height="84" fill="${HMHWD}"/><path d="M11 18 Q50 50 89 18" fill="none" stroke="#333" stroke-width="2"/>`+[0,1,2,3,4,5,6].map(i=>{const x=18+i*11,y=18+Math.sin((x-11)/78*Math.PI)*22;return `<circle cx="${x}" cy="${y+3}" r="3.6" fill="${['#ffd24d','#ff6fa8','#7ae7ff'][i%3]}"/><circle cx="${x}" cy="${y+3}" r="8" fill="${['#ffd24d','#ff6fa8','#7ae7ff'][i%3]}" opacity=".25"/>`}).join(''));
+hi('g_picnic','garden','Piknik masası',150,()=>`<rect x="8" y="48" width="84" height="8" rx="2" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="2" y="66" width="30" height="6" fill="${HMHW}" stroke="${HMHWD}"/><rect x="68" y="66" width="30" height="6" fill="${HMHW}" stroke="${HMHWD}"/><path d="M20 56 L10 96 M80 56 L90 96 M30 56 L40 96 M70 56 L60 96" stroke="${HMHWD}" stroke-width="5"/><text x="34" y="46" font-size="18">🧺</text><text x="62" y="46" font-size="16">🍉</text>`);
+hi('g_haystack','garden','Saman yığını',40,()=>`<path d="M8 96 Q14 36 50 28 Q86 36 92 96Z" fill="#e0b84a" stroke="#a8841f"/><path d="M26 90 l10-30 M44 92 l4-44 M62 90 l-8-34 M76 88 l-12-26" stroke="#b5832a" stroke-width="2"/>`);
+hi('g_scarecrow','garden','Korkuluk',80,()=>`<rect x="47" y="30" width="6" height="68" fill="${HMHWD}"/><rect x="18" y="44" width="64" height="6" rx="3" fill="${HMHWD}"/><circle cx="50" cy="26" r="11" fill="#f0c896"/><path d="M34 22 H66 L58 6 H42Z" fill="#8a5a32"/><rect x="30" y="20" width="40" height="5" rx="2" fill="#8a5a32"/><path d="M36 48 L28 74 L44 70Z M64 48 L72 74 L56 70Z" fill="#c0504a"/><circle cx="46" cy="26" r="1.8" fill="#222"/><circle cx="54" cy="26" r="1.8" fill="#222"/>`);
+hi('g_well','garden','Kuyu',160,()=>`<path d="M20 58 H80 V96 H20Z" fill="#9a9690" stroke="#5a5852" stroke-width="2"/><path d="M20 70 H80 M20 82 H80 M40 58 V70 M60 70 V82 M40 82 V96" stroke="#5a5852"/><rect x="18" y="20" width="6" height="40" fill="${HMHWD}"/><rect x="76" y="20" width="6" height="40" fill="${HMHWD}"/><path d="M10 24 L50 4 L90 24Z" fill="#c9622b" stroke="#8a3f12"/><path d="M50 22 V46" stroke="#444" stroke-width="2"/><rect x="45" y="44" width="10" height="8" fill="#8a5a32"/>`);
+hi('g_windmill','garden','Yel değirmeni',380,()=>`<path d="M32 98 L40 34 H60 L68 98Z" fill="#f0e6d0" stroke="${HMHWD}" stroke-width="2"/><path d="M36 34 L50 20 L64 34Z" fill="#c0504a"/><rect x="44" y="76" width="12" height="22" rx="5" fill="${HMHWD}"/><g class="hm-spin" style="transform-origin:50px 36px"><path d="M50 36 L46 2 L54 2Z M50 36 L84 32 L84 40Z M50 36 L54 70 L46 70Z M50 36 L16 40 L16 32Z" fill="#fff" stroke="${HMHWD}"/></g><circle cx="50" cy="36" r="4" fill="${HMHWD}"/>`);
+hi('g_sand','garden','Kum havuzu',90,()=>`<rect x="8" y="64" width="84" height="28" rx="6" fill="${HMHW}" stroke="${HMHWD}" stroke-width="2"/><rect x="14" y="68" width="72" height="20" rx="4" fill="#ecd9a0"/><text x="36" y="86" font-size="18">🏰</text><text x="64" y="84" font-size="14">🪣</text>`);
+hi('g_mailbox','garden','Posta kutusu',50,()=>`<rect x="46" y="44" width="8" height="54" fill="${HMHWD}"/><rect x="28" y="22" width="44" height="26" rx="10" fill="#d63a2f" stroke="#8c1b17" stroke-width="2"/><rect x="66" y="12" width="4" height="16" fill="#f2c14e"/><rect x="66" y="12" width="12" height="7" fill="#f2c14e"/>`);
+hi('g_kennel','garden','Kulübe',140,()=>`<rect x="14" y="48" width="72" height="48" fill="${HMHW}" stroke="${HMHWD}" stroke-width="2"/><path d="M8 52 L50 16 L92 52Z" fill="#c0504a" stroke="#8c1b17" stroke-width="2"/><path d="M36 96 V68 Q50 54 64 68 V96Z" fill="#2b2220"/><text x="50" y="94" font-size="22" text-anchor="middle">🐕</text>`);
+hi('g_tent','garden','Çadır',130,()=>`<path d="M6 98 L50 14 L94 98Z" fill="#e2802b" stroke="#8a3f12" stroke-width="2"/><path d="M50 14 L36 98 M50 14 L64 98" stroke="#8a3f12" stroke-width="2"/><path d="M38 98 L50 56 L62 98Z" fill="#2b2220"/><circle cx="50" cy="12" r="3" fill="#e2456b"/>`);
+hi('g_pumpkin','garden','Balkabağı bahçesi',70,()=>`<ellipse cx="50" cy="88" rx="44" ry="10" fill="#5a3818"/>`+['🎃','🎃','🥬','🌽'].map((e,i)=>`<text x="${20+i*20}" y="${82-(i%2)*6}" font-size="24" text-anchor="middle">${e}</text>`).join(''));
+/* — çitler (100x100 kutuda, alt 55px) — */
+hi('f_wood','fence','Ahşap çit',40,()=>`<rect x="0" y="62" width="100" height="6" fill="${HMHWL}" stroke="${HMHWD}"/><rect x="0" y="80" width="100" height="6" fill="${HMHWL}" stroke="${HMHWD}"/>`+[6,36,66,94].map(x=>`<rect x="${x-3}" y="52" width="7" height="46" fill="${HMHW}" stroke="${HMHWD}"/>`).join(''));
+hi('f_picket','fence','Beyaz çit',60,()=>`<rect x="0" y="66" width="100" height="5" fill="#fff" stroke="#ccc"/><rect x="0" y="84" width="100" height="5" fill="#fff" stroke="#ccc"/>`+[0,1,2,3,4,5,6,7].map(i=>`<path d="M${i*13+2} 98 V56 L${i*13+7} 50 L${i*13+12} 56 V98Z" fill="#fff" stroke="#c9c9c9"/>`).join(''));
+hi('f_hedge','fence','Çalı çit',80,()=>`<rect x="0" y="62" width="100" height="36" rx="12" fill="#3f9a43"/>`+[0,1,2,3,4,5].map(i=>`<circle cx="${10+i*16}" cy="${64+(i%2)*4}" r="12" fill="${i%2?'#4caf50':'#5fc450'}"/>`).join('')+`<circle cx="30" cy="70" r="3" fill="#ff6fa8"/><circle cx="70" cy="66" r="3" fill="#ffd24d"/>`);
+hi('f_stone','fence','Taş duvar',120,()=>`<rect x="0" y="58" width="100" height="40" rx="4" fill="#9a9690" stroke="#5a5852" stroke-width="2"/>`+[[4,62],[36,62],[68,62],[18,76],[52,76],[84,76],[4,88],[36,88],[68,88]].map(p=>`<rect x="${p[0]}" y="${p[1]}" width="28" height="11" rx="3" fill="#b3afa6" stroke="#6a6862"/>`).join(''));
+/* — duvar boyaları ve kâğıtları — */
+const HPAINT=[['cream','Krem','#f2e2bd',0],['sky','Gök mavisi','#cfe8ff',20],['mint','Nane','#cdeed3',20],['rose','Gül','#f8d0dc',20],['lemon','Limon','#fbf0b0',20],['lav','Lavanta','#dccff5',20],['peach','Şeftali','#ffd9bd',20],['sand','Kum','#e8d3a8',0],['red','Ahır kırmızısı','#c95a4a',30],['forest','Orman yeşili','#5f8f5a',30],['navy','Gece mavisi','#3b5a8a',30],['plank','Koyu tahta','#8a5a32',0]];
+const HPAPER=[['p_stripe','Mavi çizgili','stripes','#e6f2ff','#9ccaf0',60],['p_dots','Pembe puantiye','dots','#ffe9ef','#f29ab5',60],['p_flower','Çiçekli','flowers','#eaf7e0','#f2a0c2',80],['p_stars','Yıldızlı gece','stars','#2b3a6e','#ffd24d',90],['p_check','Kırmızı kareli','checks','#fff4ea','#e0746a',70],['p_heart','Kalpli','hearts','#fff0f5','#ee6f95',80],['p_cloud','Bulutlu','clouds','#bfe6ff','#ffffff',80],['p_plank','Açık tahta','planks','#e7c996','#c9a066',50],['p_leaf','Yapraklı','leaves','#e3f2d6','#5fae4a',80],['p_diamond','Baklava desen','diamonds','#fbe9c8','#c9622b',90]];
+function hmPattern(id,pat,fg){const P=(w,h,inner)=>`<pattern id="${id}" width="${w}" height="${h}" patternUnits="userSpaceOnUse">${inner}</pattern>`;
+  switch(pat){
+   case'stripes':return P(24,10,`<rect width="12" height="10" fill="${fg}"/>`);
+   case'dots':return P(22,22,`<circle cx="11" cy="11" r="3.4" fill="${fg}"/>`);
+   case'flowers':return P(40,40,`<g fill="${fg}"><circle cx="20" cy="12" r="4"/><circle cx="26" cy="18" r="4"/><circle cx="20" cy="24" r="4"/><circle cx="14" cy="18" r="4"/></g><circle cx="20" cy="18" r="3" fill="#ffd24d"/>`);
+   case'stars':return P(34,34,`<path d="M17 6 l3 8 8 .5 -6 5 2 8 -7-4.5 -7 4.5 2-8 -6-5 8-.5z" fill="${fg}"/>`);
+   case'checks':return P(30,30,`<rect width="15" height="15" fill="${fg}"/><rect x="15" y="15" width="15" height="15" fill="${fg}"/>`);
+   case'hearts':return P(34,34,`<path d="M17 26 C4 16 8 6 14 8 C16 9 17 11 17 12 C17 11 18 9 20 8 C26 6 30 16 17 26Z" fill="${fg}"/>`);
+   case'clouds':return P(60,40,`<g fill="${fg}"><ellipse cx="22" cy="24" rx="12" ry="6"/><ellipse cx="30" cy="20" rx="9" ry="7"/><ellipse cx="14" cy="21" rx="7" ry="5"/></g>`);
+   case'planks':return P(120,30,`<path d="M0 29.5 H120 M40 0 V30 M90 0 V30" stroke="${fg}" stroke-width="1.6" fill="none"/>`);
+   case'leaves':return P(36,36,`<path d="M18 8 Q28 14 18 28 Q8 14 18 8Z" fill="${fg}"/>`);
+   case'diamonds':return P(30,30,`<path d="M15 3 L27 15 L15 27 L3 15Z" fill="none" stroke="${fg}" stroke-width="2.4"/>`);
+   default:return '';}}
+/* genişletme ve katlar */
+const HEXP={ground:[0,350,700],upper:[0,350,700],garden:[0,450,900]};
+const HFLOOR={ground:{name:'Alt kat',who:'🪿 Kaz katı',ico:'🪿'},upper:{name:'Üst kat',who:'🧒 Karakter katı',ico:'🧒'},garden:{name:'Bahçe',who:'🌳 Bahçe',ico:'🌳'}};
+/* yuva yuvaları */
+function hmSlots(floor){const S=[];
+  if(floor==='garden'){
+   for(let i=0;i<6;i++)S.push({id:'garden:n'+i,k:'fence',x:30+125*i,y:250,w:125,h:60,need:0});
+   const rows=[{y:333,sc:.78,need:[2,1,1,1,2]},{y:398,sc:.9,need:[1,0,0,0,1]},{y:464,sc:1,need:[0,0,0,0,0]}];
+   rows.forEach((r,ri)=>r.need.forEach((n,c)=>S.push({id:'garden:g'+(ri*5+c),k:'garden',x:40+150*c-15,y:r.y,w:150,h:Math.round(125*r.sc),need:n,sc:r.sc})));
+   return S}
+  for(let r=0;r<2;r++)for(let c=0;c<6;c++){const need=r===0?0:(c===0||c===5?2:1);S.push({id:`${floor}:w${r*6+c}`,k:'wall',x:40+120*c,y:50+112*r,w:120,h:106,need})}
+  for(let i=0;i<6;i++)S.push({id:`${floor}:f${i}`,k:'floor',x:40+120*i,y:402,w:120,h:118,need:i<4?0:i-3});
+  for(let i=0;i<3;i++)S.push({id:`${floor}:r${i}`,k:'rug',x:60+230*i,y:412,w:220,h:46,need:i<2?0:1});
+  return S}
+
+
+/* ================= YUVAM: AHIR — sahne, düzenleme, mağaza ================= */
+const HM={s:null,view:'barn',edit:false,mode:null,sel:null,cat:'furn',all:true,prev:'missions'};
+const hmDef=id=>HI.find(i=>i.id===id);
+const hmSave=()=>{try{store.set('kz-home',HM.s)}catch(e){}};
+function hmStarter(){const p={};['ground:f0:bed_hay','ground:f1:trough','ground:f2:water','ground:w1:frame_wood','ground:w2:award_board','ground:r0:rug_straw','upper:f0:bed_wood','upper:f1:chair_wood','upper:f2:wardrobe','upper:w1:trophy_shelf','upper:w2:medal_rack','upper:w3:frame_wood','upper:r0:rug_round','garden:g12:g_flower','garden:g10:g_tree','garden:g14:g_lamp'].forEach(x=>{const[a,b,c]=x.split(':');p[a+':'+b]={i:c}});
+  for(let i=0;i<4;i++)p['garden:n'+i]={i:'f_wood'};
+  return{v:1,place:p,walls:{'ground:0':{c:'cream'},'ground:1':{c:'cream'},'ground:2':{c:'cream'},'upper:0':{c:'sky'},'upper:1':{c:'sky'},'upper:2':{c:'sky'}},inv:{},paints:{cream:1,sand:1,plank:1,sky:1},papers:{},exp:{ground:0,upper:0,garden:0}}}
+function hmLoad(){if(HM.s)return;let s=null;try{s=store.get('kz-home',null)}catch(e){}if(!s||s.v!==1){s=hmStarter();try{store.set('kz-home',s)}catch(e){}}
+  s.exp=s.exp||{ground:0,upper:0,garden:0};s.inv=s.inv||{};s.paints=s.paints||{};s.papers=s.papers||{};HM.s=s;
+  /* eski "yuva seviyeleri" yerine yeni ahır: harcanan tüyler iade edilir */
+  const A=ADV.s;if(A.nest>0&&!A.nestRef){const C=[30,60,100,150];let b=0;for(let i=0;i<A.nest&&i<4;i++)b+=C[i];feathers+=b;A.nestRef=true;A.nest=0;saveShop();advSave()}}
+const hmSlotById=(f,id)=>hmSlots(f).find(s=>s.id===id);
+const hmUnlocked=(f,s)=>s.need<=(HM.s.exp[f]||0);
+function hmOut(who){const e=EQ[who]||{},o={};for(const sl in e){const it=e[sl]&&itemById(e[sl]);if(it)o[sl]=it.key}return o}
+function hmWallFill(floor,i,idp){const w=HM.s.walls[floor+':'+i]||{c:'cream'};
+  if(w.p){const P=HPAPER.find(x=>x[0]===w.p);if(P){const pid=`${idp}pt${floor}${i}`;return{defs:hmPattern(pid,P[2],P[4]),fill:P[3],pat:pid}}}
+  const C=HPAINT.find(x=>x[0]===w.c)||HPAINT[0];return{defs:'',fill:C[2],pat:null}}
+function hmItem(slot,ex,kind){const d=hmDef(ex.i);if(!d)return '';const art=d.art(ex);
+  if(slot.k==='rug')return `<svg x="${slot.x}" y="${slot.y}" width="${slot.w}" height="${slot.h}" viewBox="0 0 200 50" preserveAspectRatio="none">${art}</svg>`;
+  if(slot.k==='wall')return `<svg x="${slot.x+8}" y="${slot.y+4}" width="${slot.w-16}" height="${slot.h-8}" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" overflow="visible">${art}</svg>`;
+  if(slot.k==='fence')return `<svg x="${slot.x}" y="${slot.y-slot.h*1.2+12}" width="${slot.w}" height="${slot.h*1.3}" viewBox="0 0 100 100" preserveAspectRatio="none" overflow="visible">${art}</svg>`;
+  return `<svg x="${slot.x}" y="${slot.y-slot.h}" width="${slot.w}" height="${slot.h}" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet" overflow="visible">${art}</svg>`}
+const hmEmoK={wall:'🖼️',floor:'🪑',rug:'🟫',garden:'🌿',fence:'🧱'};
+function hmSlotLayer(floor,slots,o){let s='';const lv=HM.s.exp[floor]||0;
+  for(const sl of slots){const ex=HM.s.place[sl.id],un=sl.need<=lv,rect=sl.k==='floor'||sl.k==='garden'?[sl.x,sl.y-sl.h,sl.w,sl.h]:sl.k==='fence'?[sl.x,sl.y-sl.h,sl.w,sl.h]:[sl.x,sl.y,sl.w,sl.h];
+    if(!un){if(o.edit&&!o.mini)s+=`<g data-hlock="${floor}"><rect x="${rect[0]+4}" y="${rect[1]+4}" width="${rect[2]-8}" height="${rect[3]-8}" rx="10" class="hm-lk"/><text x="${rect[0]+rect[2]/2}" y="${rect[1]+rect[3]/2+8}" font-size="22" text-anchor="middle">🔒</text></g>`;continue}
+    if(ex){if(o.mini)s+=hmItem(sl,ex);else s+=`<g data-hslot="${sl.id}" class="hm-it">${hmItem(sl,ex)}<rect x="${rect[0]}" y="${rect[1]}" width="${rect[2]}" height="${rect[3]}" fill="transparent"/>${o.edit?`<rect x="${rect[0]+2}" y="${rect[1]+2}" width="${rect[2]-4}" height="${rect[3]-4}" rx="8" class="hm-ed"/>`:''}</g>`}
+    else if(o.edit&&!o.mini)s+=`<g data-hslot="${sl.id}" class="hm-it"><rect x="${rect[0]+4}" y="${rect[1]+4}" width="${rect[2]-8}" height="${rect[3]-8}" rx="10" class="hm-em"/><text x="${rect[0]+rect[2]/2}" y="${rect[1]+rect[3]/2+8}" font-size="22" text-anchor="middle" opacity=".7">${hmEmoK[sl.k]}</text><text x="${rect[0]+rect[2]/2}" y="${rect[1]+rect[3]/2-14}" font-size="20" font-weight="800" text-anchor="middle" fill="#fff">+</text></g>`}
+  return s}
+function hmChar(floor,o){const uid='h'+(++_lkU);let art,x,y;
+  if(floor==='ground'||floor==='garden'){art=lkGooseSvg(GEESE[sel.goose]||GEESE[0],{out:hmOut('g')},uid,false,true);}
+  else art=lkKidSvg(RIDERS[sel.rider]||RIDERS[0],{out:hmOut('k')},uid,false,true);
+  const w=floor==='garden'?96:124,h=w*128/160,gy=floor==='garden'?476:466;
+  const inner=art.replace('<svg ','<svg x="0" y="0" width="'+w+'" height="'+h+'" ');
+  return `<g transform="translate(${floor==='garden'?60:70} ${gy-h+4})" data-hchar="${floor==='upper'?'kid':'goose'}" style="cursor:pointer"><g class="${floor==='upper'?'':'hm-roam'}"><g class="${floor==='upper'?'hm-bob':'hm-flip'}" style="transform-box:fill-box;transform-origin:center">${inner}</g></g></g>`}
+function hmRoom(floor,o){const idp=o.idp||'h',S=HM.s,sl=hmSlots(floor);let d=`<linearGradient id="${idp}sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#000" stop-opacity=".14"/></linearGradient><linearGradient id="${idp}fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c79a5c"/><stop offset="1" stop-color="#a87a42"/></linearGradient>`;
+  let b=`<rect width="800" height="480" fill="#4a2f12"/>`,rl='';
+  for(let i=0;i<3;i++){const wf=hmWallFill(floor,i,idp);d+=wf.defs;const x=40+240*i;b+=`<rect x="${x}" y="40" width="240" height="246" fill="${wf.fill}"/>`+(wf.pat?`<rect x="${x}" y="40" width="240" height="246" fill="url(#${wf.pat})"/>`:'')+`<rect x="${x}" y="40" width="240" height="246" fill="url(#${idp}sh)"/>`;
+    if(o.edit&&!o.mini)rl+=`<g data-hwall="${floor}:${i}" class="hm-wallhit"><g class="hm-roller"><rect x="${x+78}" y="4" width="84" height="32" rx="16" fill="#fff" stroke="#6b4528" stroke-width="3"/><text x="${x+120}" y="27" font-size="18" text-anchor="middle">🎨 Boya</text></g></g>`}
+  /* tavan kirişleri ve direkler */
+  b+=`<rect x="0" y="0" width="800" height="40" fill="#8a5a32"/><path d="M0 14 H800 M0 28 H800" stroke="#6b4528" stroke-width="2"/>`+[0,1,2,3].map(i=>`<rect x="${40+240*i-9}" y="0" width="18" height="300" fill="#7a4e28" stroke="#4a2f12"/>`).join('')+`<rect x="0" y="0" width="40" height="480" fill="#6b4528"/><rect x="760" y="0" width="40" height="480" fill="#6b4528"/>`;
+  /* duvar süsleri */
+  b+=hmSlotLayer(floor,sl.filter(s=>s.k==='wall'),o)+rl;
+  /* süpürgelik + zemin */
+  b+=`<rect x="40" y="284" width="720" height="18" fill="#6b4528"/><rect x="40" y="302" width="720" height="178" fill="url(#${idp}fl)"/>`+[330,362,398,438].map(y=>`<path d="M40 ${y} H760" stroke="#8a5a2a" stroke-width="2" opacity=".55"/>`).join('')+[[160,302,330],[420,302,330],[640,302,330],[90,330,362],[300,330,362],[540,330,362],[700,330,362],[200,362,398],[470,362,398],[620,362,398],[120,398,438],[350,398,438],[580,398,438],[730,398,438],[240,438,480],[500,438,480]].map(p=>`<path d="M${p[0]} ${p[1]} V${p[2]}" stroke="#8a5a2a" stroke-width="2" opacity=".5"/>`).join('');
+  b+=hmSlotLayer(floor,sl.filter(s=>s.k==='rug'),o);
+  b+=hmSlotLayer(floor,sl.filter(s=>s.k==='floor'),o);
+  b+=hmChar(floor,o);
+  return `<defs>${d}</defs>`+b}
+function hmGarden(o){const idp=o.idp||'hg',sl=hmSlots('garden');
+  let b=`<defs><linearGradient id="${idp}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8f5"/><stop offset="1" stop-color="#d8f0ff"/></linearGradient><linearGradient id="${idp}gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ec65a"/><stop offset="1" stop-color="#4f9e3e"/></linearGradient></defs>`;
+  b+=`<rect width="800" height="480" fill="url(#${idp}sky)"/><circle cx="700" cy="70" r="34" fill="#ffe27a"/><circle cx="700" cy="70" r="52" fill="#ffe27a" opacity=".25"/>`+
+   [[110,70,1],[330,44,.8],[520,92,.9]].map(c=>`<g transform="translate(${c[0]} ${c[1]}) scale(${c[2]})" fill="#fff" opacity=".92"><ellipse cx="0" cy="0" rx="46" ry="16"/><ellipse cx="24" cy="-10" rx="30" ry="16"/><ellipse cx="-22" cy="-6" rx="24" ry="12"/></g>`).join('')+
+   `<path d="M0 214 Q120 150 260 196 T520 186 T800 200 V260 H0Z" fill="#8fc97a"/><path d="M0 232 Q180 190 360 224 T800 214 V270 H0Z" fill="#6fb35a"/>`+
+   `<rect y="236" width="800" height="244" fill="url(#${idp}gr)"/>`+[0,1,2,3,4,5,6,7].map(i=>`<path d="M${i*110-20} 480 L${i*110+60} 236" stroke="#fff" stroke-width="18" opacity=".05"/>`).join('');
+  b+=`<path d="M300 480 Q340 400 420 340 T520 238" fill="none" stroke="#e8d3a0" stroke-width="42" opacity=".55" stroke-linecap="round"/>`;
+  b+=hmSlotLayer('garden',sl.filter(s=>s.k==='fence'),o);
+  const gs=sl.filter(s=>s.k==='garden').sort((a,c)=>a.y-c.y);b+=hmSlotLayer('garden',gs,o);
+  b+=hmChar('garden',o);return b}
+function hmBarn(){const mini=(f,x,y,w,h,idp)=>`<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 800 480">${f==='garden'?hmGarden({mini:true,idp}):hmRoom(f,{mini:true,idp})}</svg>`;
+  let b=`<defs><linearGradient id="bsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8f5"/><stop offset="1" stop-color="#e2f4ff"/></linearGradient><linearGradient id="bgr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ec65a"/><stop offset="1" stop-color="#4f9e3e"/></linearGradient><linearGradient id="broof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0503a"/><stop offset="1" stop-color="#8c2f20"/></linearGradient></defs>`;
+  b+=`<rect width="1000" height="780" fill="url(#bsky)"/><circle cx="900" cy="70" r="40" fill="#ffe27a"/><circle cx="900" cy="70" r="62" fill="#ffe27a" opacity=".25"/>`+[[640,60,1.1],[780,130,.8],[130,50,.9]].map(c=>`<g transform="translate(${c[0]} ${c[1]}) scale(${c[2]})" fill="#fff" opacity=".9"><ellipse cx="0" cy="0" rx="50" ry="17"/><ellipse cx="26" cy="-11" rx="32" ry="17"/><ellipse cx="-24" cy="-6" rx="26" ry="13"/></g>`).join('');
+  b+=`<rect y="700" width="1000" height="80" fill="url(#bgr)"/><path d="M0 702 Q250 680 500 700 T1000 690 V720 H0Z" fill="#6fb35a"/>`;
+  /* ahır gövdesi */
+  b+=`<rect x="14" y="104" width="540" height="640" rx="6" fill="#7a4e28" stroke="#3a2410" stroke-width="5"/>`+Array.from({length:14},(_,i)=>`<path d="M${40+i*38} 104 V744" stroke="#5a3818" stroke-width="2" opacity=".5"/>`).join('');
+  b+=`<path d="M-10 116 L36 40 L170 12 H398 L532 40 L578 116Z" fill="url(#broof)" stroke="#4a1a10" stroke-width="5"/>`+Array.from({length:8},(_,i)=>`<path d="M${-4+i*8} ${112-i*13} H${574-i*8}" stroke="#6a2216" stroke-width="2" opacity=".5"/>`).join('')+`<rect x="150" y="6" width="248" height="10" rx="3" fill="#6a2216"/>`;
+  b+=`<g data-hgo="barnsign"><rect x="184" y="44" width="180" height="48" rx="8" fill="#e8cc7a" stroke="#6b4528" stroke-width="4"/><text x="274" y="80" font-size="34" font-weight="900" text-anchor="middle" fill="#6b4528" font-family="Baloo 2,system-ui,sans-serif">🏡 YUVAM</text></g>`;
+  b+=`<rect x="30" y="120" width="508" height="308" fill="#3a2410"/><rect x="30" y="436" width="508" height="308" fill="#3a2410"/><rect x="14" y="425" width="540" height="14" fill="#8a5a32" stroke="#3a2410" stroke-width="3"/>`;
+  b+=mini('upper',34,124,500,300,'mu')+mini('ground',34,440,500,300,'mg');
+  b+=`<g data-hgo="upper"><rect x="34" y="124" width="500" height="300" fill="transparent"/><rect x="40" y="132" width="132" height="28" rx="14" fill="#fff" stroke="#6b4528" stroke-width="3"/><text x="106" y="152" font-size="16" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="Baloo 2,system-ui,sans-serif">🧒 Üst kat</text></g>`;
+  b+=`<g data-hgo="ground"><rect x="34" y="440" width="500" height="300" fill="transparent"/><rect x="40" y="448" width="132" height="28" rx="14" fill="#fff" stroke="#6b4528" stroke-width="3"/><text x="106" y="468" font-size="16" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="Baloo 2,system-ui,sans-serif">🪿 Alt kat</text></g>`;
+  /* merdiven işareti */
+  b+=`<rect x="538" y="430" width="14" height="8" fill="#c99a5e"/>`;
+  /* bahçe */
+  b+=`<rect x="590" y="500" width="390" height="236" rx="12" fill="#5a3818"/>`+mini('garden',594,506,382,229,'mgd')+`<g data-hgo="garden"><rect x="594" y="506" width="382" height="229" fill="transparent"/><rect x="600" y="514" width="116" height="28" rx="14" fill="#fff" stroke="#6b4528" stroke-width="3"/><text x="658" y="534" font-size="16" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="Baloo 2,system-ui,sans-serif">🌳 Bahçe</text></g>`;
+  b+=`<g font-family="Baloo 2,system-ui,sans-serif" font-weight="800" text-anchor="middle"><text x="780" y="330" font-size="26" fill="#fff" stroke="#3a6a90" stroke-width="5" paint-order="stroke" opacity=".95">Ahır</text><text x="780" y="372" font-size="18" fill="#fff" stroke="#3a6a90" stroke-width="4" paint-order="stroke">Bir kata dokun</text><text x="780" y="400" font-size="18" fill="#fff" stroke="#3a6a90" stroke-width="4" paint-order="stroke">ve yuvanı süsle!</text></g>`;
+  return b}
+
+
+/* ---- Yuvam: arayüz ---- */
+HM.all=false;HM.panel=null;
+const HCAT=[['furn','🪑','Mobilya'],['wall','🖼️','Duvar'],['rug','🟫','Halı'],['paint','🎨','Boya'],['paper','🧻','Kâğıt'],['garden','🌳','Bahçe'],['fence','🧱','Çit'],['exp','📐','Genişlet']];
+const HKIND={wall:['wall','Duvar süsü'],floor:['furn','Eşya'],rug:['rug','Halı'],garden:['garden','Bahçe eşyası'],fence:['fence','Çit']};
+const hmPlaced=id=>Object.values(HM.s.place).filter(x=>x.i===id).length;
+const hmArt=d=>d.cat==='rug'?`<svg viewBox="0 0 200 50" width="76" height="30">${d.art({})}</svg>`:`<svg viewBox="0 0 100 100" width="58" height="58" overflow="hidden">${d.art({})}</svg>`;
+function hmPaperSvg(P,sz){const id='shp_'+P[0];return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><defs>${hmPattern(id,P[2],P[4])}</defs><rect width="${sz}" height="${sz}" rx="8" fill="${P[3]}"/><rect width="${sz}" height="${sz}" rx="8" fill="url(#${id})"/><rect width="${sz}" height="${sz}" rx="8" fill="none" stroke="#6b4528" stroke-width="2"/></svg>`}
+function hmShopPanel(){const S=HM.s;let h=`<div class="hm-ph"><b>🛒 Mağaza</b><button class="hm-x" data-hclose>✕</button></div><div class="hm-cats">`+HCAT.map(c=>`<button class="hm-cat${HM.cat===c[0]?' on':''}" data-hcat="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')+`</div><div class="hm-grid">`;
+  const cat=HM.cat;
+  if(cat==='paint')h+=HPAINT.map(p=>{const own=S.paints[p[0]];return `<div class="hm-c"><div class="hm-ca"><svg width="58" height="58"><circle cx="29" cy="29" r="24" fill="${p[2]}" stroke="#6b4528" stroke-width="3"/></svg></div><div class="hm-cn">${p[1]}</div>${own?'<i>✓ Sende</i>':`<button class="hm-buy" data-hbuy="paint:${p[0]}">🪶 ${p[3]}</button>`}</div>`}).join('');
+  else if(cat==='paper')h+=HPAPER.map(p=>{const own=S.papers[p[0]];return `<div class="hm-c"><div class="hm-ca">${hmPaperSvg(p,58)}</div><div class="hm-cn">${p[1]}</div>${own?'<i>✓ Sende</i>':`<button class="hm-buy" data-hbuy="paper:${p[0]}">🪶 ${p[5]}</button>`}</div>`}).join('');
+  else if(cat==='exp')h+=['ground','upper','garden'].map(f=>{const lv=S.exp[f]||0,pr=HEXP[f][lv+1],F=HFLOOR[f];return `<div class="hm-c wide"><div class="hm-ca" style="font-size:34px">${F.ico}</div><div class="hm-cn">${F.name} <small>seviye ${lv+1}/3</small></div>${pr==null?'<i>✓ En geniş hâlinde</i>':`<button class="hm-buy" data-hbuy="exp:${f}">📐 Genişlet · 🪶 ${pr}</button>`}</div>`}).join('');
+  else h+=HI.filter(d=>d.cat===cat).map(d=>{const n=(S.inv[d.id]||0)+hmPlaced(d.id);return `<div class="hm-c"><div class="hm-ca">${hmArt(d)}</div><div class="hm-cn">${d.name}</div><button class="hm-buy" data-hbuy="${d.id}">🪶 ${d.price}</button>${n?`<i>Sende: ${n}</i>`:''}</div>`}).join('');
+  return h+'</div>'}
+function hmSlotPanel(){const S=HM.s,id=HM.sel,f=id.split(':')[0],sl=hmSlotById(f,id);if(!sl)return '';const K=HKIND[sl.k],ex=S.place[id],d=ex&&hmDef(ex.i);
+  let h=`<div class="hm-ph"><b>${HFLOOR[f].ico} ${K[1]}</b><button class="hm-x" data-hclose>✓</button></div>`;
+  if(d){h+=`<div class="hm-cur"><span>${d.name}</span><button class="hm-rem" data-hrem>↩ Kaldır</button></div>`;
+    if(d.act==='frame'){h+=`<div class="hm-sub">📸 Fotoğraf seç</div><div class="hm-ph2">`+(ADV_PH.length?ADV_PH.slice(0,12).map(p=>`<img src="${p.u}" data-hph="${p.t}" class="${ex.ph===p.t?'on':''}" alt="">`).join(''):'<small>Henüz fotoğrafın yok. Uçarken 📸 ile çek!</small>')+`</div>`}}
+  const own=HI.filter(i=>i.cat===K[0]&&(S.inv[i.id]||0)>0);
+  h+=`<div class="hm-sub">Çantandakiler</div><div class="hm-grid">`+(own.length?own.map(i=>`<div class="hm-c" data-hput="${i.id}"><div class="hm-ca">${hmArt(i)}</div><div class="hm-cn">${i.name}</div><i>x${S.inv[i.id]}</i></div>`).join(''):`<div class="hm-empty">Çantan boş.</div>`)+`</div><button class="hm-go" data-hshopcat="${K[0]}">🛒 Mağazadan al</button>`;
+  return h}
+function hmWallPanel(){const S=HM.s,[f,i]=HM.sel.split(':'),w=S.walls[f+':'+i]||{};
+  let h=`<div class="hm-ph"><b>🎨 Duvarı boya</b><button class="hm-x" data-hclose>✓</button></div><label class="hm-chk"><input type="checkbox" data-hall ${HM.all?'checked':''}> Bu kattaki tüm duvarlara uygula</label><div class="hm-sub">Boyalar</div><div class="hm-sw">`;
+  h+=HPAINT.map(p=>{const own=S.paints[p[0]],on=!w.p&&(w.c||'cream')===p[0];return own?`<button class="hm-s${on?' on':''}" data-hpaint="${p[0]}" style="background:${p[2]}" title="${p[1]}"></button>`:`<button class="hm-s lk" data-hshopcat="paint" style="background:${p[2]}" title="${p[1]} · ${p[3]}">🔒</button>`}).join('');
+  h+=`</div><div class="hm-sub">Desenli kâğıtlar</div><div class="hm-sw">`+HPAPER.map(p=>{const own=S.papers[p[0]],on=w.p===p[0];return `<button class="hm-s pp${on?' on':''}${own?'':' lk'}" ${own?`data-hpaper="${p[0]}"`:'data-hshopcat="paper"'} title="${p[1]}">${hmPaperSvg(p,40)}${own?'':'<b>🔒</b>'}</button>`}).join('')+`</div><button class="hm-go" data-hshopcat="paint">🛒 Boya / kâğıt al</button>`;
+  return h}
+function hmRender(){const root=document.getElementById('homeRoot');if(!root||!HM.s)return;
+  const v=HM.view,fl=v!=='barn';let vb='0 0 800 480',inner;
+  if(v==='barn'){vb='0 0 1000 780';inner=hmBarn()}else if(v==='garden')inner=hmGarden({edit:HM.edit,idp:'hg'});else inner=hmRoom(v,{edit:HM.edit,idp:'hr'});
+  const nav=[['barn','🏠','Ahır'],['upper','🧒','Üst kat'],['ground','🪿','Alt kat'],['garden','🌳','Bahçe']].map(n=>`<button class="hm-nv${v===n[0]?' on':''}" data-hgo="${n[0]}">${n[1]}<small>${n[2]}</small></button>`).join('');
+  const pn=HM.mode==='shop'?hmShopPanel():HM.mode==='slot'?hmSlotPanel():HM.mode==='wall'?hmWallPanel():'';
+  root.innerHTML=`<div class="hm-hd"><button class="hm-b" data-hback>←</button><b class="hm-t">${fl?HFLOOR[v].who:'🏡 Yuvam'}</b><span class="hm-nav">${nav}</span><span class="hm-f">🪶 ${feathers}</span><button class="hm-b${HM.mode==='shop'?' on':''}" data-hshop>🛒<small> Mağaza</small></button>${fl?`<button class="hm-b${HM.edit?' on':''}" data-hedit>${HM.edit?'✓<small> Bitti</small>':'✏️<small> Düzenle</small>'}</button>`:''}</div><div class="hm-body"><div class="hm-view"><svg id="hmSvg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet">${inner}</svg>${HM.edit&&!pn?`<div class="hm-hint">Boş kutuya dokun: eşya koy · 🎨: duvarı boya</div>`:''}${!fl&&!pn?`<div class="hm-hint">Bir kata dokunup içeri gir</div>`:''}</div>${pn?`<div class="hm-panel">${pn}</div>`:''}</div><div id="hmPhoto" hidden></div>`;
+  if(HM.edit&&HM.mode==='slot'&&HM.sel){const g=root.querySelector(`[data-hslot="${HM.sel}"] rect.hm-ed, [data-hslot="${HM.sel}"] rect.hm-em`);if(g)g.classList.add('on')}
+  const pnl=root.querySelector('.hm-panel');if(pnl&&HM._ps)pnl.scrollTop=HM._ps}
+function hmGo(v){HM.view=v;HM.mode=null;HM.sel=null;if(v==='barn')HM.edit=false;hmRender()}
+function hmBuy(k){const S=HM.s;let pr,ok=false,msg='';
+  const pay=()=>{if(feathers<pr){advNote('🪶 Yeterli altın tüyün yok',1.6);try{sadTone()}catch(e){}return false}feathers-=pr;saveShop();chime();return true};
+  if(k.startsWith('paint:')){const p=HPAINT.find(x=>x[0]===k.slice(6));if(!p||S.paints[p[0]])return;pr=p[3];if(!pay())return;S.paints[p[0]]=1;msg='🎨 '+p[1]+' boyası alındı!'}
+  else if(k.startsWith('paper:')){const p=HPAPER.find(x=>x[0]===k.slice(6));if(!p||S.papers[p[0]])return;pr=p[5];if(!pay())return;S.papers[p[0]]=1;msg='🧻 '+p[1]+' duvar kâğıdı alındı!'}
+  else if(k.startsWith('exp:')){const f=k.slice(4),lv=S.exp[f]||0;pr=HEXP[f][lv+1];if(pr==null||!pay())return;S.exp[f]=lv+1;try{fanfare()}catch(e){}msg='📐 '+HFLOOR[f].name+' genişledi!'}
+  else{const d=hmDef(k);if(!d)return;pr=d.price;if(!pay())return;S.inv[k]=(S.inv[k]||0)+1;msg='✅ '+d.name+' çantanda!'}
+  hmSave();advNote(msg,1.8);HM._ps=(document.querySelector('.hm-panel')||{}).scrollTop||0;hmRender()}
+function hmPut(id){const S=HM.s,sid=HM.sel;if(!(S.inv[id]>0))return;const old=S.place[sid];if(old)S.inv[old.i]=(S.inv[old.i]||0)+1;S.inv[id]--;S.place[sid]={i:id};hmSave();sfx(520,.08,'triangle',.1);hmRender()}
+function hmRem(){const S=HM.s,sid=HM.sel,old=S.place[sid];if(!old)return;S.inv[old.i]=(S.inv[old.i]||0)+1;delete S.place[sid];hmSave();sfx(330,.08,'triangle',.1);hmRender()}
+function hmPaint(kind,id){const S=HM.s,[f,i]=HM.sel.split(':'),idx=HM.all?[0,1,2]:[+i];idx.forEach(n=>{S.walls[f+':'+n]=kind==='p'?{p:id}:{c:id}});hmSave();sfx(600,.08,'triangle',.1);HM._ps=(document.querySelector('.hm-panel')||{}).scrollTop||0;hmRender()}
+function hmAct(slotId){const ex=HM.s.place[slotId],d=ex&&hmDef(ex.i);if(!d)return;const f=slotId.split(':')[0],id=d.id;
+  if(d.act==='wardrobe'){openWardrobe(f==='ground'?'goose':'kid');return}
+  if(d.act==='journal'){showHub('journal');return}
+  if(d.act==='frame'){const ph=ex.ph&&ADV_PH.find(p=>p.t===ex.ph),o=document.getElementById('hmPhoto');if(!ph){advNote('🖼️ Boş çerçeve. ✏️ Düzenle ile fotoğraf seç!',2);return}o.innerHTML=`<img src="${ph.u}" alt="">`;o.hidden=false;return}
+  if(d.act==='feed'){advNote('🌾 Kaz karnını doyurdu!',1.6);sfx(300,.05,'square',.08);setTimeout(()=>sfx(360,.05,'square',.08),90);return}
+  if(d.act==='drink'){advNote('💧 Gluk gluk!',1.4);sfx(500,.1,'sine',.1);return}
+  if(d.act==='eat'){advNote('😋 Çok lezzetli!',1.4);chime();return}
+  if(d.act==='piano'){[523,587,659,698,784,880].forEach((n,i)=>setTimeout(()=>sfx(n,.22,'triangle',.14),i*160));advNote('🎹 Ne güzel şarkı!',1.8);return}
+  if(/^bed|^rocker|^armchair|^sofa|^g_hammock|^g_tent/.test(id)){advNote('💤 Zzz… ne rahat!',1.6);sfx(260,.3,'sine',.07);return}
+  if(id==='fireplace'||id==='stove'){advNote('🔥 Çıtır çıtır, sıcacık!',1.6);sfx(180,.2,'sawtooth',.05);return}
+  if(id==='g_swing'){advNote('🎈 Uuuu! Sallan sallan!',1.6);sfx(700,.12,'triangle',.1);return}
+  if(id==='piano'||id==='globe'){advNote('🌍 Dünya ne büyük!',1.6);return}
+  if(id==='clock'){const t=new Date();advNote('🕒 Saat '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'),1.6);return}
+  if(id==='g_pond'){advNote('🦆 Şap şap! Gölet çok güzel.',1.6);sfx(420,.1,'sine',.08);return}
+  sfx(600,.05,'triangle',.07)}
+function hmClick(e){const T=e.target;
+  if(T.closest('#hmPhoto')&&!document.getElementById('hmPhoto').hidden){document.getElementById('hmPhoto').hidden=true;return}
+  const q=s=>T.closest(s);let b;
+  if(q('[data-hback]')){if(HM.view==='barn')showHub(HM.prev);else hmGo('barn');return}
+  if((b=q('[data-hgo]'))){const v=b.dataset.hgo;if(v==='barnsign'){advNote('🪿 Vak! Yuvama hoş geldin!',1.6);sfx(500,.1,'square',.08);return}hmGo(v);return}
+  if(q('[data-hshop]')){HM.mode=HM.mode==='shop'?null:'shop';HM.sel=null;HM._ps=0;hmRender();return}
+  if(q('[data-hedit]')){HM.edit=!HM.edit;HM.mode=null;HM.sel=null;hmRender();return}
+  if(q('[data-hclose]')){HM.mode=null;HM.sel=null;hmRender();return}
+  if((b=q('[data-hcat]'))){HM.cat=b.dataset.hcat;HM._ps=0;hmRender();return}
+  if((b=q('[data-hshopcat]'))){HM.cat=b.dataset.hshopcat;HM.mode='shop';HM._ps=0;hmRender();return}
+  if((b=q('[data-hbuy]'))){hmBuy(b.dataset.hbuy);return}
+  if((b=q('[data-hput]'))){hmPut(b.dataset.hput);return}
+  if(q('[data-hrem]')){hmRem();return}
+  if((b=q('[data-hph]'))){const ex=HM.s.place[HM.sel];if(ex){ex.ph=+b.dataset.hph;hmSave();hmRender()}return}
+  if((b=q('[data-hpaint]'))){hmPaint('c',b.dataset.hpaint);return}
+  if((b=q('[data-hpaper]'))){hmPaint('p',b.dataset.hpaper);return}
+  if(q('[data-hall]')){HM.all=!!T.closest('[data-hall]').checked;return}
+  if(q('[data-hlock]')){advNote('🔒 Bu alan için 📐 Genişlet gerekli',2);HM.mode='shop';HM.cat='exp';HM._ps=0;hmRender();return}
+  if((b=q('[data-hwall]'))){if(HM.edit){HM.mode='wall';HM.sel=b.dataset.hwall;HM._ps=0;hmRender()}return}
+  if((b=q('[data-hslot]'))){const id=b.dataset.hslot;if(HM.edit){HM.mode='slot';HM.sel=id;HM._ps=0;hmRender()}else hmAct(id);return}
+  if((b=q('[data-hchar]'))){if(b.dataset.hchar==='goose'){advNote('🪿 Vak vak!',1.2);sfx(420,.08,'square',.09);setTimeout(()=>sfx(360,.1,'square',.09),90)}else{advNote('😄 Hihi!',1.2);chime()}return}}
+function hmOpen(){HM.prev=(typeof hubTab==='string'&&hubTab!=='home')?hubTab:'missions';hmLoad();HM.view='barn';HM.edit=false;HM.mode=null;HM.sel=null;hmRender();showScreen('homeScreen')}
+{const st=document.createElement('style');st.textContent=`
+#homeScreen{align-items:stretch;justify-content:stretch;padding:0;z-index:30;background:#2d1d0c;font-family:'Baloo 2',system-ui,sans-serif}
+#homeRoot{display:flex;flex-direction:column;width:100%;height:100%;padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);position:relative}
+.hm-hd{display:flex;align-items:center;gap:6px;padding:5px 8px;background:linear-gradient(#8a5a32,#6b4528);color:#fff;flex:none;overflow-x:auto;scrollbar-width:none}
+.hm-hd::-webkit-scrollbar{display:none}
+.hm-t{font-size:15px;white-space:nowrap;text-shadow:0 1px 0 rgba(0,0,0,.4)}
+.hm-nav{display:flex;gap:4px;margin-left:4px}
+.hm-b,.hm-nv{border:0;border-radius:12px;background:#fff7e6;color:#6b4528;font:800 15px 'Baloo 2',system-ui,sans-serif;padding:3px 9px;cursor:pointer;white-space:nowrap;line-height:1.25;flex:none;box-shadow:0 2px 0 #3a2410}
+.hm-b small,.hm-nv small{font-size:11px;font-weight:800}
+.hm-nv{background:rgba(255,255,255,.18);color:#fff;box-shadow:none;padding:3px 8px}
+.hm-nv.on,.hm-b.on{background:#ffd24d;color:#5a3300}
+.hm-f{margin-left:auto;background:rgba(0,0,0,.28);border-radius:12px;padding:2px 10px;font-weight:800;font-size:14px;white-space:nowrap}
+.hm-body{flex:1;min-height:0;display:flex}
+.hm-view{flex:1;min-width:0;position:relative;background:#2d1d0c}
+.hm-view>svg{width:100%;height:100%;display:block;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.hm-hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:rgba(255,247,230,.92);color:#6b4528;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:800;pointer-events:none;white-space:nowrap}
+.hm-panel{width:min(290px,42vw);flex:none;background:#fff7e6;border-left:4px solid #6b4528;overflow-y:auto;padding:6px 8px 10px;color:#4a2f12;-webkit-overflow-scrolling:touch}
+.hm-ph{display:flex;align-items:center;justify-content:space-between;font-size:15px;position:sticky;top:-6px;background:#fff7e6;padding:2px 0 4px;z-index:2}
+.hm-x{border:0;border-radius:50%;width:28px;height:28px;background:#6b4528;color:#fff;font-weight:900;cursor:pointer}
+.hm-cats{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.hm-cat{border:2px solid #d9bf90;border-radius:10px;background:#fff;color:#6b4528;font:800 14px 'Baloo 2',system-ui,sans-serif;padding:1px 6px;cursor:pointer;line-height:1.1}
+.hm-cat small{display:block;font-size:9px}
+.hm-cat.on{background:#ffd24d;border-color:#c9962b}
+.hm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.hm-c{background:#fff;border:2px solid #e3cfa6;border-radius:12px;padding:4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;cursor:default}
+.hm-c[data-hput]{cursor:pointer}.hm-c[data-hput]:active{background:#fff2c4}
+.hm-c.wide{grid-column:1/-1}
+.hm-ca{height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hm-cn{font-weight:800;line-height:1.1}
+.hm-c i{font-style:normal;color:#5a8a3a;font-weight:800}
+.hm-buy,.hm-go,.hm-rem{border:0;border-radius:10px;background:#e8a317;color:#fff;font:800 12px 'Baloo 2',system-ui,sans-serif;padding:3px 8px;cursor:pointer;box-shadow:0 2px 0 #9a6a00}
+.hm-buy:active,.hm-go:active{transform:translateY(1px)}
+.hm-go{display:block;margin:8px auto 0;font-size:13px}
+.hm-rem{background:#c95a4a;box-shadow:0 2px 0 #7a2a20}
+.hm-sub{font-weight:800;font-size:12px;margin:8px 0 3px;color:#8a5a32}
+.hm-cur{display:flex;align-items:center;justify-content:space-between;gap:6px;background:#fff2c4;border-radius:10px;padding:4px 8px;font-weight:800;font-size:13px}
+.hm-ph2{display:flex;flex-wrap:wrap;gap:4px}
+.hm-ph2 img{width:54px;height:42px;object-fit:cover;border-radius:6px;border:3px solid #fff;box-shadow:0 0 0 1px #c9a76a;cursor:pointer}
+.hm-ph2 img.on{border-color:#ffd24d}
+.hm-empty{grid-column:1/-1;text-align:center;color:#8a6a4a;font-size:12px;padding:6px}
+.hm-chk{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:800;margin:2px 0}
+.hm-sw{display:flex;flex-wrap:wrap;gap:5px}
+.hm-s{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px #6b4528;cursor:pointer;padding:0;position:relative;font-size:13px;line-height:1}
+.hm-s.on{box-shadow:0 0 0 3px #ffb300}
+.hm-s.lk{opacity:.55}
+.hm-s.pp{width:42px;height:42px;border-radius:8px;border:0;background:none;box-shadow:none}
+.hm-s.pp svg{display:block}.hm-s.pp.on svg{outline:3px solid #ffb300;border-radius:8px}
+.hm-s.pp b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+.hm-ed{fill:none;stroke:#fff;stroke-width:2.5;stroke-dasharray:6 5;opacity:.75}
+.hm-em{fill:rgba(255,255,255,.14);stroke:#fff;stroke-width:3;stroke-dasharray:8 6}
+.hm-lk{fill:rgba(0,0,0,.3);stroke:#ddd;stroke-width:2;stroke-dasharray:4 6}
+.hm-ed.on,.hm-em.on{stroke:#ffd24d;stroke-width:5;stroke-dasharray:none;opacity:1}
+.hm-it,[data-hchar],[data-hgo],[data-hlock],[data-hwall]{cursor:pointer}
+.hm-roller circle{filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.hm-roam{animation:hmwalk 18s ease-in-out infinite}
+.hm-bob{animation:hmbob 2.4s ease-in-out infinite}
+.hm-flip{animation:hmflip 18s steps(1,end) infinite}
+@keyframes hmwalk{0%{transform:translateX(0)}50%{transform:translateX(420px)}100%{transform:translateX(0)}}
+@keyframes hmflip{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+@keyframes hmbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.hm-sway{animation:hmsway 3s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}
+@keyframes hmsway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.hm-spin{animation:hmspin 5s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes hmspin{to{transform:rotate(360deg)}}
+#hmPhoto{position:absolute;inset:0;background:rgba(0,0,0,.82);z-index:5;display:flex;align-items:center;justify-content:center;padding:14px}
+#hmPhoto[hidden]{display:none}
+#hmPhoto img{max-width:100%;max-height:100%;border:8px solid #fff;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+@media(max-height:380px){.hm-hd{padding:3px 6px}.hm-b,.hm-nv{font-size:13px;padding:2px 7px}}
+`;document.head.appendChild(st);
+const hs=document.createElement('div');hs.id='homeScreen';hs.className='screen';hs.innerHTML='<div id="homeRoot"></div>';const hub=document.getElementById('hub');hub.parentNode.insertBefore(hs,hub.nextSibling);
+hs.addEventListener('click',hmClick);
+document.getElementById('hubTabs').addEventListener('click',e=>{if(e.target.closest('[data-tab="home"]')){e.stopPropagation();try{unlockAudio();sfx(520,.06,'triangle',.08)}catch(x){}hmOpen()}},true)}
 refreshNest();placeFlying(HOME.x,HOME.y+40,HOME.z,0);menuGoose();
 scene.traverse(o=>{if(o.isInstancedMesh)o.frustumCulled=false});
 updateMuteBtns();applyCtrl('');applyGfx();
