@@ -492,7 +492,7 @@ const RIDERS=[
 ];
 const MISSIONS=[
  {id:'chase',icon:'🦅',name:'Amansız Takip',desc:'Kartal yumurtanı kaptı! Tünellerden, köprü altından, ormandan ve kaya sütunlarının arasından peşine düş. Her 100 metrede bir havada asılı kalan altın tüyleri (+2 enerji) topla; balon slalomunda, sıcak hava akımlarında ve rüzgâr halkalarında hızlan, mıknatısla tüyleri çek. 200 m geride kalma! Başta otopilot seni kartala doğru götürür. Kartalın yeşil izinin 21 m çevresindeki koridorda kal: dışına çıkarsan (kestirme yapınca) enerjin her saniye 3 azalır.'},
- {id:'war',icon:'🏹',name:'Kaz Savaşları',desc:'40 kaz, herkes düşman! Havalan, yerdeki Tüylü, Altın Tüylü ve Alevli okları topla (çantaya en fazla 100 ok), diğer kazları vur ve yol. Başlangıçta 12 Tüylü Okun var; oklar 20-40 hasar verir ve çok hızlıdır. Kalpler enerjini yükseltir. Her 2 dakikada güvenli alan daralır: dışarıda kalırsan enerjin erir. Alt çubuktan Hız ayarla, Roket tuşuyla hızlan, Asılı Kal ile havada sabit dur. Kırmızı halka nişangahın: rakip halkadaysa atışın isabet eder, ama hasar için okun kazın GÖVDESİNE çarpması gerekir (kanat ve binici hasar vermez). 2 kişilik (internetle) de oynanabilir. Vurduğun kazın okları sana geçer. Son kaz sen kal!'},
+ {id:'war',icon:'🏹',name:'Kaz Savaşları',desc:'40 kaz, herkes düşman! Havalan, yerdeki Tüylü, Altın Tüylü ve Alevli okları topla (çantaya en fazla 100 ok), diğer kazları vur ve yol. Başlangıçta 12 Tüylü Okun var; oklar 20-40 hasar verir ve çok hızlıdır; ama hasar mesafeyle azalır: Tüylü ok 20 metreye kadar tam hasar verir, 100 metrede sıfırlanır; Altın Tüylü 30 / 150 metre, Alevli 40 / 200 metre. Ardışık atışlar arasında 1,5 saniye beklenir. Kalpler enerjini yükseltir. Her 2 dakikada güvenli alan daralır: dışarıda kalırsan enerjin erir. Alt çubuktan Hız ayarla, Roket tuşuyla hızlan, Asılı Kal ile havada sabit dur. Kırmızı halka nişangahın: rakip halkadaysa atışın isabet eder, ama hasar için okun kazın GÖVDESİNE çarpması gerekir (kanat ve binici hasar vermez). 2 kişilik (internetle) de oynanabilir. Vurduğun kazın okları sana geçer. Son kaz sen kal!'},
  {id:'ta',icon:'⏱️',name:'Zamana Karşı',desc:'Haritaya dağılmış parlayan balonları süre bitmeden patlat. Her tur zorlaşır.'},
  {id:'lights',icon:'🏮',name:'Işık Festivali',desc:'Gökyüzünde sırayla beliren fener halkalarının içinden geç. Arka arkaya geçersen seri çarpanı büyür; altın fenerde havai fişek patlar!'},
  {id:'gr',icon:'🏃',name:'Kaz Koşusu',desc:'Uçmadan, yerde koşarak 9 kazla yarış! Önce maden tüneli, sonra otomatik hızlanan buz kaydırağı; ardından çitli parkurda zıpla, kay, çamur, kütük, kaya, dere ve tren. İlk üçe giren kupa kaldırır.'},
@@ -5486,7 +5486,7 @@ function setupChase(){
 function setupWar(){
   const N=40,MAXBAG=100,STACK=12,SPD=100,LIFE=3.2,HITR=3.1,BASE=26+player.g.speed*5,HUD=document.getElementById('hud');
   const NET=(MP.act&&MP.conn&&MP.conn.open)?(MP.host?'h':'g'):'',GST=NET==='g',HST=NET==='h';
-  const AM=[{n:'Tüylü Ok',ic:'🪶',col:0xf2efe4,css:'#f2efe4',lo:20,hi:27,gl:2.4},{n:'Altın Tüylü Ok',ic:'🌟',col:0xffc62e,css:'#ffc62e',lo:27,hi:34,gl:3.4},{n:'Alevli Ok',ic:'🔥',col:0xff5a14,css:'#ff5a14',lo:34,hi:40,gl:5}];
+  const AM=[{n:'Tüylü Ok',ic:'🪶',col:0xf2efe4,css:'#f2efe4',lo:20,hi:27,gl:2.4,fr:20,mr:100},{n:'Altın Tüylü Ok',ic:'🌟',col:0xffc62e,css:'#ffc62e',lo:27,hi:34,gl:3.4,fr:30,mr:150},{n:'Alevli Ok',ic:'🔥',col:0xff5a14,css:'#ff5a14',lo:34,hi:40,gl:5,fr:40,mr:200}];
   const Rn=Math.random,rr=(a,b)=>a+(b-a)*Rn(),gs=()=>(Rn()+Rn()+Rn()-1.5)*2,cl=(v,a,b)=>Math.max(a,Math.min(b,v));
   const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
   const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -5496,6 +5496,7 @@ function setupWar(){
 #hud.war #warUI{display:block}
 #hud.war .kb:not(#rocketBtn),#hud.war #spBtn{display:none!important}
 #warFire{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--vh)*var(--r,11.5));bottom:calc(var(--vh)*var(--b,52.5));margin:0 calc(var(--vh)*var(--d,17)*-.5) calc(var(--vh)*var(--d,17)*-.5) 0;width:calc(var(--vh)*var(--d,17));height:calc(var(--vh)*var(--d,17));border-radius:50%;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord);background:radial-gradient(circle at 35% 30%,#ff9d8a,#e2456b);font-size:calc(var(--vh)*var(--d,17)*.38);line-height:1;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .06s;-webkit-user-select:none;user-select:none}
+#warFire.cd{filter:grayscale(.55) brightness(.85)}
 #warFire.down{transform:translateY(5px);box-shadow:0 0 0 var(--fjord);filter:brightness(1.1)}
 #warBar{position:absolute;inset:0;pointer-events:none}
 #warBar .wb{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--vh)*var(--r,40));bottom:calc(var(--vh)*var(--b,7));margin:0 calc(var(--vh)*var(--d,11)*-.5) calc(var(--vh)*var(--d,11)*-.5) 0;width:calc(var(--vh)*var(--d,11));height:calc(var(--vh)*var(--d,11));border-radius:14px;border:3px solid var(--fjord);background:#fff;color:#1f3348;font-weight:800;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:calc(var(--vh)*var(--d,11)*.36);padding:0;box-shadow:0 3px 0 var(--fjord)}
@@ -5590,7 +5591,7 @@ function setupWar(){
   const tmpA=new V3(),tmpB=new V3(),tmpC=new V3();
   function shoot(o,dir,ty,hom,fd){
     let a=null;for(const q of ARR)if(!q.on){a=q;break}if(!a)return false;
-    a.on=true;a.life=LIFE;a.own=o;a.ty=ty;a.hom=hom||null;a.dmg=fd||Math.round(rr(AM[ty].lo,AM[ty].hi));
+    a.on=true;a.life=LIFE;a.dist=0;a.own=o;a.ty=ty;a.hom=hom||null;a.dmg=fd||Math.round(rr(AM[ty].lo,AM[ty].hi));
     a.pos.set(o.pos.x,o.pos.y+1.7,o.pos.z).addScaledVector(dir,3);a.vel.copy(dir).multiplyScalar(SPD);
     armA(a,ty);
     a.g.position.copy(a.pos);a.g.lookAt(a.pos.x+a.vel.x,a.pos.y+a.vel.y,a.pos.z+a.vel.z);a.g.visible=true;return true}
@@ -5665,7 +5666,7 @@ function setupWar(){
   const NY=.24,RING=.13,tmpD=new V3(),tmpE=new V3(),tmpF=new V3();
   function aimRay(o){camera.updateMatrixWorld();tmpF.set(0,NY,.5).unproject(camera);return o.set(tmpF.x-camera.position.x,tmpF.y-camera.position.y,tmpF.z-camera.position.z).normalize()}
   function ringTarget(){camera.updateMatrixWorld();const th=Math.tan(camera.fov*Math.PI/360)||.6;let best=null,bs=1e9;
-    for(const o of tgs()){if(o.isMe||!o.alive||(o.isRem&&!o.seen))continue;const pd=Math.hypot(o.pos.x-player.pos.x,o.pos.y-player.pos.y,o.pos.z-player.pos.z);if(pd>285||pd<4)continue;
+    for(const o of tgs()){if(o.isMe||!o.alive||(o.isRem&&!o.seen))continue;const pd=Math.hypot(o.pos.x-player.pos.x,o.pos.y-player.pos.y,o.pos.z-player.pos.z);if(pd>AM[sel].mr||pd<4)continue;
       tmpD.set(o.pos.x,o.pos.y+.3,o.pos.z).project(camera);if(!(tmpD.z>-1&&tmpD.z<1))continue;
       const cd=Math.hypot(o.pos.x-camera.position.x,o.pos.y-camera.position.y,o.pos.z-camera.position.z)||1,d=Math.hypot(tmpD.x*camera.aspect,tmpD.y-NY),R=RING+(3.2/cd)/th;
       if(d<R&&d<bs){bs=d;best={o,d:pd}}}
@@ -5676,8 +5677,8 @@ function setupWar(){
     const tg=ringTarget(),org=tmpD.set(player.pos.x,player.pos.y+1.7,player.pos.z);let dir;
     if(tg){dir=new V3(tg.o.pos.x-org.x,tg.o.pos.y-org.y,tg.o.pos.z-org.z).normalize()}
     else{aimRay(tmpE);dir=new V3(camera.position.x+tmpE.x*230-org.x,camera.position.y+tmpE.y*230-org.y,camera.position.z+tmpE.z*230-org.z).normalize()}
-    if(GST){mpSend({t:'wf',d:[+dir.x.toFixed(4),+dir.y.toFixed(4),+dir.z.toFixed(4)],ty:sel,h:tg?(E.indexOf(tg.o)>=0?gmap(E.indexOf(tg.o)):1000+SKS.indexOf(tg.o)):-1});me.ammo[sel]--;fireCd=.42;sfx(520,.07,'sawtooth',.07);sfx(980,.05,'square',.05);return}
-    if(shoot(me,dir,sel,tg?tg.o:null)){me.ammo[sel]--;fireCd=.42;sfx(520,.07,'sawtooth',.07);sfx(980,.05,'square',.05)}}
+    if(GST){mpSend({t:'wf',d:[+dir.x.toFixed(4),+dir.y.toFixed(4),+dir.z.toFixed(4)],ty:sel,h:tg?(E.indexOf(tg.o)>=0?gmap(E.indexOf(tg.o)):1000+SKS.indexOf(tg.o)):-1});me.ammo[sel]--;fireCd=1.5;sfx(520,.07,'sawtooth',.07);sfx(980,.05,'square',.05);return}
+    if(shoot(me,dir,sel,tg?tg.o:null)){me.ammo[sel]--;fireCd=1.5;sfx(520,.07,'sawtooth',.07);sfx(980,.05,'square',.05)}}
   /* ---------- çanta ---------- */
   function renderBag(){const b=$w('#warBag');b.innerHTML=`<h4>🎒 Savaş çantası · ${total(me)}/${MAXBAG}</h4>`+AM.map((a,i)=>`<div class="br"><b>${a.ic} ${a.n}: ${me.ammo[i]}</b><button data-m="${i}">−</button><span class="qn">${Math.min(bagQ[i],me.ammo[i])}</span><button data-p="${i}">+</button><button class="dr" data-d="${i}">Bırak</button></div>`).join('')+`<div style="text-align:center;margin-top:6px"><button data-x="1">Kapat</button></div>`}
   function dropMine(i){const q=Math.min(bagQ[i],me.ammo[i]);if(q<=0)return;me.ammo[i]-=q;addStack(i,q,player.pos.x,player.pos.y-3,player.pos.z,true);toast(`${AM[i].ic} ${q} ok bıraktın`,1);renderBag();hudT=0}
@@ -5750,9 +5751,9 @@ function setupWar(){
     const sg=(.03-.027*b.skill)*(Rn()<.12?2:1);
     const ux=-tmpB.z,uz=tmpB.x,ul=Math.hypot(ux,uz)||1;
     tmpB.x+=ux/ul*gs()*sg;tmpB.z+=uz/ul*gs()*sg;tmpB.y+=gs()*sg;tmpB.normalize();
-    let ty=-1;const have=[0,1,2].filter(i=>b.ammo[i]>0);if(!have.length)return;
+    let ty=-1;const have=[0,1,2].filter(i=>b.ammo[i]>0&&AM[i].mr*.95>=d);if(!have.length)return;
     ty=Rn()<.3+b.skill*.6?have[have.length-1]:have[(Rn()*have.length)|0];
-    if(shoot(b,tmpB.clone(),ty)){b.ammo[ty]--;b.fireCd=rr(.8,1.3)+(1-b.skill)*rr(1.4,3)}else b.fireCd=.3}
+    if(shoot(b,tmpB.clone(),ty)){b.ammo[ty]--;b.fireCd=rr(1.5,2)+(1-b.skill)*rr(1,2.5)}else b.fireCd=.3}
   function moveBot(b,dt){
     b.t+=dt;b.thinkT-=dt;b.fireCd-=dt;if(b.inv>0)b.inv-=dt;
     if(b.thinkT<=0)think(b);
@@ -5851,7 +5852,7 @@ function setupWar(){
     case'wf':{if(!HST||!rem.alive||!go||fin||rem.fireCd>0)break;const ty=d.ty|0;if(!(ty>=0&&ty<3)||rem.ammo[ty]<=0||!Array.isArray(d.d))break;
       const dir=new V3(+d.d[0]||0,+d.d[1]||0,+d.d[2]||0);if(dir.lengthSq()<.01)break;dir.normalize();
       const ho=d.h>=1000?SKS[d.h-1000]:(d.h>=0&&d.h<N?E[d.h|0]:null);
-      if(shoot(rem,dir,ty,ho&&ho.alive&&ho!==rem?ho:null)){rem.ammo[ty]--;rem.fireCd=.3}break}
+      if(shoot(rem,dir,ty,ho&&ho.alive&&ho!==rem?ho:null)){rem.ammo[ty]--;rem.fireCd=1.3}break}
     case'wl':{if(HST&&rem.alive&&!fin)kill(rem,null,'oyundan ayrıldı');break}
     case'wi':{if(!GST)break;if(Array.isArray(d.n))for(let h=1;h<N-1;h++){const o=E[h];if(typeof d.n[h]==='string')o.name=d.n[h].slice(0,16);if(!o.g&&!o.meshed){o.meshed=true;mkMesh(o)}}
       if(Array.isArray(d.hr)&&!HRT.length)for(const q of d.hr)mkHrt(q[0],q[1],q[2]);break}
@@ -5877,6 +5878,8 @@ function setupWar(){
     }}catch(e){console.error('warnet',e)}}
   function peerLeft(){if(fin)return;if(GST){if(!over)end('host',null)}else if(HST&&rem&&rem.alive)kill(rem,null,'oyundan ayrıldı')}
   const tgs=()=>SKS.length?E.concat(SKS):E;
+  /* mesafeye göre hasar: fr metreye kadar tam, mr metrede sıfır */
+  const dmgAt=a=>{if(a.own&&a.own.stork)return a.dmg;const t=AM[a.ty];return a.dist<=t.fr?a.dmg:Math.round(a.dmg*Math.max(0,1-(a.dist-t.fr)/(t.mr-t.fr)))};
   /* ---------- enerji şeridi ---------- */
   function mkBar(){const c=document.createElement('canvas');c.width=64;c.height=10;const x=c.getContext('2d'),tex=new THREE.CanvasTexture(c),s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,fog:false}));s.scale.set(3.2,.5,1);s.position.set(0,-2.1,0);return{s,x,tex,v:-1}}
   function barDraw(b,hp){const v=Math.max(0,Math.min(20,Math.round(hp/5)));if(v===b.v)return;b.v=v;const x=b.x;x.clearRect(0,0,64,10);x.fillStyle='rgba(10,20,30,.8)';x.fillRect(0,0,64,10);x.fillStyle=hp>60?'#4cd964':hp>30?'#ffcc33':'#ff453a';x.fillRect(2,2,60*v/20,6);b.tex.needsUpdate=true}
@@ -5956,7 +5959,7 @@ function setupWar(){
     if(hold&&state.mode==='fly'&&!over){player.pos.copy(holdPos);player.speed=0}
     if(!go){const n=Math.ceil(3.2-T);if(n!==cdN&&n>=1&&n<=3){cdN=n;toast(String(n),.9)}if(T>=3.2){go=true;toast('Savaş başladı! 🏹',1.6);fanfare()}}
     me.vel.set((player.pos.x-lastP.x)/dt,(player.pos.y-lastP.y)/dt,(player.pos.z-lastP.z)/dt);if(me.vel.length()>90)me.vel.set(0,0,0);lastP.copy(player.pos);
-    if(me.inv>0)me.inv-=dt;hitMsgT-=dt;fireCd-=dt;
+    if(me.inv>0)me.inv-=dt;hitMsgT-=dt;fireCd-=dt;fb.classList.toggle('cd',fireCd>0&&go&&me.alive);
     const hum=rem?[me,rem]:[me];
     if(rem){remStep(dt);if(rem.fireCd>0)rem.fireCd-=dt}
     /* alan */
@@ -5992,9 +5995,9 @@ function setupWar(){
     if(GST)gArrows(dt);
     else for(const a of ARR){if(!a.on)continue;
       if(a.hom&&a.hom.alive){tmpB.set(a.hom.pos.x-a.pos.x,a.hom.pos.y-a.pos.y,a.hom.pos.z-a.pos.z);const hl=tmpB.length()||1;a.vel.copy(tmpB).multiplyScalar(SPD/hl);a.g.lookAt(a.pos.x+a.vel.x,a.pos.y+a.vel.y,a.pos.z+a.vel.z)}
-      tmpA.copy(a.pos);a.pos.addScaledVector(a.vel,dt);a.life-=dt;
-      let done=a.life<=0;
-      if(!done){for(const o of E){if(!o.alive||o===a.own||o.inv>0||(o.isRem&&!o.seen))continue;if(hitEll(tmpA,a.vel,dt,o)){damage(o,a.dmg,a.own,a.ty);done=true;break}}}
+      tmpA.copy(a.pos);a.pos.addScaledVector(a.vel,dt);a.life-=dt;a.dist+=a.vel.length()*dt;
+      let done=a.life<=0||a.dist>=AM[a.ty].mr;
+      if(!done){for(const o of E){if(!o.alive||o===a.own||o.inv>0||(o.isRem&&!o.seen))continue;if(hitEll(tmpA,a.vel,dt,o)){const dd=dmgAt(a);if(dd>0)damage(o,dd,a.own,a.ty);done=true;break}}}
       if(!done&&!a.own.stork&&SKS.length){for(const s of SKS){if(!s.alive)continue;if(hitEll(tmpA,a.vel,dt,s)){hurtStork(s,a.dmg,a.own);done=true;break}}}
       if(!done&&!a.hom&&a.pos.y<solidTop(a.pos.x,a.pos.z,a.pos.y+4,true)+.2){burst(a.pos.clone(),dustMat,3,.4);done=true}
       if(done){a.on=false;a.g.visible=false;if(fin)return;continue}
