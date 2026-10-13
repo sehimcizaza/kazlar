@@ -1,13 +1,28 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <style id="klOpaCss">[data-klo]{opacity:var(--ko)}#hud.fsw [data-klo].kb.off{opacity:calc(var(--ko)*.5)}#rocketBtn[data-klo].empty{opacity:calc(var(--ko)*.55)}#warBar [data-klo].wb.zero{opacity:calc(var(--ko)*.5)}#spBtn{opacity:var(--cdo,1)}#spBtn[data-klo]{opacity:calc(var(--ko)*var(--cdo,1))}</style>
-<style id="klpCss">#hud.grb #actWrap{left:0;top:0;right:0;bottom:0;display:block;pointer-events:none}#hud.grb #actBtn,#hud.grb #spBtn,#hud.grb #stam{position:absolute;right:calc(var(--vh)*var(--r));bottom:calc(var(--vh)*var(--b));margin:0 calc(var(--vh)*var(--d)*-.5) calc(var(--vh)*var(--d)*-.5) 0}#hud.grb #actBtn,#hud.grb #spBtn{width:calc(var(--vh)*var(--d));height:calc(var(--vh)*var(--d));padding:0;font-size:calc(var(--vh)*var(--d)*.16);pointer-events:auto;z-index:3}#hud.grb #stam{width:calc(var(--vh)*var(--d));margin-bottom:0}
-.klp{position:fixed!important;left:auto!important;top:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;margin:0!important;max-width:none!important;transform:translate(50%,50%) scale(var(--sc,1))!important;z-index:4}</style></head><body>
+<style id="klpCss">#hud.grb #actWrap{left:0;top:0;right:0;bottom:0;display:block;pointer-events:none}#hud.grb #actBtn,#hud.grb #spBtn,#hud.grb #stam{position:absolute;right:calc(var(--u)*var(--r));bottom:calc(var(--u)*var(--b));margin:0 calc(var(--u)*var(--d)*-.5) calc(var(--u)*var(--d)*-.5) 0}#hud.grb #actBtn,#hud.grb #spBtn{width:calc(var(--u)*var(--d));height:calc(var(--u)*var(--d));padding:0;font-size:calc(var(--u)*var(--d)*.16);pointer-events:auto;z-index:3}#hud.grb #stam{width:calc(var(--u)*var(--d));margin-bottom:0}
+.klp{position:fixed!important;left:auto!important;top:auto!important;right:calc(var(--u)*var(--r))!important;bottom:calc(var(--u)*var(--b))!important;margin:0!important;max-width:none!important;transform:translate(50%,50%) scale(var(--sc,1))!important;z-index:4}</style><style id="klNew">:root,#app{--u:min(var(--vh),calc(var(--vw)*.5556))}
+#topleft{position:absolute!important;left:calc(var(--u)*2 + env(safe-area-inset-left,0px))!important;top:calc(var(--u)*2 + env(safe-area-inset-top,0px))!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;gap:calc(var(--u)*1.5)!important;max-width:calc(var(--u)*62)!important;z-index:3}
+#topleft>*:not(.klp){position:static!important;transform:none!important;margin:0!important;left:auto!important;top:auto!important;max-width:100%!important;box-sizing:border-box!important;font-size:calc(var(--u)*3.1)!important;line-height:1.2!important;padding:calc(var(--u)*.9) calc(var(--u)*2.6)!important;white-space:normal;overflow:hidden;text-overflow:ellipsis}
+#topleft>#objective:not(.klp){white-space:nowrap}
+#topright{position:absolute!important;right:calc(var(--u)*2 + env(safe-area-inset-right,0px))!important;top:calc(var(--u)*2 + env(safe-area-inset-top,0px))!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:flex-end!important;align-items:center!important;align-content:flex-start!important;gap:calc(var(--u)*1.5)!important;max-width:calc(var(--u)*62)!important;z-index:3}
+#trRow{display:flex!important;flex:0 0 100%!important;width:auto!important;flex-wrap:nowrap!important;justify-content:flex-end!important;align-items:center!important;gap:calc(var(--u)*1.5)!important}
+#topright button:not(.klp){width:calc(var(--u)*9)!important;height:calc(var(--u)*9)!important;min-width:0!important;padding:0!important;margin:0!important;font-size:calc(var(--u)*4)!important;line-height:1!important;flex:none}
+#topright #camViewBtn:not(.klp){width:auto!important;padding:0 calc(var(--u)*2.6)!important;font-size:calc(var(--u)*3.2)!important;white-space:nowrap}
+#topright #timer:not(.klp){min-width:calc(var(--u)*12)!important;height:calc(var(--u)*9)!important;line-height:calc(var(--u)*8)!important;padding:0 calc(var(--u)*2)!important;margin:0!important;font-size:calc(var(--u)*3.6)!important;box-sizing:border-box!important}
+#compass{top:calc(var(--u)*2 + env(safe-area-inset-top,0px))!important;font-size:calc(var(--u)*3.2)!important}
+#advNote{top:calc(var(--u)*30)!important;width:max-content!important;max-width:calc(var(--u)*70)!important;white-space:normal!important;text-align:center;font-size:calc(var(--u)*3.2)!important}
+#toast,#hud.rc #toast,html.port #toast,html.land #toast{top:calc(var(--u)*44)!important;width:max-content!important;max-width:calc(var(--u)*80)!important;white-space:normal!important;line-height:1.1;font-size:calc(var(--u)*4.6)!important}
+#hud.rc #toast{font-size:calc(var(--u)*3.6)!important}#toast.big,#hud.rc #toast.big{font-size:calc(var(--u)*6)!important}
+#taBar{left:calc(var(--u)*2 + env(safe-area-inset-left,0px))!important;top:calc(var(--u)*31)!important;font-size:calc(var(--u)*3.3)!important}</style>
+<style id="profSubCss">.psub{display:flex;gap:8px;margin:2px 0 4px}.psub .chip2{flex:1;justify-content:center;text-align:center}.pjn{display:block}</style>
+</head><body>
 <!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Kazonya</title>
+<title>kazonya</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -34,6 +49,13 @@ h1{font-size:clamp(2.2rem,calc(var(--vw)*8),3.6rem);line-height:.95;margin:6px 0
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) h1{color:var(--sky)}}
 .lead{font-size:1.15rem;margin:0 0 16px;color:var(--soft)}
 .hint{font-size:.95rem;color:var(--soft);margin:12px 0 0}
+.kzLogo{display:flex;flex-direction:column;align-items:center;gap:4px}
+.kzEmb{width:clamp(88px,calc(var(--vh)*26),160px);height:auto;filter:drop-shadow(0 5px 0 rgba(31,78,121,.28));animation:bob 2.6s ease-in-out infinite}
+h1.kzWord{margin:0;font-size:clamp(2.4rem,calc(var(--vw)*9),3.9rem);line-height:1;font-weight:900;letter-spacing:.5px;text-transform:none;color:#fff;-webkit-text-stroke:7px var(--fjord);paint-order:stroke fill;text-shadow:0 4px 0 rgba(31,78,121,.35)}
+h1.kzWord i{font-style:normal;color:#ffb21f}
+html.land #title .kzEmb{width:calc(var(--vh)*24)}
+#hubHead .hlogo{display:inline-flex;align-items:center;gap:6px;text-transform:none}.kzEmbS{width:30px;height:30px;flex:none;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+@media (prefers-reduced-motion:reduce){.kzEmb{animation:none}}
 .flyer{font-size:4rem;display:inline-block;animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-10px) rotate(-6deg)}}
 @media (prefers-reduced-motion:reduce){.flyer{animation:none}}
@@ -345,8 +367,8 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
 #hud.fsw #flyX{display:block}
 #hud.fsw #actWrap,#hud.fsw #btnRow{display:contents}
 
-#hud.fsw .kb,#hud.fsw #actBtn,#hud.fsw #brakeBtn,#hud.fsw #spBtn{position:absolute;z-index:3;left:auto;top:auto;right:calc(var(--vh)*var(--r));bottom:calc(var(--vh)*var(--b));margin:0 calc(var(--vh)*var(--d)*-.5) calc(var(--vh)*var(--d)*-.5) 0;
-  --d:15;width:calc(var(--vh)*var(--d));height:calc(var(--vh)*var(--d));padding:0;border-radius:50%;font-size:calc(var(--vh)*2.6);line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:#1f3348;transition:transform .06s}
+#hud.fsw .kb,#hud.fsw #actBtn,#hud.fsw #brakeBtn,#hud.fsw #spBtn{position:absolute;z-index:3;left:auto;top:auto;right:calc(var(--u)*var(--r));bottom:calc(var(--u)*var(--b));margin:0 calc(var(--u)*var(--d)*-.5) calc(var(--u)*var(--d)*-.5) 0;
+  --d:15;width:calc(var(--u)*var(--d));height:calc(var(--u)*var(--d));padding:0;border-radius:50%;font-size:calc(var(--u)*2.6);line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:#1f3348;transition:transform .06s}
 #hud.fsw .kb{pointer-events:auto;touch-action:none;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);background:#fff}
 #hud.fsw .kb.down,#hud.fsw #actBtn:active,#hud.fsw #brakeBtn:active{transform:translateY(4px);box-shadow:0 0 0 var(--fjord)}
 #hud.fsw .kb svg{width:72%;height:72%;display:block;pointer-events:none}
@@ -356,11 +378,11 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
 #hud.fsw.flyk .kb.kfly{display:flex}
 #hud.fsw.kfree .kb.kfr.on{display:flex}
 /* 1) Turbo: başparmak dinlenme noktası, en büyük; çevresindeki yeşil halka = turbo dayanıklılığı */
-#hud.fsw #actBtn{--r:19.6;--b:22.1;--d:21;--st:1;font-size:calc(var(--vh)*3.3);border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord);
+#hud.fsw #actBtn{--r:19.6;--b:22.1;--d:21;--st:1;font-size:calc(var(--u)*3.3);border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord);
   background:radial-gradient(closest-side,#ffd36b 0 81%,transparent 83%),conic-gradient(#3ec46d calc(var(--st)*360deg),rgba(31,51,72,.28) 0)}
 #hud.fsw #stam{display:none!important}
 /* 2) iç yay */
-#hud.fsw #brakeBtn{--r:46.5;--b:13.2;--d:17.5;font-size:calc(var(--vh)*2.9);background:#ffe1e1;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord)}
+#hud.fsw #brakeBtn{--r:46.5;--b:13.2;--d:17.5;font-size:calc(var(--u)*2.9);background:#ffe1e1;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord)}
 #bankL{--r:40.1;--b:29.9;background:#d9f0ff!important}#bankR{--r:10.7;--b:49;background:#d9f0ff!important}
 /* 3) dış yay */
 #slalomBtn{--r:53;--b:47.6;--d:14!important;background:#ffe9a6!important}
@@ -370,7 +392,7 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
 #rocketBtn svg{width:62%!important;height:62%!important}#rocketBtn .rkf{opacity:.35}#rocketBtn.go .rkf{opacity:1}#rocketBtn.go svg{animation:rkS .1s infinite alternate}
 #rocketBtn.empty{filter:grayscale(.85);opacity:.55}#rocketBtn.full{box-shadow:0 4px 0 #0e1d38,0 0 calc(var(--vh)*2.4) #ffd21f!important}
 @keyframes rkS{from{transform:translate(-1px,0)}to{transform:translate(1px,-1px)}}
-#hud.fsw #spBtn{--r:28;--b:65.8;--d:14;font-size:calc(var(--vh)*2.2);background:#c9f5d6;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);display:none}
+#hud.fsw #spBtn{--r:28;--b:65.8;--d:14;font-size:calc(var(--u)*2.2);background:#c9f5d6;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);display:none}
 #hud.fsw #spBtn.on{display:flex}
 #hud.fsw #spBtn.mash{--d:18;background:var(--berry);color:#fff}
 #hud.fsw #spBtn.down{transform:translateY(4px);box-shadow:0 0 0 var(--fjord)}
@@ -547,13 +569,31 @@ html.port .dq3{margin-top:12px}html.port .dqc{min-height:64px}
  O.apply();try{O.lock()}catch(e){}})();
 </script>
 <div id="app">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="kzSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fbcff"/><stop offset="1" stop-color="#dff4ff"/></linearGradient>
+<clipPath id="kzClip"><circle cx="60" cy="60" r="55"/></clipPath>
+<symbol id="kzGoose" viewBox="0 0 120 120">
+<circle cx="60" cy="60" r="57" fill="url(#kzSky)"/>
+<g clip-path="url(#kzClip)"><circle cx="96" cy="26" r="9" fill="#ffe27a"/><ellipse cx="28" cy="30" rx="15" ry="6" fill="#fff"/><ellipse cx="40" cy="26" rx="10" ry="6.5" fill="#fff"/><path d="M0 96 Q30 80 60 92 T120 88 V120 H0Z" fill="#6cc24a"/><path d="M0 106 Q40 94 80 106 T120 104 V120 H0Z" fill="#4fa83a"/></g>
+<g stroke="#1f4e79" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M44 66 L20 56 L30 74Z" fill="#fff"/>
+<path d="M70 70 C88 66 88 54 84 46" fill="none" stroke-width="17"/>
+<ellipse cx="56" cy="76" rx="30" ry="19" fill="#fff"/>
+<path d="M70 70 C88 66 88 54 84 46" fill="none" stroke="#fff" stroke-width="10.5"/>
+<circle cx="86" cy="42" r="12" fill="#fff"/>
+<path d="M96 39 L113 46 L96 52Z" fill="#ffa31a"/>
+<path d="M34 76 Q48 56 74 74 Q56 92 34 76Z" fill="#cfe6ff"/>
+</g>
+<circle cx="88" cy="39" r="2.8" fill="#1f3348"/><circle cx="83" cy="47" r="3" fill="#ffb3c1" opacity=".8"/>
+<path d="M50 94 v9 M63 94 v9 M45 104 h10 M58 104 h10" stroke="#ff9d1a" stroke-width="4" stroke-linecap="round" fill="none"/>
+<circle cx="60" cy="60" r="55.5" fill="none" stroke="#1f4e79" stroke-width="5"/>
+</symbol></defs></svg>
 <canvas id="c"></canvas>
 <div id="loading">Gökyüzü hazırlanıyor…</div>
 
 <div id="title" class="screen">
   <div class="panel center">
-    <div class="flyer">🪿</div>
-    <h1>Kazonya</h1>
+    <div class="kzLogo"><svg class="kzEmb" viewBox="0 0 120 120" role="img" aria-label="kazonya logosu"><use href="#kzGoose"/></svg><h1 class="kzWord">kaz<i>o</i>nya</h1></div>
     <p class="lead">Bir kaza bin, ormanların, şelalelerin ve denizin üstünden uç.</p>
     <button class="big" id="playBtn">Giriş</button>
   </div>
@@ -562,14 +602,14 @@ html.port .dq3{margin-top:12px}html.port .dqc{min-height:64px}
 <div id="hub" class="screen hubScreen">
   <div id="hubSheet" role="region" aria-label="Ana menü">
     <div id="hubHead">
-      <b class="hlogo">🪿 Kazonya</b>
+      <b class="hlogo"><svg class="kzEmbS" viewBox="0 0 120 120" aria-hidden="true"><use href="#kzGoose"/></svg><span>kazonya</span></b>
       <div id="hubTabs" role="tablist">
         <button class="tab" data-tab="missions" role="tab" title="Oyun Seç" aria-label="Oyun Seç"><span class="ti">🎮</span><span class="tl">Oyun Seç</span></button>
         <button class="tab" data-tab="rider" role="tab" title="Karakter" aria-label="Karakter"><span class="ti">🧒</span><span class="tl">Karakter</span></button>
         <button class="tab" data-tab="goose" role="tab" title="Kaz" aria-label="Kaz"><span class="ti">🪿</span><span class="tl">Kaz</span></button>
         <button class="tab" data-tab="home" role="tab" title="Yuvam" aria-label="Yuvam"><span class="ti">🏡</span><span class="tl">Yuvam</span></button>
         <button class="tab" data-tab="nest" role="tab" title="Dolap" aria-label="Dolap"><span class="ti">👗</span><span class="tl">Dolap</span></button>
-        <button class="tab" data-tab="journal" role="tab" title="Defter" aria-label="Defter"><span class="ti">📖</span><span class="tl">Defter</span></button>
+        
         <button class="tab" data-tab="profile" role="tab" title="Profil" aria-label="Profil"><span class="ti">👤</span><span class="tl">Profil</span></button>
         <button class="tab" data-tab="settings" role="tab" title="Ayarlar" aria-label="Ayarlar"><span class="ti">⚙️</span><span class="tl">Ayarlar</span></button>
       </div>
@@ -650,11 +690,6 @@ const GN=GEESE.length;
 (function(){try{if(localStorage.getItem('kz-g12'))return;let o=JSON.parse(localStorage.getItem('kz-goose'));if(typeof o==='number'&&o>=6)localStorage.setItem('kz-goose',JSON.stringify(o+6));localStorage.setItem('kz-g12','1')}catch(e){}})();
 (function(){try{const m={kehribar:'mavis',pars:'pembis',gokkusagi:'minnos'};const bs=JSON.parse(localStorage.getItem('kz-gbase'));if(bs&&m[bs])localStorage.setItem('kz-gbase',JSON.stringify(m[bs]))}catch(e){}})();
 const RIDERS=[
- {id:'elif',name:'Elif',g:'f',desc:'Hareketli ve meraklı. Turkuaz mont, at kuyruğu ve spor ayakkabılar.',perk:'Keskin göz: yakındaki gizli tüyleri, hazine işaretlerini ve nesneleri daha kolay fark eder',shirt:0x1fb5b0,pants:0x35496b,hair:0x5e301b,skin:0xf3cfae,eye:0x4a2f1c,style:'pony',pack:0xf28a2e},
- {id:'mami',name:'Mami',g:'m',desc:'Yuvarlak yüzlü ve neşeli. Yeşil kapüşonlu, kırmızı ayakkabılı.',perk:'Hızlı: tilkiden kaçarken daha hızlı koşar',shirt:0x3fa65a,pants:0x8a7552,hair:0x7c552e,skin:0xf8d9bd,eye:0x3a2814,style:'short'},
- {id:'nisa',name:'Nisa',g:'f',desc:'Sakin ve dikkatli. Mor ceket, kıvırcık saçlar ve turkuaz ayakkabılar.',perk:'',shirt:0x8754d6,pants:0x2e3248,hair:0x2a1711,skin:0xdca67c,eye:0x2a1a10,style:'curly'},
- {id:'ali',name:'Ali',g:'m',desc:'Atletik ve enerjik. Mavi spor ceket, sarı spor ayakkabı ve kısa saç.',perk:'Seri adımlar: yerde yürürken ve koşarken biraz daha hızlı',shirt:0x2f6fd8,pants:0x3b3f4a,hair:0x17110e,skin:0xe6b58c,eye:0x6a4a28,style:'crop'},
- {id:'ela',name:'Ela',g:'f',desc:'Uzun boylu ve meraklı. Turuncu rüzgârlık ve dağınık kahverengi saçlar.',perk:'',shirt:0xf47a20,pants:0x2c3a58,hair:0xa8733f,skin:0xfbdfc9,eye:0x4f8a5a,style:'messy',pack:0x3f9a4f,freckles:true},
  {id:'maceraci',name:'Maceracı',g:'n',desc:'Küçük Maceracı: neşeli ve cesur. Turuncu kapüşonlu, bulut cepli tulum şortlu, yeşil spor ayakkabılı.',perk:'Maceraperest: turbo biraz daha uzun sürer, slalom ve dönüşler biraz daha hızlı',shirt:0xf37a2b,pants:0x2f80d8,hair:0x7c4129,skin:0xf7c1a3,eye:0x3a1f14,style:'bobwave',sleeve:0xf9b434,overall:true,shoe:0x4d9138},
  {id:'kazcobani',name:'Kaz Çobanı',g:'m',desc:'Grup lideri, kazların dostu. Turuncu bereli, yeşil ceketli, kargo pantolonlu ve botlu.',perk:'Çoban sabrı: turbo daha uzun sürer, slalom biraz daha hızlı',shirt:0x3f8f6c,pants:0xa45c38,hair:0x6a3b25,skin:0xf2b890,eye:0x4a2a18,style:'beanie',hat:0xe8731f},
  {id:'peri',name:'Peri Kız',g:'f',desc:'Pembe dalgalı saçlı, kanatlı küçük peri. Yaprak etekli, yeşil taytlı ve pembe botlu.',perk:'Peri hafifliği: dönüşler ve yatışlar daha çevik',shirt:0xb8a0e6,pants:0xaad48c,hair:0xf2a5c5,skin:0xf3be96,eye:0x4a2a18,style:'fairy',skirt:0xf7b79a},
@@ -665,6 +700,8 @@ const RIDERS=[
 (function(){try{if(localStorage.getItem('kz-r7'))return;const i=JSON.parse(localStorage.getItem('kz-rider2'));if(i===5)localStorage.setItem('kz-rider2','6');localStorage.setItem('kz-r7','1')}catch(e){}})();
 /* üç yeni karakter Ben'den önce eklendi: Ben'i seçmiş olanın seçimi bir kez yeni sıraya taşınır */
 (function(){try{if(localStorage.getItem('kz-r8'))return;const i=JSON.parse(localStorage.getItem('kz-rider2'));if(i===6)localStorage.setItem('kz-rider2','9');localStorage.setItem('kz-r8','1')}catch(e){}})();
+/* karakter listesi sadeleşti: kayıtlı seçim, eski sıradaki karakterin yeni sıradaki yerine taşınır (silinen karakter için ilk karakter) */
+(function(){try{if(localStorage.getItem('kz-r9'))return;const old=['elif','mami','nisa','ali','ela','maceraci','kazcobani','peri','macera2','hero'],i=JSON.parse(localStorage.getItem('kz-rider2'));if(i!=null&&old[i]){const n=RIDERS.findIndex(r=>r.id===old[i]);localStorage.setItem('kz-rider2',String(n>=0?n:0))}localStorage.setItem('kz-r9','1')}catch(e){}})();
 const MISSIONS=[
  {id:'chase',icon:'🦅',name:'Amansız Takip',desc:'Kartal yumurtanı kaptı! Tünellerden, köprü altından, ormandan ve kaya sütunlarının arasından peşine düş. Her 100 metrede bir havada asılı kalan altın tüyleri (+2 enerji) topla; balon slalomunda, sıcak hava akımlarında ve rüzgâr halkalarında hızlan, mıknatısla tüyleri çek. 200 m geride kalma! Başta otopilot seni kartala doğru götürür. Kartalın yeşil izinin 21 m çevresindeki koridorda kal: dışına çıkarsan (kestirme yapınca) enerjin her saniye 3 azalır.'},
  {id:'war',icon:'🏹',name:'Kaz Savaşları',desc:'40 kaz, herkes düşman! Havalan, yerdeki Tüylü, Altın Tüylü ve Alevli okları topla (çantaya en fazla 100 ok), diğer kazları vur ve yol. Başlangıçta 12 Tüylü Okun var; oklar 20-40 hasar verir ve çok hızlıdır; ama hasar mesafeyle azalır: Tüylü ok 20 metreye kadar tam hasar verir, 100 metrede sıfırlanır; Altın Tüylü 30 / 150 metre, Alevli 40 / 200 metre. Ardışık atışlar arasında 1,5 saniye beklenir. Kalpler enerjini yükseltir. Her 2 dakikada güvenli alan daralır: dışarıda kalırsan enerjin erir. Alt çubuktan Hız ayarla, Roket tuşuyla hızlan, Asılı Kal ile havada sabit dur. Kırmızı halka nişangahın: rakip halkadaysa atışın isabet eder, ama hasar için okun kazın GÖVDESİNE çarpması gerekir (kanat ve binici hasar vermez). 2 kişilik (internetle) de oynanabilir. Vurduğun kazın okları sana geçer. Son kaz sen kal!'},
@@ -3082,7 +3119,7 @@ function stPoster(kind){const W=256,H=kind===2?256:352,cv=document.createElement
   if(kind===0){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#f6c36b');gr.addColorStop(.55,'#f08a5d');gr.addColorStop(1,'#6a4a7a');g.fillStyle=gr;g.fillRect(0,0,W,H);
     g.fillStyle='#fff3c8';g.beginPath();g.arc(170,120,34,0,6.3);g.fill();g.fillStyle='#4a3a6a';g.beginPath();g.moveTo(0,250);g.lineTo(60,170);g.lineTo(110,225);g.lineTo(170,150);g.lineTo(256,250);g.lineTo(256,352);g.lineTo(0,352);g.fill();
     g.fillStyle='#22202e';g.fillRect(20,262,150,26);g.fillRect(20,246,40,16);g.beginPath();g.arc(35,244,10,0,6.3);g.fill();for(let k=0;k<4;k++)g.fillRect(70+k*24,266,20,18);g.fillRect(0,290,256,6);
-    txt('TRENLE',128,42,46,'#3a1f12');txt('SEYAHAT ET',128,84,30,'#3a1f12');txt('Kazonya Hattı',128,326,19,'#fff3c8','700');frame()}
+    txt('TRENLE',128,42,46,'#3a1f12');txt('SEYAHAT ET',128,84,30,'#3a1f12');txt('kazonya Hattı',128,326,19,'#fff3c8','700');frame()}
   else if(kind===1){g.fillStyle='#f3ecd8';g.fillRect(0,0,W,H);g.fillStyle='#2d5a46';g.fillRect(0,0,W,46);txt('SEFER ÇİZELGESİ',128,24,24,'#f3ecd8');
     const rows=[['07:20','Göl Kasabası'],['09:05','Kaz Tepesi'],['10:40','Değirmen'],['12:15','Liman'],['14:30','Buz Dağı'],['16:10','Orman Yolu'],['18:00','Fener Burnu'],['19:45','Son Sefer']];
     rows.forEach((r,i)=>{const y=70+i*34;g.fillStyle=i%2?'#e4dcc4':'#f3ecd8';g.fillRect(8,y-15,W-16,32);g.fillStyle='#7a1f1f';g.font='800 21px "Baloo 2",sans-serif';g.textAlign='left';g.textBaseline='middle';g.fillText(r[0],16,y+1);g.fillStyle='#2b2b2b';g.font='700 19px "Baloo 2",sans-serif';g.fillText(r[1],84,y+1)});frame()}
@@ -3090,7 +3127,7 @@ function stPoster(kind){const W=256,H=kind===2?256:352,cv=document.createElement
     g.fillStyle='#9ac17a';g.beginPath();g.arc(70,200,38,0,6.3);g.fill();g.fillStyle='#b5a78a';g.beginPath();g.moveTo(170,256);g.lineTo(205,190);g.lineTo(240,256);g.fill();
     g.strokeStyle='#3a2a1a';g.lineWidth=3;g.setLineDash([8,5]);g.beginPath();g.ellipse(128,170,100,60,0,0,6.3);g.stroke();g.setLineDash([]);g.fillStyle='#c0392b';[[28,170],[128,110],[228,170],[128,230]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],7,0,6.3);g.fill()});txt('HARİTA',128,24,26,'#3a2a1a');frame()}
   else if(kind===3){g.fillStyle='#2f6fa5';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.beginPath();g.ellipse(128,200,60,38,-.2,0,6.3);g.fill();g.beginPath();g.moveTo(160,180);g.quadraticCurveTo(190,120,168,90);g.lineTo(184,86);g.quadraticCurveTo(210,130,184,184);g.fill();g.beginPath();g.arc(176,84,14,0,6.3);g.fill();g.fillStyle='#f2a33a';g.beginPath();g.moveTo(188,82);g.lineTo(214,88);g.lineTo(188,94);g.fill();
-    g.beginPath();g.moveTo(90,190);g.quadraticCurveTo(20,150,30,230);g.quadraticCurveTo(70,230,100,215);g.fill();txt('KAZONYA',128,62,46,'#fff3c8');txt('Kazınla birlikte uç!',128,310,22,'#fff','700');frame()}
+    g.beginPath();g.moveTo(90,190);g.quadraticCurveTo(20,150,30,230);g.quadraticCurveTo(70,230,100,215);g.fill();txt('kazonya',128,62,46,'#fff3c8');txt('Kazınla birlikte uç!',128,310,22,'#fff','700');frame()}
   else if(kind===4){g.fillStyle='#f2d25a';g.fillRect(0,0,W,H);g.fillStyle='#1d1d1d';for(let k=0;k<8;k++){g.save();g.translate(0,0);g.fillRect(0,k*44,W,12);g.restore()}g.fillStyle='#f2d25a';g.fillRect(20,70,216,210);txt('DİKKAT!',128,108,48,'#b3261e');txt('Trenden önce',128,170,26,'#1d1d1d');txt('rayları',128,204,26,'#1d1d1d');txt('GEÇME',128,248,40,'#b3261e');frame()}
   else{g.fillStyle='#f6f0dc';g.fillRect(0,0,W,H);g.fillStyle='#8cc3e8';g.fillRect(0,0,W,150);g.fillStyle='#7fb069';g.fillRect(0,150,W,70);g.fillStyle='#fff';g.beginPath();g.ellipse(110,150,56,30,0,0,6.3);g.fill();g.fillStyle='#222';g.beginPath();g.ellipse(95,142,16,12,0,0,6.3);g.fill();g.fillStyle='#fff';g.fillRect(80,170,10,32);g.fillRect(124,170,10,32);g.beginPath();g.arc(172,138,18,0,6.3);g.fill();
     txt('TAZE SÜT',128,252,44,'#2f6fa5');txt('Çiftlikten, her sabah',128,300,22,'#5a3a22','700');frame()}
@@ -5435,6 +5472,7 @@ function showScreen(id){
 function showHub(tab){
   if(paused)setPause(false);
   if(tab)hubTab=tab;
+  if(hubTab==='journal'){hubTab='profile';profSub='journal'}
   if(hubTab==='nest'&&nestSub==='decor'&&(CG.st==='sitting'||CG.st==='sitDown')){CG.st='standUp';CG.t=0}let rebuild=curScreen!=='hub';
   if(curScreen!=='hub'){setHubMin(false)}
   if(hubTab!=='nest'&&preview){preview=null;refreshNest();rebuild=true}
@@ -5667,7 +5705,10 @@ function pvLoop(t){PV.raf=0;if(!PV.on)return;
   else{const u=o.userData,cyc=T%7;if(PV.fx>0||cyc>5.6){u.unfold();u.tuck.visible=false;u.feet.visible=true;u.flap(T*10,.55)}else{u.fold();u.feet.visible=true;u.tuck.visible=false}
     o.rotation.x=Math.sin(T*1.3)*.02;o.rotation.z=Math.sin(T*.9)*.015}
   PV.r.render(PV.sc,PV.cam)}catch(e){if(!PV.err){PV.err=1;console.error('pvLoop',e)}}}
+let profSub='rec';
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-profsub]');if(!b)return;profSub=b.dataset.profsub==='journal'?'journal':'rec';renderHub(true)});
 function renderHub(keep){
+  if(hubTab==='journal'){hubTab='profile';profSub='journal'}
   syncShowcase();
   const body=$('#hubBody'),sub=$('#hubSub'),top=keep?body.scrollTop:0,rl0=body.querySelector('.roll'),rx=rl0?rl0.scrollLeft:0;
   $('#hubFeathers').textContent='🪶 '+feathers;{const e=$('#hubPts');if(e)e.textContent='⭐ '+PROF.total}
@@ -5822,7 +5863,8 @@ function profileHtml(){const r=RIDERS[sel.rider],nm=r.custom?heroName:r.name,lv=
   return `<div class="prof"><div class="phead"><span class="pav">🧒</span><div><b>${escapeHtml(nm)}</b><small>${lvTitle(lv.L)} · 🪿 ${GEESE[sel.goose].name}</small></div><span class="plv">Seviye ${lv.L}</span></div>
   <div class="pbar"><i style="width:${Math.round(lv.cur/lv.need*100)}%"></i></div><div class="pnote">Sonraki seviyeye ${lv.need-lv.cur} puan kaldı</div>${r.custom?heroLevelHtml():''}
   <div class="pstats"><div><b>⭐ ${PROF.total}</b><span>Toplam puan</span></div><div><b>🪶 ${feathers}</b><span>Altın tüy</span></div><div><b>🎮 ${PROF.games}</b><span>Oynanan oyun</span></div><div><b>★ ${stars}</b><span>Toplanan yıldız</span></div></div>
-  <div class="sgroup"><h3>🏆 Mod rekorları</h3><p class="hint2">Her oyunda kazandığın puan toplam puanına eklenir. Görevi daha hızlı bitirirsen daha çok puan alırsın.</p><div class="prec">${rows}</div></div></div>`}
+  <div class="psub" role="tablist"><button class="chip2${profSub==='rec'?' on':''}" data-profsub="rec" role="tab">🏆 Rekorlar</button><button class="chip2${profSub==='journal'?' on':''}" data-profsub="journal" role="tab">📖 Defter</button></div>
+  ${profSub==='journal'?`<div class="pjn">${journalHtml()}</div>`:`<div class="sgroup"><h3>🏆 Mod rekorları</h3><p class="hint2">Her oyunda kazandığın puan toplam puanına eklenir. Görevi daha hızlı bitirirsen daha çok puan alırsın.</p><div class="prec">${rows}</div></div>`}</div>`}
 /* ---------------- mission framework ---------------- */
 const state={mode:'menu',time:0,limit:0,mission:null};
 let mObjs=[],lastMission='free',updates=null;
@@ -6522,11 +6564,11 @@ function setupWar(){
 #warUI{position:absolute;inset:0;pointer-events:none;z-index:4;display:none}
 #hud.war #warUI{display:block}
 #hud.war .kb:not(#rocketBtn),#hud.war #spBtn{display:none!important}
-#warFire{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--vh)*var(--r,11.5));bottom:calc(var(--vh)*var(--b,52.5));margin:0 calc(var(--vh)*var(--d,17)*-.5) calc(var(--vh)*var(--d,17)*-.5) 0;width:calc(var(--vh)*var(--d,17));height:calc(var(--vh)*var(--d,17));border-radius:50%;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord);background:radial-gradient(circle at 35% 30%,#ff9d8a,#e2456b);font-size:calc(var(--vh)*var(--d,17)*.38);line-height:1;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .06s;-webkit-user-select:none;user-select:none}
+#warFire{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--u)*var(--r,11.5));bottom:calc(var(--u)*var(--b,52.5));margin:0 calc(var(--u)*var(--d,17)*-.5) calc(var(--u)*var(--d,17)*-.5) 0;width:calc(var(--u)*var(--d,17));height:calc(var(--u)*var(--d,17));border-radius:50%;border:3px solid var(--fjord);box-shadow:0 5px 0 var(--fjord);background:radial-gradient(circle at 35% 30%,#ff9d8a,#e2456b);font-size:calc(var(--u)*var(--d,17)*.38);line-height:1;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .06s;-webkit-user-select:none;user-select:none}
 #warFire.cd{filter:grayscale(.55) brightness(.85)}
 #warFire.down{transform:translateY(5px);box-shadow:0 0 0 var(--fjord);filter:brightness(1.1)}
 #warBar{position:absolute;inset:0;pointer-events:none}
-#warBar .wb{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--vh)*var(--r,40));bottom:calc(var(--vh)*var(--b,7));margin:0 calc(var(--vh)*var(--d,11)*-.5) calc(var(--vh)*var(--d,11)*-.5) 0;width:calc(var(--vh)*var(--d,11));height:calc(var(--vh)*var(--d,11));border-radius:14px;border:3px solid var(--fjord);background:#fff;color:#1f3348;font-weight:800;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:calc(var(--vh)*var(--d,11)*.36);padding:0;box-shadow:0 3px 0 var(--fjord)}
+#warBar .wb{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--u)*var(--r,40));bottom:calc(var(--u)*var(--b,7));margin:0 calc(var(--u)*var(--d,11)*-.5) calc(var(--u)*var(--d,11)*-.5) 0;width:calc(var(--u)*var(--d,11));height:calc(var(--u)*var(--d,11));border-radius:14px;border:3px solid var(--fjord);background:#fff;color:#1f3348;font-weight:800;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:calc(var(--u)*var(--d,11)*.36);padding:0;box-shadow:0 3px 0 var(--fjord)}
 #warBar .wb small{font-size:.68em;font-weight:800}
 #warBar .wb.on{background:#ffe9a6;box-shadow:0 0 0 3px #e2456b,0 3px 0 var(--fjord)}
 #warBar .wb.zero{opacity:.5}
@@ -6541,12 +6583,12 @@ function setupWar(){
 #warXh.lock .rg{stroke:#fff35a;fill:rgba(255,40,40,.2);stroke-width:7}
 #warXh.lock .tk{stroke:#fff35a}#warXh.lock .dt{fill:#fff35a}
 #warXh.hit{transform:translate(-50%,-50%) scale(1.3)}
-#warHold{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--vh)*var(--r,27.25));bottom:calc(var(--vh)*var(--b,41.25));margin:0 calc(var(--vh)*var(--d,12.5)*-.5) calc(var(--vh)*var(--d,12.5)*-.5) 0;width:calc(var(--vh)*var(--d,12.5));height:calc(var(--vh)*var(--d,12.5));border-radius:50%;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);background:#d9f0ff;font-size:calc(var(--vh)*var(--d,12.5)*.2);font-weight:800;line-height:1.05;color:#1f3348;padding:0}
+#warHold{position:absolute;pointer-events:auto;touch-action:none;right:calc(var(--u)*var(--r,27.25));bottom:calc(var(--u)*var(--b,41.25));margin:0 calc(var(--u)*var(--d,12.5)*-.5) calc(var(--u)*var(--d,12.5)*-.5) 0;width:calc(var(--u)*var(--d,12.5));height:calc(var(--u)*var(--d,12.5));border-radius:50%;border:3px solid var(--fjord);box-shadow:0 4px 0 var(--fjord);background:#d9f0ff;font-size:calc(var(--u)*var(--d,12.5)*.2);font-weight:800;line-height:1.05;color:#1f3348;padding:0}
 #warHold.on{background:#ffd24a;box-shadow:0 0 0 3px #e2456b,0 4px 0 var(--fjord)}
-#warGear{position:absolute;right:calc(var(--vh)*var(--r,88));bottom:calc(var(--vh)*var(--b,18));margin-right:calc(var(--vh)*var(--d,64)*-.5);width:calc(var(--vh)*var(--d,64));transform:translateY(50%);box-sizing:border-box;display:flex;align-items:center;gap:calc(var(--vh)*1.5);background:rgba(10,26,40,.6);border-radius:20px;padding:calc(var(--vh)*.6) calc(var(--vh)*2);pointer-events:auto;touch-action:none;color:#fff;font-weight:800;font-size:calc(var(--vh)*2.8);white-space:nowrap;text-shadow:0 1px 0 #000}
+#warGear{position:absolute;right:calc(var(--u)*var(--r,88));bottom:calc(var(--u)*var(--b,18));margin-right:calc(var(--u)*var(--d,64)*-.5);width:calc(var(--u)*var(--d,64));transform:translateY(50%);box-sizing:border-box;display:flex;align-items:center;gap:calc(var(--u)*1.5);background:rgba(10,26,40,.6);border-radius:20px;padding:calc(var(--u)*.6) calc(var(--u)*2);pointer-events:auto;touch-action:none;color:#fff;font-weight:800;font-size:calc(var(--u)*2.8);white-space:nowrap;text-shadow:0 1px 0 #000}
 #warGear input{flex:1;min-width:0;width:auto;height:calc(var(--vh)*5);accent-color:#ffd24a;margin:0}
 #warLock{position:absolute;left:50%;top:calc(var(--vh)*21);transform:translateX(-50%);background:rgba(10,26,40,.55);color:#fff;font-weight:800;font-size:.82rem;padding:2px 12px;border-radius:12px;display:none;white-space:nowrap;text-shadow:0 1px 0 #000}
-#warMap{position:absolute;pointer-events:none;right:calc(var(--vh)*var(--r,14));bottom:calc(var(--vh)*var(--b,74));margin:0 calc(var(--vh)*var(--d,24)*-.5) calc(var(--vh)*var(--d,24)*-.5) 0;width:calc(var(--vh)*var(--d,24));height:calc(var(--vh)*var(--d,24));border-radius:50%;overflow:hidden;box-sizing:border-box;border:calc(var(--vh)*.9) solid #3fd16a;background:rgba(10,26,40,.55);box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 14px rgba(63,209,106,.55);transition:border-color .25s,box-shadow .25s}
+#warMap{position:absolute;pointer-events:none;right:calc(var(--u)*var(--r,14));bottom:calc(var(--u)*var(--b,74));margin:0 calc(var(--u)*var(--d,24)*-.5) calc(var(--u)*var(--d,24)*-.5) 0;width:calc(var(--u)*var(--d,24));height:calc(var(--u)*var(--d,24));border-radius:50%;overflow:hidden;box-sizing:border-box;border:calc(var(--u)*.9) solid #3fd16a;background:rgba(10,26,40,.55);box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 14px rgba(63,209,106,.55);transition:border-color .25s,box-shadow .25s}
 #warMap.out{border-color:#ff3b3b;box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 16px rgba(255,59,59,.75);animation:warMapP 1s ease-in-out infinite}
 @keyframes warMapP{50%{box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 4px rgba(255,59,59,.3)}}
 #warMap canvas{display:block;width:100%;height:100%}
@@ -9213,7 +9255,7 @@ function advBuild(){if(ADV.built)return;ADV.built=true;featherParts();
   ADV.beam=beam(0xffe27a);ADV.beam.position.set(advSpot('island').p.x,250,advSpot('island').p.z);ADV.beam.visible=false;G.add(ADV.beam);
   ADV.portal=advMakePortal(0xffe27a,0x9be7ff);ADV.portal.position.set(advSpot('island').p.x,52,advSpot('island').p.z);ADV.portal.visible=false;scene.add(ADV.portal);
   /* HUD rozeti */
-  const c=document.createElement('div');c.id='advChip';c.className='chip';c.style.display='none';c.style.fontWeight='800';$('#hud').appendChild(c);ADV.chip=c}
+  const c=document.createElement('div');c.id='advChip';c.className='chip';c.style.display='none';c.style.fontWeight='800';$('#topleft').appendChild(c);ADV.chip=c}
 function advChipUpdate(){if(!ADV.chip)return;const S=ADV.s,np=advPieces();ADV.chip.textContent=`⚪ ${S.white}  🔵 ${S.blue}  🌈 ${S.rainbow}  ·  🗺️ ${S.treasure?'✔':np+'/4'}`}
 function advFx(p,rgb,size,life,delay){ADV.fx.push({sp:null,p:p.clone(),rgb,size,life,t:-(delay||0)})}
 function advToast(msg,d){advNote(msg,d||2.4)}
@@ -10175,7 +10217,7 @@ const KLD={
  gr:W=>({grJump:{r:14,b:18,d:21},grSlide:{r:36,b:13,d:17},actBtn:{r:14,b:41,d:16},spBtn:{r:34,b:36,d:14},stam:{r:34,b:48,d:16},dpad:{r:W-24,b:15,d:42}}),
  war:W=>{const c=W/2;return{warFire:{r:14,b:24,d:23,inl:1},actBtn:{r:35,b:12,d:14.5,inl:1},brakeBtn:{r:51,b:12,d:14.5,inl:1},rocketBtn:{r:13,b:50,d:14.5,inl:1},warHold:{r:32,b:35,d:12.5,inl:1},
   wa0:{r:c+21.9,b:7,d:11,inl:1},wa1:{r:c+9.7,b:7,d:11,inl:1},wa2:{r:c-2.5,b:7,d:11,inl:1},warBagBtn:{r:c-13.45,b:5.75,d:8.5,inl:1},warBoardBtn:{r:c-23.15,b:5.75,d:8.5,inl:1},
-  warGear:{r:c,b:18,d:64,inl:1,bar:1},warMap:{r:W-14,b:62,d:22,inl:1},dpad:{r:W-26,b:27.8,d:43}}}};
+  warGear:{r:c,b:18,d:60,inl:1,bar:1},warMap:{r:W-12,b:56,d:18,inl:1},dpad:{r:W-26,b:26,d:40}}}};
 const KL_INFO={actBtn:['⚡','Turbo','#ffd36b'],brakeBtn:['🛑','Yavaşla','#ffe1e1'],bankL:['↶','Sola yat','#d9f0ff'],bankR:['↷','Sağa yat','#d9f0ff'],
  slalomBtn:['🌀','Slalom','#ffe9a6'],rocketBtn:['🚀','Roket','#16305e'],spBtn:['✨','Görev tuşu','#c9f5d6'],inBinBtn:['🪿','Kaza in/bin','#cfeeff'],goBtn:['🧭','Tüneğe git','#ffe9b8'],
  dpad:['✥','Yön tuşları','#ffffff','sq'],grJump:['⬆','Zıpla','#a6e6a0'],grSlide:['⬇','Kay','#9ff0ff'],
@@ -10184,27 +10226,30 @@ const KL_INFO={actBtn:['⚡','Turbo','#ffd36b'],brakeBtn:['🛑','Yavaşla','#ff
 /* ekrandaki küçük HUD öğeleri (görev, enerji, ses, durdur, harita, kamera...) */
 Object.assign(KL_INFO,{objective:['🎯','Görev etiketi','#ffffff','chip'],hearts:['❤️','Enerji çubuğu','#ffffff','chip'],advChip:['⚪','Tüy sayaçları','#ffffff','chip'],regChip:['📍','Bölge adı','#d5dbe4','chip'],timer:['⏱','Süre','#ffffff','chip'],
  muteBtn:['🔊','Ses','#ffffff'],pauseBtn:['⏸','Durdur','#ffd36b'],exitBtn:['✕','Çıkış','#ffffff'],camViewBtn:['📷','Kamera 1/2','#ffffff','chip'],advMapBtn:['🗺️','Harita','#ffffff'],advQBtn:['🧭','Görevler','#ffffff'],advCam:['📸','Fotoğraf','#ffffff'],chaseStat:['🏁','Takip bilgisi','#ffffff','chip'],stam:['🪽','Uçuş enerjisi','#ffffff','thin']});
-const KL_HK=W=>({objective:{r:W-17,b:92.5,d:28,k:1},hearts:{r:W-45,b:92.5,d:25,k:1},advChip:{r:W-86,b:92.5,d:39.5,k:1},timer:{r:45,b:92.5,d:11,k:1},
- muteBtn:{r:30.6,b:92.5,d:9.3,k:1},pauseBtn:{r:19,b:92.5,d:9.3,k:1},exitBtn:{r:7.4,b:92.5,d:9.3,k:1},
- regChip:{r:W-19,b:81,d:24.4,k:1},chaseStat:{r:W-52,b:81,d:24,k:1},
- camViewBtn:{r:49,b:81,d:18,k:1},advMapBtn:{r:30.6,b:81,d:9.3,k:1},advQBtn:{r:19,b:81,d:9.3,k:1},advCam:{r:7.4,b:81,d:9.3,k:1}});
+const KL_HK=W=>({objective:{r:W-16,b:94.3,d:28,k:1},hearts:{r:W-44,b:94.3,d:25,k:1},advChip:{r:W-22,b:85.2,d:40,k:1},regChip:{r:W-14,b:76.2,d:24,k:1},chaseStat:{r:W-41,b:76.2,d:26,k:1},
+ timer:{r:39.5,b:93.5,d:12,k:1},muteBtn:{r:27.5,b:93.5,d:9,k:1},pauseBtn:{r:17,b:93.5,d:9,k:1},exitBtn:{r:6.5,b:93.5,d:9,k:1},
+ camViewBtn:{r:42,b:83,d:17,k:1},advMapBtn:{r:27.5,b:83,d:9,k:1},advQBtn:{r:17,b:83,d:9,k:1},advCam:{r:6.5,b:83,d:9,k:1}});
 for(const p of Object.keys(KLD)){const f=KLD[p];KLD[p]=W=>Object.assign(f(W),KL_HK(W))}
 const KL_ALL=[...new Set(Object.values(KLD).flatMap(f=>Object.keys(f(100))))];
 function klLoad(){let s=store.get('kz-keylayout3',null)||{};for(const p of['fly','gr','war'])s[p]=s[p]||{};return s}
 const KL={saved:klLoad(),prof:'fly',work:null,tab:'main',sel:null,msg:''};
 const klDefs=p=>KLD[p](klW());
 const klSave=()=>store.set('kz-keylayout3',KL.saved);
+function klU(){const O=window.ORI,w=O?O.lw:innerWidth,h=O?O.lh:innerHeight;return Math.min(h/100,w*.005556)}
+addEventListener('resize',()=>setTimeout(()=>{try{klApply(KL.cur)}catch(_){}},250));
 function klApply(prof){prof=prof||'fly';KL.cur=prof;const L=KL.saved[prof]||{},D=klDefs(prof);
   for(const id of KL_ALL){const el=document.getElementById(id);if(!el)continue;const df=D[id],o=df?(L[id]?Object.assign({},df,L[id]):df):null;
     if(o){el.style.setProperty('--r',o.r,'important');el.style.setProperty('--b',o.b,'important');el.style.setProperty('--d',o.d,'important')}
     else{el.style.removeProperty('--r');el.style.removeProperty('--b');el.style.removeProperty('--d')}
     if(o&&o.o!=null&&o.o<1){el.style.setProperty('--ko',o.o);el.setAttribute('data-klo','1')}else{el.style.removeProperty('--ko');el.removeAttribute('data-klo')}
-    if(id==='dpad'||(df&&df.k))el.style.setProperty('--sc',o&&df?o.d/df.d:1);{const l=L[id];el.classList.toggle('klp',!!(df&&df.k&&l&&(Math.abs(l.r-df.r)>.01||Math.abs(l.b-df.b)>.01||Math.abs(l.d-df.d)>.01)))}
+    if(id==='dpad'||(df&&df.k))el.style.setProperty('--sc',o&&df?(id==='dpad'?o.d*klU()/(el.offsetWidth||156):o.d/df.d):1);{const l=L[id];el.classList.toggle('klp',!!(df&&df.k&&l&&(Math.abs(l.r-df.r)>.01||Math.abs(l.b-df.b)>.01||Math.abs(l.d-df.d)>.01)))}
     if(id==='dpad')el.classList.toggle('klc',!!df)}
   const gp=document.getElementById('grPad');if(gp)gp.classList.toggle('klc',prof==='gr')}
 klApply('fly');
 /* sonradan oluşturulan tuşlar (Görevler, Fotoğraf, Kamera, Harita, Bölge adı...) de düzene yerleşsin */
 {const h=document.getElementById('hud');if(h)new MutationObserver(ms=>{if(KL._t||!ms.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&n.id&&KL_ALL.includes(n.id))))return;KL._t=setTimeout(()=>{KL._t=0;try{klApply(KL.cur)}catch(_){}},0)}).observe(h,{childList:true,subtree:true})}
+
+
 const klShape=id=>KL_INFO[id][3]||'';
 const klBox=(id,o)=>({w:o.d,h:klShape(id)==='bar'?9:o.d});
 function klEditorHtml(){const D=klDefs(KL.prof);if(!KL.work){KL.work={};for(const id in D)KL.work[id]=Object.assign({},D[id],KL.saved[KL.prof][id]||{})}
@@ -10262,9 +10307,9 @@ function klCommit(p,work){const D=klDefs(p),L={};for(const id in D){const w=work
 .klh{display:none;position:absolute;right:-9%;bottom:-9%;width:26%;min-width:18px;aspect-ratio:1;border-radius:50%;background:var(--berry);border:3px solid #fff;cursor:nwse-resize;touch-action:none}
 .klb.sel .klh{display:block}
 .klctl{margin:4px 0 8px;font-weight:700;font-size:.9rem}.klctl label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.klctl input{flex:1;min-width:120px}
-#dpad.klc{left:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;transform:translate(50%,50%) scale(var(--sc,1))!important}
+#dpad.klc{left:auto!important;right:calc(var(--u)*var(--r))!important;bottom:calc(var(--u)*var(--b))!important;transform:translate(50%,50%) scale(var(--sc,1))!important}
 #hud.grb #grPad.klc{inset:0;display:block}
-#grPad.klc button{position:absolute;right:calc(var(--vh)*var(--r));bottom:calc(var(--vh)*var(--b));margin:0 calc(var(--vh)*var(--d)*-.5) calc(var(--vh)*var(--d)*-.5) 0;width:calc(var(--vh)*var(--d))!important;height:calc(var(--vh)*var(--d))!important}`;document.head.appendChild(st)}
+#grPad.klc button{position:absolute;right:calc(var(--u)*var(--r));bottom:calc(var(--u)*var(--b));margin:0 calc(var(--u)*var(--d)*-.5) calc(var(--u)*var(--d)*-.5) 0;width:calc(var(--u)*var(--d))!important;height:calc(var(--u)*var(--d))!important}`;document.head.appendChild(st)}
 
 
 /* ================= TAM EKRAN TUŞ DÜZENLEYİCİ (boyut + saydamlık + kaydet) ================= */
@@ -10460,7 +10505,7 @@ hi('sconce','wall','Duvar lambası',55,()=>`<rect x="44" y="30" width="12" heigh
 hi('horseshoe','wall','At nalı',30,()=>`<path d="M30 80 V40 a20 20 0 0 1 40 0 V80" fill="none" stroke="#9a9ca4" stroke-width="10" stroke-linecap="round"/>`+[34,46,58].map(y=>`<circle cx="30" cy="${y+8}" r="1.8" fill="#333"/><circle cx="70" cy="${y+8}" r="1.8" fill="#333"/>`).join(''));
 hi('banner','wall','Bayrak girlandası',50,()=>`<path d="M8 28 Q50 52 92 28" fill="none" stroke="#6b4528" stroke-width="2"/>`+['#e2456b','#f2c14e','#3f8fe0','#5fae4a','#9b5de5'].map((c,i)=>{const x=18+i*16,y=28+Math.sin((x-8)/84*Math.PI)*14;return `<path d="M${x-6} ${y} H${x+6} L${x} ${y+16}Z" fill="${c}"/>`}).join(''));
 hi('wreath','wall','Çelenk',60,()=>`<circle cx="50" cy="50" r="28" fill="none" stroke="#3f9a43" stroke-width="12"/>`+[0,1,2,3,4,5,6,7].map(i=>`<circle cx="${50+Math.cos(i*.785)*28}" cy="${50+Math.sin(i*.785)*28}" r="${i%2?3:4}" fill="${i%2?'#e2456b':'#5fc450'}"/>`).join('')+`<path d="M50 78 l-8 10 l8-4 l8 4z" fill="#e2456b"/>`);
-hi('poster','wall','Kaz posteri',40,()=>`<rect x="18" y="10" width="64" height="80" fill="#fff6d8" stroke="#8a6b25" stroke-width="2"/><rect x="24" y="16" width="52" height="46" fill="#9ed8ff"/><text x="50" y="52" font-size="34" text-anchor="middle">🪿</text><text x="50" y="80" font-size="9" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">KAZONYA</text>`);
+hi('poster','wall','Kaz posteri',40,()=>`<rect x="18" y="10" width="64" height="80" fill="#fff6d8" stroke="#8a6b25" stroke-width="2"/><rect x="24" y="16" width="52" height="46" fill="#9ed8ff"/><text x="50" y="52" font-size="34" text-anchor="middle">🪿</text><text x="50" y="80" font-size="9" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">kazonya</text>`);
 /* — halılar (200x50 kutu) — */
 hi('rug_straw','rug','Hasır paspas',50,()=>`<rect x="6" y="6" width="188" height="38" rx="8" fill="#d9b86a" stroke="#a8841f"/>`+Array.from({length:12},(_,i)=>`<path d="M${14+i*15} 8 V42" stroke="#b5922f" stroke-width="2"/>`).join(''));
 hi('rug_round','rug','Yuvarlak kilim',90,()=>`<ellipse cx="100" cy="25" rx="94" ry="21" fill="#c9622b" stroke="#8a3f12"/><ellipse cx="100" cy="25" rx="70" ry="15" fill="#f2c14e"/><ellipse cx="100" cy="25" rx="46" ry="10" fill="#c9622b"/><ellipse cx="100" cy="25" rx="22" ry="5" fill="#fff3c4"/>`);
@@ -10790,7 +10835,7 @@ ANIM.push(dt=>{
     const d=Math.max(80,Math.hypot(L.x-camera.position.x,L.s.position.y-camera.position.y,L.z-camera.position.z));L.s.visible=true;L.m.opacity=a*.95;L.s.scale.set(d*L.k,d*L.k*.2188,1)}
   /* konum rozeti */
   REGUI.tick-=dt;if(REGUI.tick>0)return;REGUI.tick=.3;
-  if(!REGUI.chip){const e=document.createElement('div');e.id='regChip';e.setAttribute('role','status');document.getElementById('hud').appendChild(e);REGUI.chip=e;try{klApply(KL.cur)}catch(_){}}
+  if(!REGUI.chip){const e=document.createElement('div');e.id='regChip';e.setAttribute('role','status');document.getElementById('topleft').appendChild(e);REGUI.chip=e;try{klApply(KL.cur)}catch(_){}}
   const r=regionAt(P.x,P.z),poi=poiAt(P.x,P.z),want=r&&r.n;
   if(REGUI.cur===null)REGUI.cur=want;else if(want!==REGUI.cur){if(REGUI.cand!==want){REGUI.cand=want;REGUI.ct=0}REGUI.ct+=.3;if(REGUI.ct>=1.2){REGUI.cur=want;REGUI.cand=null}}else REGUI.cand=null;
   const txt='📍 '+(poi?poi+' · ':'')+REGUI.cur;
