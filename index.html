@@ -10243,7 +10243,11 @@ function klCommit(p,work){const D=klDefs(p),L={};for(const id in D){const w=work
 /* atlıkarınca: kartlar bir çember üzerinde, sırtları merkeze dönük; sonsuz döngü */
 const CAR={pos:null,tgt:0,key:'',drag:0,raf:0,r:null};
 function carDraw(r){const cs=[...r.children].filter(c=>c.classList.contains('rc')),n=cs.length;if(!n)return;
-  const W=r.clientWidth,H=r.clientHeight,Rx=Math.max(34,(W-92)/2),Ry=Math.min(22,H*.1);
+  const W=r.clientWidth,H=r.clientHeight;
+  /* WebView'da şerit henüz ölçülmemişken (genişlik ~0) çizilirse kartlar üst üste yığılıyordu: ölçü gelene kadar bir sonraki karede yeniden çiz */
+  if(W<120||H<40){if(r.isConnected&&(CAR.rt=(CAR.rt||0)+1)<240)requestAnimationFrame(()=>carDraw(r))}else CAR.rt=0;
+  if(!r._ro&&window.ResizeObserver){try{r._ro=new ResizeObserver(()=>{if(r.isConnected)carDraw(r)});r._ro.observe(r)}catch(e){}}
+  const Rx=Math.max(34,(W-92)/2),Ry=Math.min(22,H*.1);
   for(let i=0;i<n;i++){let d=i-CAR.pos;d-=n*Math.round(d/n);const th=d*2*Math.PI/n,co=Math.cos(th),v=(co+1)/2,c=cs[i];
     c.style.transform=`translate(-50%,-50%) translate3d(${(Math.sin(th)*Rx).toFixed(1)}px,${(-(1-co)/2*Ry*2+Ry*.4).toFixed(1)}px,0) rotateY(${(th*180/Math.PI).toFixed(1)}deg) scale(${(.6+.4*v).toFixed(3)})`;
     c.style.zIndex=String(100+Math.round(co*100));c.style.opacity=String((.5+.5*v).toFixed(2));c.style.filter=Math.abs(d)<.25?'':`brightness(${(.62+.38*v).toFixed(2)})`}}
