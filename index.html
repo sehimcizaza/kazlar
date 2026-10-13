@@ -1,12 +1,13 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <style id="klOpaCss">[data-klo]{opacity:var(--ko)}#hud.fsw [data-klo].kb.off{opacity:calc(var(--ko)*.5)}#rocketBtn[data-klo].empty{opacity:calc(var(--ko)*.55)}#warBar [data-klo].wb.zero{opacity:calc(var(--ko)*.5)}#spBtn{opacity:var(--cdo,1)}#spBtn[data-klo]{opacity:calc(var(--ko)*var(--cdo,1))}</style>
-<style id="klpCss">.klp{position:fixed!important;left:auto!important;top:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;margin:0!important;max-width:none!important;transform:translate(50%,50%) scale(var(--sc,1))!important;z-index:4}</style></head><body>
+<style id="klpCss">#hud.grb #actWrap{left:0;top:0;right:0;bottom:0;display:block;pointer-events:none}#hud.grb #actBtn,#hud.grb #spBtn,#hud.grb #stam{position:absolute;right:calc(var(--vh)*var(--r));bottom:calc(var(--vh)*var(--b));margin:0 calc(var(--vh)*var(--d)*-.5) calc(var(--vh)*var(--d)*-.5) 0}#hud.grb #actBtn,#hud.grb #spBtn{width:calc(var(--vh)*var(--d));height:calc(var(--vh)*var(--d));padding:0;font-size:calc(var(--vh)*var(--d)*.16);pointer-events:auto;z-index:3}#hud.grb #stam{width:calc(var(--vh)*var(--d));margin-bottom:0}
+.klp{position:fixed!important;left:auto!important;top:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;margin:0!important;max-width:none!important;transform:translate(50%,50%) scale(var(--sc,1))!important;z-index:4}</style></head><body>
 <!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Kazanya</title>
+<title>Kazonya</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -552,7 +553,7 @@ html.port .dq3{margin-top:12px}html.port .dqc{min-height:64px}
 <div id="title" class="screen">
   <div class="panel center">
     <div class="flyer">🪿</div>
-    <h1>Kazanya</h1>
+    <h1>Kazonya</h1>
     <p class="lead">Bir kaza bin, ormanların, şelalelerin ve denizin üstünden uç.</p>
     <button class="big" id="playBtn">Giriş</button>
   </div>
@@ -561,7 +562,7 @@ html.port .dq3{margin-top:12px}html.port .dqc{min-height:64px}
 <div id="hub" class="screen hubScreen">
   <div id="hubSheet" role="region" aria-label="Ana menü">
     <div id="hubHead">
-      <b class="hlogo">🪿 Kazanya</b>
+      <b class="hlogo">🪿 Kazonya</b>
       <div id="hubTabs" role="tablist">
         <button class="tab" data-tab="missions" role="tab" title="Oyun Seç" aria-label="Oyun Seç"><span class="ti">🎮</span><span class="tl">Oyun Seç</span></button>
         <button class="tab" data-tab="rider" role="tab" title="Karakter" aria-label="Karakter"><span class="ti">🧒</span><span class="tl">Karakter</span></button>
@@ -3081,7 +3082,7 @@ function stPoster(kind){const W=256,H=kind===2?256:352,cv=document.createElement
   if(kind===0){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#f6c36b');gr.addColorStop(.55,'#f08a5d');gr.addColorStop(1,'#6a4a7a');g.fillStyle=gr;g.fillRect(0,0,W,H);
     g.fillStyle='#fff3c8';g.beginPath();g.arc(170,120,34,0,6.3);g.fill();g.fillStyle='#4a3a6a';g.beginPath();g.moveTo(0,250);g.lineTo(60,170);g.lineTo(110,225);g.lineTo(170,150);g.lineTo(256,250);g.lineTo(256,352);g.lineTo(0,352);g.fill();
     g.fillStyle='#22202e';g.fillRect(20,262,150,26);g.fillRect(20,246,40,16);g.beginPath();g.arc(35,244,10,0,6.3);g.fill();for(let k=0;k<4;k++)g.fillRect(70+k*24,266,20,18);g.fillRect(0,290,256,6);
-    txt('TRENLE',128,42,46,'#3a1f12');txt('SEYAHAT ET',128,84,30,'#3a1f12');txt('Kazanya Hattı',128,326,19,'#fff3c8','700');frame()}
+    txt('TRENLE',128,42,46,'#3a1f12');txt('SEYAHAT ET',128,84,30,'#3a1f12');txt('Kazonya Hattı',128,326,19,'#fff3c8','700');frame()}
   else if(kind===1){g.fillStyle='#f3ecd8';g.fillRect(0,0,W,H);g.fillStyle='#2d5a46';g.fillRect(0,0,W,46);txt('SEFER ÇİZELGESİ',128,24,24,'#f3ecd8');
     const rows=[['07:20','Göl Kasabası'],['09:05','Kaz Tepesi'],['10:40','Değirmen'],['12:15','Liman'],['14:30','Buz Dağı'],['16:10','Orman Yolu'],['18:00','Fener Burnu'],['19:45','Son Sefer']];
     rows.forEach((r,i)=>{const y=70+i*34;g.fillStyle=i%2?'#e4dcc4':'#f3ecd8';g.fillRect(8,y-15,W-16,32);g.fillStyle='#7a1f1f';g.font='800 21px "Baloo 2",sans-serif';g.textAlign='left';g.textBaseline='middle';g.fillText(r[0],16,y+1);g.fillStyle='#2b2b2b';g.font='700 19px "Baloo 2",sans-serif';g.fillText(r[1],84,y+1)});frame()}
@@ -3089,7 +3090,7 @@ function stPoster(kind){const W=256,H=kind===2?256:352,cv=document.createElement
     g.fillStyle='#9ac17a';g.beginPath();g.arc(70,200,38,0,6.3);g.fill();g.fillStyle='#b5a78a';g.beginPath();g.moveTo(170,256);g.lineTo(205,190);g.lineTo(240,256);g.fill();
     g.strokeStyle='#3a2a1a';g.lineWidth=3;g.setLineDash([8,5]);g.beginPath();g.ellipse(128,170,100,60,0,0,6.3);g.stroke();g.setLineDash([]);g.fillStyle='#c0392b';[[28,170],[128,110],[228,170],[128,230]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],7,0,6.3);g.fill()});txt('HARİTA',128,24,26,'#3a2a1a');frame()}
   else if(kind===3){g.fillStyle='#2f6fa5';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.beginPath();g.ellipse(128,200,60,38,-.2,0,6.3);g.fill();g.beginPath();g.moveTo(160,180);g.quadraticCurveTo(190,120,168,90);g.lineTo(184,86);g.quadraticCurveTo(210,130,184,184);g.fill();g.beginPath();g.arc(176,84,14,0,6.3);g.fill();g.fillStyle='#f2a33a';g.beginPath();g.moveTo(188,82);g.lineTo(214,88);g.lineTo(188,94);g.fill();
-    g.beginPath();g.moveTo(90,190);g.quadraticCurveTo(20,150,30,230);g.quadraticCurveTo(70,230,100,215);g.fill();txt('KAZANYA',128,62,46,'#fff3c8');txt('Kazınla birlikte uç!',128,310,22,'#fff','700');frame()}
+    g.beginPath();g.moveTo(90,190);g.quadraticCurveTo(20,150,30,230);g.quadraticCurveTo(70,230,100,215);g.fill();txt('KAZONYA',128,62,46,'#fff3c8');txt('Kazınla birlikte uç!',128,310,22,'#fff','700');frame()}
   else if(kind===4){g.fillStyle='#f2d25a';g.fillRect(0,0,W,H);g.fillStyle='#1d1d1d';for(let k=0;k<8;k++){g.save();g.translate(0,0);g.fillRect(0,k*44,W,12);g.restore()}g.fillStyle='#f2d25a';g.fillRect(20,70,216,210);txt('DİKKAT!',128,108,48,'#b3261e');txt('Trenden önce',128,170,26,'#1d1d1d');txt('rayları',128,204,26,'#1d1d1d');txt('GEÇME',128,248,40,'#b3261e');frame()}
   else{g.fillStyle='#f6f0dc';g.fillRect(0,0,W,H);g.fillStyle='#8cc3e8';g.fillRect(0,0,W,150);g.fillStyle='#7fb069';g.fillRect(0,150,W,70);g.fillStyle='#fff';g.beginPath();g.ellipse(110,150,56,30,0,0,6.3);g.fill();g.fillStyle='#222';g.beginPath();g.ellipse(95,142,16,12,0,0,6.3);g.fill();g.fillStyle='#fff';g.fillRect(80,170,10,32);g.fillRect(124,170,10,32);g.beginPath();g.arc(172,138,18,0,6.3);g.fill();
     txt('TAZE SÜT',128,252,44,'#2f6fa5');txt('Çiftlikten, her sabah',128,300,22,'#5a3a22','700');frame()}
@@ -10171,7 +10172,7 @@ const KL_FLY={actBtn:{r:14,b:17,d:21},brakeBtn:{r:36,b:11,d:16},bankL:{r:47,b:24
  slalomBtn:{r:31,b:57,d:13},rocketBtn:{r:14,b:41,d:15.5},spBtn:{r:14,b:60,d:15},inBinBtn:{r:46,b:45,d:14},goBtn:{r:62,b:28,d:14}};
 const KLD={
  fly:W=>Object.assign({},KL_FLY,{dpad:{r:W-26,b:27.8,d:43}}),
- gr:W=>({grJump:{r:15,b:22,d:21},grSlide:{r:38,b:14,d:18},dpad:{r:W-24,b:15,d:42}}),
+ gr:W=>({grJump:{r:14,b:18,d:21},grSlide:{r:36,b:13,d:17},actBtn:{r:14,b:41,d:16},spBtn:{r:34,b:36,d:14},stam:{r:34,b:48,d:16},dpad:{r:W-24,b:15,d:42}}),
  war:W=>{const c=W/2;return{warFire:{r:14,b:24,d:23,inl:1},actBtn:{r:35,b:12,d:14.5,inl:1},brakeBtn:{r:51,b:12,d:14.5,inl:1},rocketBtn:{r:13,b:50,d:14.5,inl:1},warHold:{r:32,b:35,d:12.5,inl:1},
   wa0:{r:c+21.9,b:7,d:11,inl:1},wa1:{r:c+9.7,b:7,d:11,inl:1},wa2:{r:c-2.5,b:7,d:11,inl:1},warBagBtn:{r:c-13.45,b:5.75,d:8.5,inl:1},warBoardBtn:{r:c-23.15,b:5.75,d:8.5,inl:1},
   warGear:{r:c,b:18,d:64,inl:1,bar:1},warMap:{r:W-14,b:62,d:22,inl:1},dpad:{r:W-26,b:27.8,d:43}}}};
@@ -10182,7 +10183,7 @@ const KL_INFO={actBtn:['⚡','Turbo','#ffd36b'],brakeBtn:['🛑','Yavaşla','#ff
  warMap:['🗺️','Mini harita','#bfe8c8'],warBagBtn:['🎒','Çanta','#d9f0ff','sq'],warBoardBtn:['🏆','Skor','#d9f0ff','sq'],warGear:['🚀','Hız çubuğu','#ffffff','bar']};
 /* ekrandaki küçük HUD öğeleri (görev, enerji, ses, durdur, harita, kamera...) */
 Object.assign(KL_INFO,{objective:['🎯','Görev etiketi','#ffffff','chip'],hearts:['❤️','Enerji çubuğu','#ffffff','chip'],advChip:['⚪','Tüy sayaçları','#ffffff','chip'],regChip:['📍','Bölge adı','#d5dbe4','chip'],timer:['⏱','Süre','#ffffff','chip'],
- muteBtn:['🔊','Ses','#ffffff'],pauseBtn:['⏸','Durdur','#ffd36b'],exitBtn:['✕','Çıkış','#ffffff'],camViewBtn:['📷','Kamera 1/2','#ffffff','chip'],advMapBtn:['🗺️','Harita','#ffffff'],advQBtn:['🧭','Görevler','#ffffff'],advCam:['📸','Fotoğraf','#ffffff'],chaseStat:['🏁','Takip bilgisi','#ffffff','chip']});
+ muteBtn:['🔊','Ses','#ffffff'],pauseBtn:['⏸','Durdur','#ffd36b'],exitBtn:['✕','Çıkış','#ffffff'],camViewBtn:['📷','Kamera 1/2','#ffffff','chip'],advMapBtn:['🗺️','Harita','#ffffff'],advQBtn:['🧭','Görevler','#ffffff'],advCam:['📸','Fotoğraf','#ffffff'],chaseStat:['🏁','Takip bilgisi','#ffffff','chip'],stam:['🪽','Uçuş enerjisi','#ffffff','thin']});
 const KL_HK=W=>({objective:{r:W-17,b:92.5,d:28,k:1},hearts:{r:W-45,b:92.5,d:25,k:1},advChip:{r:W-86,b:92.5,d:39.5,k:1},timer:{r:45,b:92.5,d:11,k:1},
  muteBtn:{r:30.6,b:92.5,d:9.3,k:1},pauseBtn:{r:19,b:92.5,d:9.3,k:1},exitBtn:{r:7.4,b:92.5,d:9.3,k:1},
  regChip:{r:W-19,b:81,d:24.4,k:1},chaseStat:{r:W-52,b:81,d:24,k:1},
@@ -10198,7 +10199,7 @@ function klApply(prof){prof=prof||'fly';KL.cur=prof;const L=KL.saved[prof]||{},D
     if(o){el.style.setProperty('--r',o.r,'important');el.style.setProperty('--b',o.b,'important');el.style.setProperty('--d',o.d,'important')}
     else{el.style.removeProperty('--r');el.style.removeProperty('--b');el.style.removeProperty('--d')}
     if(o&&o.o!=null&&o.o<1){el.style.setProperty('--ko',o.o);el.setAttribute('data-klo','1')}else{el.style.removeProperty('--ko');el.removeAttribute('data-klo')}
-    if(id==='dpad'||(df&&df.k))el.style.setProperty('--sc',o&&df?o.d/df.d:1);el.classList.toggle('klp',!!(df&&df.k));
+    if(id==='dpad'||(df&&df.k))el.style.setProperty('--sc',o&&df?o.d/df.d:1);{const l=L[id];el.classList.toggle('klp',!!(df&&df.k&&l&&(Math.abs(l.r-df.r)>.01||Math.abs(l.b-df.b)>.01||Math.abs(l.d-df.d)>.01)))}
     if(id==='dpad')el.classList.toggle('klc',!!df)}
   const gp=document.getElementById('grPad');if(gp)gp.classList.toggle('klc',prof==='gr')}
 klApply('fly');
@@ -10272,8 +10273,8 @@ const KLE={ov:null,prof:'fly',works:{},sel:null,dirty:false,drag:null,moved:fals
 const px=e=>window.ORI?ORI.x(e):e.clientX,py=e=>window.ORI?ORI.y(e):e.clientY;
 const mk=(p,reset)=>{const D=klDefs(p),w={};for(const id in D)w[id]=Object.assign({o:1},D[id],reset?{}:(KL.saved[p][id]||{}));return w};
 const work=p=>KLE.works[p]||(KLE.works[p]=mk(p));
-const box=(id,o)=>({w:o.d,h:klShape(id)==='bar'?9:klShape(id)==='chip'?7.5:(id==='dpad'&&KLE.prof==='gr')?o.d*.47:o.d});
-const rng=id=>{const d=klDefs(KLE.prof)[id];return d.k?[Math.round(d.d*.5),Math.round(d.d*1.8)]:klShape(id)==='bar'?[34,96]:id==='dpad'?[24,64]:[9,30]};
+const box=(id,o)=>({w:o.d,h:klShape(id)==='bar'?9:klShape(id)==='thin'?3.2:klShape(id)==='chip'?7.5:(id==='dpad'&&KLE.prof==='gr')?o.d*.47:o.d});
+const rng=id=>{const d=klDefs(KLE.prof)[id];return d.k?[Math.round(d.d*.5),Math.round(d.d*1.8)]:klShape(id)==='thin'?[10,30]:klShape(id)==='bar'?[34,96]:id==='dpad'?[24,64]:[9,30]};
 const q=s=>KLE.ov.querySelector(s);
 const say=m=>{const t=q('.klToast');t.textContent=m;t.classList.add('on');clearTimeout(say.t);say.t=setTimeout(()=>t.classList.remove('on'),1800)};
 const mark=()=>{KLE.dirty=true;const b=q('[data-a=save]');if(b)b.classList.add('dirty')};
@@ -10337,7 +10338,7 @@ const st=document.createElement('style');st.textContent=`
 #klFull{position:absolute;inset:0;z-index:300;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;color:#fff;background:radial-gradient(120% 100% at 50% 0,#2f6db5,#0c1830)}
 #klFull .klStage::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.1) 0 1px,transparent 1px 10%),repeating-linear-gradient(90deg,rgba(255,255,255,.1) 0 1px,transparent 1px 7%)}
 #klFull button{font-family:inherit;cursor:pointer}
-.klStage{position:absolute;overflow:hidden;border-radius:16px;border:3px solid rgba(255,255,255,.75);box-shadow:0 10px 30px rgba(0,0,0,.5);background:linear-gradient(#7cc4ff,#bfe6ff 55%,#74be55 56%,#4f9f42)}.klBtns{position:absolute;inset:0}.klb.chip{border-radius:999px;flex-direction:row;gap:5px}.klb.chip small{margin:0}
+.klStage{position:absolute;overflow:hidden;border-radius:16px;border:3px solid rgba(255,255,255,.75);box-shadow:0 10px 30px rgba(0,0,0,.5);background:linear-gradient(#7cc4ff,#bfe6ff 55%,#74be55 56%,#4f9f42)}.klBtns{position:absolute;inset:0}.klb.thin{border-radius:8px}.klb.thin .kli,.klb.thin small,.klb.thin .klh{display:none}.klb.thin.sel .klh{display:block}.klb.chip{border-radius:999px;flex-direction:row;gap:5px}.klb.chip small{margin:0}
 .klTop{position:absolute;left:0;right:0;top:0;z-index:6;display:flex;align-items:center;gap:7px;padding:6px 10px;background:rgba(14,29,56,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 3px 14px rgba(0,0,0,.3)}
 .klTitle{font-size:.92rem;font-weight:900;white-space:nowrap}
 .klChips{flex:1;min-width:0;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
@@ -10459,7 +10460,7 @@ hi('sconce','wall','Duvar lambası',55,()=>`<rect x="44" y="30" width="12" heigh
 hi('horseshoe','wall','At nalı',30,()=>`<path d="M30 80 V40 a20 20 0 0 1 40 0 V80" fill="none" stroke="#9a9ca4" stroke-width="10" stroke-linecap="round"/>`+[34,46,58].map(y=>`<circle cx="30" cy="${y+8}" r="1.8" fill="#333"/><circle cx="70" cy="${y+8}" r="1.8" fill="#333"/>`).join(''));
 hi('banner','wall','Bayrak girlandası',50,()=>`<path d="M8 28 Q50 52 92 28" fill="none" stroke="#6b4528" stroke-width="2"/>`+['#e2456b','#f2c14e','#3f8fe0','#5fae4a','#9b5de5'].map((c,i)=>{const x=18+i*16,y=28+Math.sin((x-8)/84*Math.PI)*14;return `<path d="M${x-6} ${y} H${x+6} L${x} ${y+16}Z" fill="${c}"/>`}).join(''));
 hi('wreath','wall','Çelenk',60,()=>`<circle cx="50" cy="50" r="28" fill="none" stroke="#3f9a43" stroke-width="12"/>`+[0,1,2,3,4,5,6,7].map(i=>`<circle cx="${50+Math.cos(i*.785)*28}" cy="${50+Math.sin(i*.785)*28}" r="${i%2?3:4}" fill="${i%2?'#e2456b':'#5fc450'}"/>`).join('')+`<path d="M50 78 l-8 10 l8-4 l8 4z" fill="#e2456b"/>`);
-hi('poster','wall','Kaz posteri',40,()=>`<rect x="18" y="10" width="64" height="80" fill="#fff6d8" stroke="#8a6b25" stroke-width="2"/><rect x="24" y="16" width="52" height="46" fill="#9ed8ff"/><text x="50" y="52" font-size="34" text-anchor="middle">🪿</text><text x="50" y="80" font-size="9" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">KAZANYA</text>`);
+hi('poster','wall','Kaz posteri',40,()=>`<rect x="18" y="10" width="64" height="80" fill="#fff6d8" stroke="#8a6b25" stroke-width="2"/><rect x="24" y="16" width="52" height="46" fill="#9ed8ff"/><text x="50" y="52" font-size="34" text-anchor="middle">🪿</text><text x="50" y="80" font-size="9" font-weight="800" text-anchor="middle" fill="#6b4528" font-family="sans-serif">KAZONYA</text>`);
 /* — halılar (200x50 kutu) — */
 hi('rug_straw','rug','Hasır paspas',50,()=>`<rect x="6" y="6" width="188" height="38" rx="8" fill="#d9b86a" stroke="#a8841f"/>`+Array.from({length:12},(_,i)=>`<path d="M${14+i*15} 8 V42" stroke="#b5922f" stroke-width="2"/>`).join(''));
 hi('rug_round','rug','Yuvarlak kilim',90,()=>`<ellipse cx="100" cy="25" rx="94" ry="21" fill="#c9622b" stroke="#8a3f12"/><ellipse cx="100" cy="25" rx="70" ry="15" fill="#f2c14e"/><ellipse cx="100" cy="25" rx="46" ry="10" fill="#c9622b"/><ellipse cx="100" cy="25" rx="22" ry="5" fill="#fff3c4"/>`);
