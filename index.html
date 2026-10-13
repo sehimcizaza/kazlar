@@ -381,7 +381,7 @@ html.land #title .big{font-size:calc(var(--vh)*6);padding:calc(var(--vh)*2) calc
 #hubSheet::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 26px,transparent 26px 64px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #hubSheet{background:radial-gradient(120% 90% at 85% 0%,rgba(120,160,255,.22),transparent 55%),radial-gradient(90% 70% at 0% 100%,rgba(255,170,90,.12),transparent 60%),linear-gradient(165deg,#0c1830 0%,#17305a 48%,#25507f 100%)}}
 :root[data-theme="dark"] #hubSheet{background:radial-gradient(120% 90% at 85% 0%,rgba(120,160,255,.22),transparent 55%),radial-gradient(90% 70% at 0% 100%,rgba(255,170,90,.12),transparent 60%),linear-gradient(165deg,#0c1830 0%,#17305a 48%,#25507f 100%)}
-#hubHead{position:relative;z-index:2;display:flex;align-items:center;gap:10px;flex:none;padding:calc(6px + env(safe-area-inset-top,0px)) calc(12px + env(safe-area-inset-right,0px)) 6px calc(12px + env(safe-area-inset-left,0px))}
+#hubHead{position:relative;z-index:2;display:flex;align-items:center;gap:10px;flex:none;padding:calc(2px + min(env(safe-area-inset-top,0px),8px)) calc(12px + env(safe-area-inset-right,0px)) 6px calc(12px + env(safe-area-inset-left,0px))}
 #hubHead .hlogo{flex:none;font-size:1.25rem;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.28);letter-spacing:.3px}
 #hubHead .hr{flex:none;display:flex;align-items:center;gap:6px}
 #hubHead .featherChip{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.7);color:#fff;font-size:.85rem}
@@ -457,7 +457,12 @@ html.land .m3 .mtile .mst2{flex:none;font-size:.58rem;letter-spacing:0;color:#b0
 html.land .m3 .mgrid2 .mtile.on{transform:scale(1.03);box-shadow:0 0 0 3px #ffd24d,0 5px 10px rgba(0,0,0,.28)}
 html.land .m3 .mdet{display:flex;flex-direction:column;min-height:0;height:100%}
 html.land .m3 .mdet .crew{flex:1;flex-direction:column;margin:6px 8px 8px;gap:5px;min-height:0}
-html.land .m3 .mdet .crewL{flex:2;flex-direction:column;gap:5px;min-height:0}
+html.land .m3 .mdet .crewL{flex:2.3;flex-direction:row;gap:6px;min-height:0;min-width:0}
+html.land .m3 .mdet .crewL .ccard{flex:1 1 0;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:4px 4px 3px;position:relative}
+html.land .m3 .mdet .crewL .ccard .cart{flex:1 1 0;min-height:0;width:100%;height:auto;aspect-ratio:auto;max-height:none;border-radius:11px}
+html.land .m3 .mdet .crewL .ccard .cart svg{height:100%;width:auto;max-height:none;max-width:100%}
+html.land .m3 .mdet .crewL .ccard b{flex:none;width:100%;text-align:center;font-size:.74rem;padding:0 15px 0 2px;box-sizing:border-box}
+html.land .m3 .mdet .crewL .ccard .cedit{top:auto;bottom:3px;right:4px;width:19px;height:19px;font-size:.62rem;border-width:2px}
 html.land .m3 .mdet .ccard,html.land .m3 .mdet .cfriend{--cs:40px;flex:1;width:auto;height:auto;min-height:0;min-width:0;flex-direction:row;justify-content:flex-start;gap:7px;padding:3px 8px 3px 4px;border-radius:14px;border-width:2px;box-shadow:0 3px 0 var(--line)}
 html.land .m3 .mdet .ccard .cart{flex:none;height:calc(100% - 2px);aspect-ratio:1;width:auto;max-height:42px;border-radius:10px}
 html.land .m3 .mdet .ccard .cart svg{height:100%;max-height:36px}
@@ -4192,21 +4197,32 @@ const OLD_PRICE={"flowers": 100, "mailbox": 150, "fence": 200, "lantern": 250, "
 const itemById=id=>SHOP.find(i=>i.id===id);
 let preview=null;
 let feathers=store.get('kz-feathers',0),owned=store.get('kz-owned',[]);
-let EQ=store.get('kz-equip2',null);
-if(!EQ){const o=store.get('kz-equip',{})||{};EQ={g:{hat:o.hat||null,eyes:o.eyes||null,neck:o.neck||null,top:null,back:null,feet:null,hand:null},k:{hat:null,eyes:null,neck:null,top:null,bottom:null,back:null,feet:null,hand:null}}}
+/* her kaz ve her karakterin kendi gardırobu var: kz-equip3 = {gs:{kazId:{..}}, ks:{karakterId:{..}}} */
+let EQ_OVR=null;
+const eqBlank=w=>w==='g'?{hat:null,eyes:null,neck:null,top:null,back:null,feet:null,hand:null}:{hat:null,eyes:null,neck:null,top:null,bottom:null,back:null,feet:null,hand:null};
+const eqKey=w=>{const i=(EQ_OVR&&EQ_OVR[w]!=null)?EQ_OVR[w]:(w==='g'?sel.goose:sel.rider),o=(w==='g'?GEESE:RIDERS)[i];return o&&o.id!=null?o.id:String(i)};
+let EQS=store.get('kz-equip3',null);
+if(!EQS||!EQS.gs||!EQS.ks){
+  const o2=store.get('kz-equip2',null),o1=store.get('kz-equip',{})||{};
+  const og=o2&&o2.g?o2.g:{hat:o1.hat||null,eyes:o1.eyes||null,neck:o1.neck||null},ok=o2&&o2.k?o2.k:{};
+  EQS={gs:{},ks:{}};
+  /* eski ortak gardırop yalnız şu an seçili kaz ve karakterde kalır */
+  EQS.gs[eqKey('g')]=Object.assign(eqBlank('g'),og);EQS.ks[eqKey('k')]=Object.assign(eqBlank('k'),ok)}
+const EQ={get g(){const k=eqKey('g');return EQS.gs[k]||(EQS.gs[k]=eqBlank('g'))},get k(){const k=eqKey('k');return EQS.ks[k]||(EQS.ks[k]=eqBlank('k'))},set g(v){EQS.gs[eqKey('g')]=v},set k(v){EQS.ks[eqKey('k')]=v}};
+function eqWith(ov,fn){const p=EQ_OVR;EQ_OVR=ov;try{return fn()}finally{EQ_OVR=p}}
 /* mağaza yenilendi: kalkan eski eşyaların bedeli tüy olarak iade edilir */
 (function(){try{if(store.get('kz-shop3',false))return;let back=0;
   owned=owned.filter(id=>{if(itemById(id))return true;const k=String(id).replace(/^[gk]_/,'');back+=OLD_PRICE[k]||0;return false});
-  for(const w of['g','k']){const e=EQ[w]||(EQ[w]={});for(const sl of Object.keys(e)){if(e[sl]&&!itemById(e[sl]))e[sl]=null}}
+  for(const e of Object.values(EQS.gs).concat(Object.values(EQS.ks))){for(const sl of Object.keys(e)){if(e[sl]&&!itemById(e[sl]))e[sl]=null}}
   feathers+=back;store.set('kz-shop3',true);store.set('kz-shop3-refund',back);saveShop()}catch(e){console.error('shop mig',e)}})();
 /* mağaza ikinci kez yenilendi (kaz/karakter ayrıldı, gökkuşağı kalktı): kalkan eşyaların bedeli iade */
 (function(){try{if(store.get('kz-shop4',false))return;
   const REM={g_tee_red:250,g_tee_blue:250,g_tee_yellow:250,g_jersey:450,g_hawaii:450,g_rainbow:450,g_pack_red:400,g_pack_blue:400,g_guitar:500,g_sneaker_w:300,g_sneaker_r:300,g_hitop:350,g_umb_rainbow:500,k_rainbow:450,k_umb_rainbow:500};
   let back=0;owned=owned.filter(id=>{if(itemById(id))return true;if(REM[id]!==undefined){back+=REM[id];return false}return true});
-  for(const w of['g','k']){const e=EQ[w]||(EQ[w]={});for(const sl of Object.keys(e)){if(e[sl]&&!itemById(e[sl]))e[sl]=null}}
+  for(const e of Object.values(EQS.gs).concat(Object.values(EQS.ks))){for(const sl of Object.keys(e)){if(e[sl]&&!itemById(e[sl]))e[sl]=null}}
   feathers+=back;store.set('kz-shop4',true);store.set('kz-shop4-refund',back);saveShop()}catch(e){console.error('shop mig4',e)}})();
-function saveShop(){store.set('kz-feathers',feathers);store.set('kz-owned',owned);store.set('kz-equip2',EQ)}
-function eqOf(who){const e=Object.assign({},EQ[who]),pv=preview&&itemById(preview);if(pv&&pv.who===who&&pv.type!=='nest')e[pv.type]=pv.id;return e}
+function saveShop(){store.set('kz-feathers',feathers);store.set('kz-owned',owned);store.set('kz-equip3',EQS)}
+function eqOf(who,idx){const e=Object.assign({},idx==null?EQ[who]:eqWith({[who]:idx},()=>EQ[who])),pv=preview&&itemById(preview);if(pv&&pv.who===who&&pv.type!=='nest')e[pv.type]=pv.id;return e}
 const wearable=id=>!!id&&(owned.includes(id)||id===preview);
 function strawHat(r,col,band){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.CylinderGeometry(r,r,.04,18),S(col));g.add(b);const c=new THREE.Mesh(new THREE.CylinderGeometry(r*.42,r*.5,r*.5,14),S(col));c.position.y=r*.25;g.add(c);
   const bd=new THREE.Mesh(new THREE.CylinderGeometry(r*.51,r*.51,r*.12,14),S(band));bd.position.y=r*.08;g.add(bd);return g}
@@ -5588,7 +5604,7 @@ function pvInit(){if(PV.r)return true;if(PV.bad)return false;
     const up=()=>{const d=PV.drag;PV.drag=null;if(d&&!d.m){PV.fx=1.2;try{if(PV.kind==='goose')vak();else chime()}catch(_){}}};
     cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',()=>{PV.drag=null});
     PVW.t=setTimeout(pvWarm,2500);return true}catch(e){PV.bad=true;console.error('pv',e);return false}}
-function pvPick(kind){return kind==='kid'?['k',focR(),JSON.stringify(eqOf('k')),RIDERS[focR()]&&RIDERS[focR()].custom?JSON.stringify(HLK):''].join('|'):['g',focG(),JSON.stringify(eqOf('g'))].join('|')}
+function pvPick(kind){return kind==='kid'?['k',focR(),JSON.stringify(eqOf('k',focR())),RIDERS[focR()]&&RIDERS[focR()].custom?JSON.stringify(HLK):''].join('|'):['g',focG(),JSON.stringify(eqOf('g',focG()))].join('|')}
 /* Yalnız geometri serbest bırakılır. Materyal dispose edilirse üç.js son kullanıcısı kalmayan shader programını siler ve her yeni kazda yeniden derler (telefonda saniyelerce donma). Materyaller çöp toplayıcıya bırakılır; program önbellekte kalır. */
 function pvDispose(o){try{o.traverse(n=>{if(n.geometry&&n.geometry.dispose)n.geometry.dispose()})}catch(e){}}
 /* shader programlarını boşta kalan anlarda, kaz kaz önceden derle (seçerken donma olmasın) */
@@ -5602,11 +5618,11 @@ function pvWarm(){clearTimeout(PVW.t);if(!PV.r||PV.bad)return;
   PVW.t=setTimeout(pvWarm,260)}
 /* model önbelleği: her kaz/karakter bir kez kurulur; seçim sırasında yalnızca sahnedeki nesne değiştirilir (kurma/derleme yok) */
 const PVC=new Map();
-function pvKey(kind,idx){return kind==='kid'?['k',idx,JSON.stringify(eqOf('k')),RIDERS[idx]&&RIDERS[idx].custom?JSON.stringify(HLK):''].join('|'):['g',idx,JSON.stringify(eqOf('g'))].join('|')}
+function pvKey(kind,idx){return kind==='kid'?['k',idx,JSON.stringify(eqOf('k',idx)),RIDERS[idx]&&RIDERS[idx].custom?JSON.stringify(HLK):''].join('|'):['g',idx,JSON.stringify(eqOf('g',idx))].join('|')}
 function pvEvict(){while(PVC.size>30){const k=PVC.keys().next().value,e=PVC.get(k);PVC.delete(k);if(e.o!==PV.obj)pvDispose(e.o)}}
 function pvMake(kind,idx){let o;
-  if(kind==='kid'){o=makeRider(RIDERS[idx]);applyKidOutfit(o);poseStand(o)}
-  else{o=makeGoose(GEESE[idx]);applyAccessories(o);o.userData.fold();o.userData.feet.visible=true;o.userData.tuck.visible=false}
+  if(kind==='kid'){o=makeRider(RIDERS[idx]);eqWith({k:idx},()=>applyKidOutfit(o));poseStand(o)}
+  else{o=makeGoose(GEESE[idx]);eqWith({g:idx},()=>applyAccessories(o));o.userData.fold();o.userData.feet.visible=true;o.userData.tuck.visible=false}
   o.updateMatrixWorld(true);
   const bx=new THREE.Box3().setFromObject(o),c=bx.getCenter(new THREE.Vector3()),sz=bx.getSize(new THREE.Vector3());
   o.position.set(-c.x,-c.y,-c.z);return{o,sz,box:{h:sz.y,w:Math.max(sz.x,sz.z)}}}
@@ -9524,10 +9540,9 @@ LOOKS_G.forEach((l,i)=>{l.pts=LK_PT_G[i]||LK_PT_G[LK_PT_G.length-1];Object.defin
 const lkState=l=>{const[c,n]=l.un();return{cur:Math.min(c,n),need:n,ok:c>=n}};
 const lkSave=()=>{};
 function lkOutItems(who,out){const r=[];for(const sl in out){const it=advWearItem(who,sl,out[sl]);if(it)r.push([sl,it])}return r}
-function lkApply(who,l){const slots=(who==='g'?SLOTS_G:SLOTS_K).map(s=>s[0]);const e=EQ[who]||(EQ[who]={});slots.forEach(s=>e[s]=null);
+function lkApply(who,l){if(who==='g'){const fb=focBase();if(fb)store.set('kz-gbase',fb);FOC.g=null;sel.goose=l.gi;store.set('kz-goose',l.gi)}else{const fr=focR();if(fr!==sel.rider){sel.rider=fr;store.set('kz-rider2',fr)}FOC.r=null}
+  const slots=(who==='g'?SLOTS_G:SLOTS_K).map(s=>s[0]);const e=EQ[who];slots.forEach(s=>e[s]=null);
   for(const[sl,it]of lkOutItems(who,l.out)){if(!owned.includes(it.id))owned.push(it.id);e[sl]=it.id}
-  if(who==='g'){const fb=focBase();if(fb)store.set('kz-gbase',fb);FOC.g=null;sel.goose=l.gi;store.set('kz-goose',l.gi)}
-  else{const fr=focR();if(fr!==sel.rider){sel.rider=fr;store.set('kz-rider2',fr)}FOC.r=null}
   saveShop();fanfare();menuGoose();renderHub(true)}
 function lkKidOn(l){const e=EQ.k||{};const its=lkOutItems('k',l.out);if(!its.length)return false;
   for(const sl of['hat','eyes','neck','top','bottom','feet','back','hand']){const want=(its.find(x=>x[0]===sl)||[])[1];if((e[sl]||null)!==(want?want.id:null))return false}return true}
