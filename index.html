@@ -1,4 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style id="klOpaCss">[data-klo]{opacity:var(--ko)}#hud.fsw [data-klo].kb.off{opacity:calc(var(--ko)*.5)}#rocketBtn[data-klo].empty{opacity:calc(var(--ko)*.55)}#warBar [data-klo].wb.zero{opacity:calc(var(--ko)*.5)}#spBtn{opacity:var(--cdo,1)}#spBtn[data-klo]{opacity:calc(var(--ko)*var(--cdo,1))}</style>
+<style id="klpCss">.klp{position:fixed!important;left:auto!important;top:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;margin:0!important;max-width:none!important;transform:translate(50%,50%) scale(var(--sc,1))!important;z-index:4}</style></head><body>
 <!doctype html>
 <html lang="tr">
 <head>
@@ -5768,7 +5770,7 @@ function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 let honkT=9,toastT=0;function toast(msg,d=1.8){const t=$('#toast');t.textContent=msg;t.classList.toggle('big',/^[0-9]$/.test(msg)||msg==='Koş!'||msg==='Uç!');t.classList.add('on');toastT=d}
 function setObjective(title,text){$('#objTitle').textContent=title;$('#objText').textContent=text||''}
 function setAction(label){actBtn.innerHTML=label}
-function setSpecial(label,mash){spOn=!!label;if(label){spBtn.innerHTML=label;spBtn.classList.add('on');spBtn.classList.toggle('mash',!!mash)}else{spBtn.classList.remove('on');spBtn.classList.remove('mash')}spBtn.style.opacity=1;$('#hud').classList.toggle('mash',!!(mash&&label))}
+function setSpecial(label,mash){spOn=!!label;if(label){spBtn.innerHTML=label;spBtn.classList.add('on');spBtn.classList.toggle('mash',!!mash)}else{spBtn.classList.remove('on');spBtn.classList.remove('mash')}spBtn.style.setProperty('--cdo',1);$('#hud').classList.toggle('mash',!!(mash&&label))}
 $('#exitBtn').addEventListener('click',()=>{
   if(document.getElementById('exitCf'))return;try{if(typeof setPause==='function')setPause(true)}catch(e){}
   const d=document.createElement('div');d.id='exitCf';
@@ -7400,7 +7402,7 @@ function setupScare(){
   let cd=0,downN=0,lastObj='';const waves=[];
   setObjective('Korkuluk devirme',`Tarlalardaki ${crows.length} korkuluğa alçaktan yaklaş ve kanat dalgasıyla devir!`);
   updates=(dt,inp)=>{
-    if(state.done)return;cd-=dt;spBtn.style.opacity=cd>0?.55:1;
+    if(state.done)return;cd-=dt;spBtn.style.setProperty('--cdo',cd>0?.55:1);
     if(inp.pressed&&state.mode==='fly'&&cd<=0){cd=1.2;sfx(180,.35,'sine',.14);
       const w=new THREE.Mesh(new THREE.SphereGeometry(1,18,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35,depthWrite:false}));w.position.copy(player.pos);addM(w);waves.push({w,t:0});
       let any=false;for(const c of crows){if(c.down)continue;if(c.p.distanceTo(player.pos)<22){c.down=true;any=true;downN++;state.pts+=10;const dx=c.p.x-player.pos.x,dz=c.p.z-player.pos.z;c.sc.rotation.y=Math.atan2(dx,dz);burst(c.p.clone(),hayMat,16);setTimeout(()=>sfx(260,.25,'triangle',.12),200)}}
@@ -10165,32 +10167,43 @@ const KL_PROFS=[['fly','🪿 Uçuş modları'],['gr','🏃 Kaz Koşusu'],['war',
 const klProf=id=>id==='war'?'war':id==='gr'?'gr':'fly';
 const klDims=()=>{const lw=(window.ORI&&ORI.lw)||innerWidth,lh=(window.ORI&&ORI.lh)||innerHeight;return{lw,lh}};
 const klW=()=>{const{lw,lh}=klDims();return lw/lh*100};
-const KL_FLY={actBtn:{r:19.6,b:22.1,d:21},brakeBtn:{r:46.5,b:13.2,d:17.5},bankL:{r:40.1,b:29.9,d:15},bankR:{r:10.7,b:49,d:15},
- slalomBtn:{r:53,b:47.6,d:14},rocketBtn:{r:27.4,b:42.6,d:16},spBtn:{r:28,b:65.8,d:14},inBinBtn:{r:66.6,b:19.8,d:14.5},goBtn:{r:66.6,b:37.2,d:14.5}};
+const KL_FLY={actBtn:{r:14,b:17,d:21},brakeBtn:{r:36,b:11,d:16},bankL:{r:47,b:24,d:14.5},bankR:{r:31,b:34,d:14.5},
+ slalomBtn:{r:31,b:57,d:13},rocketBtn:{r:14,b:41,d:15.5},spBtn:{r:14,b:60,d:15},inBinBtn:{r:46,b:45,d:14},goBtn:{r:62,b:28,d:14}};
 const KLD={
- fly:W=>Object.assign({},KL_FLY,{dpad:{r:W-26,b:27.8,d:43,fix:1}}),
- gr:W=>({grJump:{r:40.3,b:36.4,d:18.3,inl:1},grSlide:{r:40.3,b:15.3,d:18.3,inl:1},dpad:{r:W-22,b:14.7,d:42,fix:1}}),
- war:W=>{const c=W/2;return{actBtn:{r:34,b:12,d:14,inl:1},brakeBtn:{r:49,b:12,d:14,inl:1},rocketBtn:{r:10,b:47,d:14,inl:1},
-  warFire:{r:13,b:21,d:22,inl:1},warHold:{r:31,b:38,d:12.5,inl:1},
+ fly:W=>Object.assign({},KL_FLY,{dpad:{r:W-26,b:27.8,d:43}}),
+ gr:W=>({grJump:{r:15,b:22,d:21},grSlide:{r:38,b:14,d:18},dpad:{r:W-24,b:15,d:42}}),
+ war:W=>{const c=W/2;return{warFire:{r:14,b:24,d:23,inl:1},actBtn:{r:35,b:12,d:14.5,inl:1},brakeBtn:{r:51,b:12,d:14.5,inl:1},rocketBtn:{r:13,b:50,d:14.5,inl:1},warHold:{r:32,b:35,d:12.5,inl:1},
   wa0:{r:c+21.9,b:7,d:11,inl:1},wa1:{r:c+9.7,b:7,d:11,inl:1},wa2:{r:c-2.5,b:7,d:11,inl:1},warBagBtn:{r:c-13.45,b:5.75,d:8.5,inl:1},warBoardBtn:{r:c-23.15,b:5.75,d:8.5,inl:1},
-  warGear:{r:c,b:18,d:64,inl:1,bar:1},warMap:{r:14,b:74,d:24,inl:1},dpad:{r:W-26,b:27.8,d:43,fix:1}}}};
+  warGear:{r:c,b:18,d:64,inl:1,bar:1},warMap:{r:W-14,b:62,d:22,inl:1},dpad:{r:W-26,b:27.8,d:43}}}};
 const KL_INFO={actBtn:['⚡','Turbo','#ffd36b'],brakeBtn:['🛑','Yavaşla','#ffe1e1'],bankL:['↶','Sola yat','#d9f0ff'],bankR:['↷','Sağa yat','#d9f0ff'],
  slalomBtn:['🌀','Slalom','#ffe9a6'],rocketBtn:['🚀','Roket','#16305e'],spBtn:['✨','Görev tuşu','#c9f5d6'],inBinBtn:['🪿','Kaza in/bin','#cfeeff'],goBtn:['🧭','Tüneğe git','#ffe9b8'],
  dpad:['✥','Yön tuşları','#ffffff','sq'],grJump:['⬆','Zıpla','#a6e6a0'],grSlide:['⬇','Kay','#9ff0ff'],
  warFire:['🏹','Ok at','#ff8fa6'],warHold:['⏸','Asılı Kal','#d9f0ff'],wa0:['🪶','Tüylü ok','#ffffff','sq'],wa1:['🌟','Altın ok','#ffffff','sq'],wa2:['🔥','Alevli ok','#ffffff','sq'],
  warMap:['🗺️','Mini harita','#bfe8c8'],warBagBtn:['🎒','Çanta','#d9f0ff','sq'],warBoardBtn:['🏆','Skor','#d9f0ff','sq'],warGear:['🚀','Hız çubuğu','#ffffff','bar']};
+/* ekrandaki küçük HUD öğeleri (görev, enerji, ses, durdur, harita, kamera...) */
+Object.assign(KL_INFO,{objective:['🎯','Görev etiketi','#ffffff','chip'],hearts:['❤️','Enerji çubuğu','#ffffff','chip'],advChip:['⚪','Tüy sayaçları','#ffffff','chip'],regChip:['📍','Bölge adı','#d5dbe4','chip'],timer:['⏱','Süre','#ffffff','chip'],
+ muteBtn:['🔊','Ses','#ffffff'],pauseBtn:['⏸','Durdur','#ffd36b'],exitBtn:['✕','Çıkış','#ffffff'],camViewBtn:['📷','Kamera 1/2','#ffffff','chip'],advMapBtn:['🗺️','Harita','#ffffff'],advQBtn:['🧭','Görevler','#ffffff'],advCam:['📸','Fotoğraf','#ffffff'],chaseStat:['🏁','Takip bilgisi','#ffffff','chip']});
+const KL_HK=W=>({objective:{r:W-17,b:92.5,d:28,k:1},hearts:{r:W-45,b:92.5,d:25,k:1},advChip:{r:W-86,b:92.5,d:39.5,k:1},timer:{r:45,b:92.5,d:11,k:1},
+ muteBtn:{r:30.6,b:92.5,d:9.3,k:1},pauseBtn:{r:19,b:92.5,d:9.3,k:1},exitBtn:{r:7.4,b:92.5,d:9.3,k:1},
+ regChip:{r:W-19,b:81,d:24.4,k:1},chaseStat:{r:W-52,b:81,d:24,k:1},
+ camViewBtn:{r:49,b:81,d:18,k:1},advMapBtn:{r:30.6,b:81,d:9.3,k:1},advQBtn:{r:19,b:81,d:9.3,k:1},advCam:{r:7.4,b:81,d:9.3,k:1}});
+for(const p of Object.keys(KLD)){const f=KLD[p];KLD[p]=W=>Object.assign(f(W),KL_HK(W))}
 const KL_ALL=[...new Set(Object.values(KLD).flatMap(f=>Object.keys(f(100))))];
-function klLoad(){let s=store.get('kz-keylayout2',null);if(!s){const o=store.get('kz-keylayout',{})||{};s={fly:o}}for(const p of['fly','gr','war'])s[p]=s[p]||{};return s}
+function klLoad(){let s=store.get('kz-keylayout3',null)||{};for(const p of['fly','gr','war'])s[p]=s[p]||{};return s}
 const KL={saved:klLoad(),prof:'fly',work:null,tab:'main',sel:null,msg:''};
 const klDefs=p=>KLD[p](klW());
-const klSave=()=>store.set('kz-keylayout2',KL.saved);
-function klApply(prof){prof=prof||'fly';const L=KL.saved[prof]||{},D=klDefs(prof);
-  for(const id of KL_ALL){const el=document.getElementById(id);if(!el)continue;const df=D[id],o=df?(L[id]?Object.assign({},df,L[id]):(df.inl?df:null)):null;
+const klSave=()=>store.set('kz-keylayout3',KL.saved);
+function klApply(prof){prof=prof||'fly';KL.cur=prof;const L=KL.saved[prof]||{},D=klDefs(prof);
+  for(const id of KL_ALL){const el=document.getElementById(id);if(!el)continue;const df=D[id],o=df?(L[id]?Object.assign({},df,L[id]):df):null;
     if(o){el.style.setProperty('--r',o.r,'important');el.style.setProperty('--b',o.b,'important');el.style.setProperty('--d',o.d,'important')}
     else{el.style.removeProperty('--r');el.style.removeProperty('--b');el.style.removeProperty('--d')}
-    if(id==='dpad')el.classList.toggle('klc',!!(df&&L[id]))}
-  const gp=document.getElementById('grPad');if(gp)gp.classList.toggle('klc',prof==='gr'&&!!(L.grJump||L.grSlide))}
+    if(o&&o.o!=null&&o.o<1){el.style.setProperty('--ko',o.o);el.setAttribute('data-klo','1')}else{el.style.removeProperty('--ko');el.removeAttribute('data-klo')}
+    if(id==='dpad'||(df&&df.k))el.style.setProperty('--sc',o&&df?o.d/df.d:1);el.classList.toggle('klp',!!(df&&df.k));
+    if(id==='dpad')el.classList.toggle('klc',!!df)}
+  const gp=document.getElementById('grPad');if(gp)gp.classList.toggle('klc',prof==='gr')}
 klApply('fly');
+/* sonradan oluşturulan tuşlar (Görevler, Fotoğraf, Kamera, Harita, Bölge adı...) de düzene yerleşsin */
+{const h=document.getElementById('hud');if(h)new MutationObserver(ms=>{if(KL._t||!ms.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&n.id&&KL_ALL.includes(n.id))))return;KL._t=setTimeout(()=>{KL._t=0;try{klApply(KL.cur)}catch(_){}},0)}).observe(h,{childList:true,subtree:true})}
 const klShape=id=>KL_INFO[id][3]||'';
 const klBox=(id,o)=>({w:o.d,h:klShape(id)==='bar'?9:o.d});
 function klEditorHtml(){const D=klDefs(KL.prof);if(!KL.work){KL.work={};for(const id in D)KL.work[id]=Object.assign({},D[id],KL.saved[KL.prof][id]||{})}
@@ -10209,9 +10222,8 @@ function klLayout(n){const scr=document.getElementById('klScr');if(!scr||!KL.wor
   const ids=Object.keys(els);for(const a of ids){let bad=false;for(const b of ids){if(a===b)continue;const A=KL.work[a],B=KL.work[b],ba=klBox(a,A),bb=klBox(b,B);
     if(Math.abs(A.r-B.r)<(ba.w+bb.w)/2*.82&&Math.abs(A.b-B.b)<(ba.h+bb.h)/2*.82)bad=true}els[a].classList.toggle('bad',bad)}}
 const klSettingsOld=settingsHtml;
-settingsHtml=function(){const nav=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="chip2" data-kltab="main" style="${KL.tab==='main'?'background:var(--berry);color:#fff':''}">⚙️ Genel</button><button class="chip2" data-kltab="keys" style="${KL.tab==='keys'?'background:var(--berry);color:#fff':''}">🎛️ Tuş Düzeni</button></div>`;
-  return nav+(KL.tab==='keys'?klEditorHtml():klSettingsOld())};
-function klCommit(p,work){const D=klDefs(p),L={};for(const id in D){const w=work[id];if(!w)continue;const d=D[id];if(Math.abs(w.r-d.r)>.01||Math.abs(w.b-d.b)>.01||(!d.fix&&Math.abs(w.d-d.d)>.01))L[id]={r:+w.r.toFixed(2),b:+w.b.toFixed(2),d:+(d.fix?d.d:w.d).toFixed(2)}}KL.saved[p]=L}
+settingsHtml=function(){const nav=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="chip2" style="background:var(--berry);color:#fff">⚙️ Genel</button><button class="chip2" data-klopen="1">🎛️ Tuş Düzeni ⛶</button></div>`;return nav+klSettingsOld()};
+function klCommit(p,work){const D=klDefs(p),L={};for(const id in D){const w=work[id];if(!w)continue;const d=D[id],oo=w.o==null?1:w.o;if(Math.abs(w.r-d.r)>.01||Math.abs(w.b-d.b)>.01||Math.abs(w.d-d.d)>.01||oo<1){L[id]={r:+w.r.toFixed(2),b:+w.b.toFixed(2),d:+w.d.toFixed(2)};if(oo<1)L[id].o=+oo.toFixed(2)}}KL.saved[p]=L}
 {new MutationObserver(()=>{const sc=document.getElementById('klScr');if(sc&&!sc.dataset.laid){sc.dataset.laid=1;klLayout()}}).observe($('#hubBody'),{childList:true,subtree:true});addEventListener('resize',()=>klLayout());
  const body=$('#hubBody');let drag=null;
  const rerender=()=>{renderHub(true);setTimeout(klLayout,0)};
@@ -10249,10 +10261,113 @@ function klCommit(p,work){const D=klDefs(p),L={};for(const id in D){const w=work
 .klh{display:none;position:absolute;right:-9%;bottom:-9%;width:26%;min-width:18px;aspect-ratio:1;border-radius:50%;background:var(--berry);border:3px solid #fff;cursor:nwse-resize;touch-action:none}
 .klb.sel .klh{display:block}
 .klctl{margin:4px 0 8px;font-weight:700;font-size:.9rem}.klctl label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.klctl input{flex:1;min-width:120px}
-#dpad.klc{left:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;transform:translate(50%,50%)!important}
+#dpad.klc{left:auto!important;right:calc(var(--vh)*var(--r))!important;bottom:calc(var(--vh)*var(--b))!important;transform:translate(50%,50%) scale(var(--sc,1))!important}
 #hud.grb #grPad.klc{inset:0;display:block}
 #grPad.klc button{position:absolute;right:calc(var(--vh)*var(--r));bottom:calc(var(--vh)*var(--b));margin:0 calc(var(--vh)*var(--d)*-.5) calc(var(--vh)*var(--d)*-.5) 0;width:calc(var(--vh)*var(--d))!important;height:calc(var(--vh)*var(--d))!important}`;document.head.appendChild(st)}
 
+
+/* ================= TAM EKRAN TUŞ DÜZENLEYİCİ (boyut + saydamlık + kaydet) ================= */
+const KLE={ov:null,prof:'fly',works:{},sel:null,dirty:false,drag:null,moved:false};
+{
+const px=e=>window.ORI?ORI.x(e):e.clientX,py=e=>window.ORI?ORI.y(e):e.clientY;
+const mk=(p,reset)=>{const D=klDefs(p),w={};for(const id in D)w[id]=Object.assign({o:1},D[id],reset?{}:(KL.saved[p][id]||{}));return w};
+const work=p=>KLE.works[p]||(KLE.works[p]=mk(p));
+const box=(id,o)=>({w:o.d,h:klShape(id)==='bar'?9:klShape(id)==='chip'?7.5:(id==='dpad'&&KLE.prof==='gr')?o.d*.47:o.d});
+const rng=id=>{const d=klDefs(KLE.prof)[id];return d.k?[Math.round(d.d*.5),Math.round(d.d*1.8)]:klShape(id)==='bar'?[34,96]:id==='dpad'?[24,64]:[9,30]};
+const q=s=>KLE.ov.querySelector(s);
+const say=m=>{const t=q('.klToast');t.textContent=m;t.classList.add('on');clearTimeout(say.t);say.t=setTimeout(()=>t.classList.remove('on'),1800)};
+const mark=()=>{KLE.dirty=true;const b=q('[data-a=save]');if(b)b.classList.add('dirty')};
+const clamp=id=>{const o=work(KLE.prof)[id],bx=box(id,o),S=q('.klStage'),W=S.clientWidth/(S.clientHeight/100);o.r=Math.max(bx.w/2,Math.min(W-bx.w/2,o.r));o.b=Math.max(bx.h/2,Math.min(100-bx.h/2,o.b))};
+function paint(){const ov=KLE.ov;if(!ov)return;const{lw,lh}=klDims(),asp=lw/lh,H=ov.clientHeight,W=ov.clientWidth,T=q('.klTop').offsetHeight+8;let sh=H-T-8,sw=sh*asp;if(sw>W-16){sw=W-16;sh=sw/asp}
+  const S=q('.klStage');S.style.cssText=`left:${(W-sw)/2}px;top:${T+(H-T-8-sh)/2}px;width:${sw}px;height:${sh}px`;
+  const u=sh/100,w=work(KLE.prof),els=[...ov.querySelectorAll('.klb')];
+  els.forEach(e=>{const id=e.dataset.k,o=w[id],bx=box(id,o),ww=bx.w*u,hh=bx.h*u;
+    e.style.cssText=`width:${ww}px;height:${hh}px;left:${sw-o.r*u-ww/2}px;top:${sh-o.b*u-hh/2}px;font-size:${Math.max(8,Math.min(ww,hh)*.34)}px;opacity:${o.o};--bg:${KL_INFO[id][2]}`;
+    e.classList.toggle('sel',KLE.sel===id);
+    e.classList.toggle('bad',els.some(f=>{if(f===e)return false;const B=w[f.dataset.k],bb=box(f.dataset.k,B);return Math.abs(o.r-B.r)<(bx.w+bb.w)/2*.82&&Math.abs(o.b-B.b)<(bx.h+bb.h)/2*.82}))})}
+function sync(){const id=KLE.sel;if(!id)return;const o=work(KLE.prof)[id],d=klDefs(KLE.prof)[id],a=q('#klSz'),b=q('#klOp');if(a)a.value=o.d;if(b)b.value=Math.round(o.o*100);
+  const x=q('#klSv'),y=q('#klOv');if(x)x.textContent=Math.round(o.d/d.d*100)+'%';if(y)y.textContent=Math.round(o.o*100)+'%'}
+function panel(){const p=q('.klPb'),id=KLE.sel;
+  const foot=`<div class="klFoot"><button class="klG" data-a="resetmode">↺ Bu modu sıfırla</button></div>`;
+  if(!id){p.innerHTML=`<p class="klHint">👆 Düzenlemek için bir tuşa dokun.<br><b>Sürükle</b> = konum<br><b>Köşedeki tutamaç</b> = boyut</p>${foot}`;return}
+  const o=work(KLE.prof)[id],i=KL_INFO[id],[mn,mx]=rng(id);
+  p.innerHTML=`<div class="klSel"><span class="klIc" style="background:${i[2]}">${i[0]}</span><b>${i[1]}</b></div>
+  <label class="klRow"><span>📏 Boyut</span><output id="klSv"></output><input type="range" id="klSz" min="${mn}" max="${mx}" step=".5"></label>
+  <label class="klRow"><span>🫥 Saydamlık</span><output id="klOv"></output><input type="range" id="klOp" min="15" max="100" step="5"></label>
+  <div class="klNudge"><span>Konum</span><button data-n="l">◀</button><button data-n="u">▲</button><button data-n="d">▼</button><button data-n="r">▶</button><button class="klG" data-a="resetkey">↺ Tuşu sıfırla</button></div>${foot}`;sync()}
+function build(){const D=klDefs(KLE.prof),ov=KLE.ov;
+  q('.klChips').innerHTML=KL_PROFS.map(p=>`<button class="klC${KLE.prof===p[0]?' on':''}" data-p="${p[0]}">${p[1]}</button>`).join('');
+  ov.querySelectorAll('.klb').forEach(e=>e.remove());
+  ov.querySelector('.klBtns').innerHTML=Object.keys(D).map(id=>{const i=KL_INFO[id],sh=klShape(id);return `<div class="klb ${sh}" data-k="${id}"><span class="kli">${i[0]}</span><small>${i[1]}</small>${sh==='bar'?'':'<i class="klh"></i>'}</div>`}).join('');
+  paint();panel()}
+function saveAll(){for(const p in KLE.works)klCommit(p,KLE.works[p]);klSave();try{klApply('fly')}catch(_){}KLE.dirty=false;const b=q('[data-a=save]');if(b)b.classList.remove('dirty');try{chime()}catch(_){}say('✔ Kaydedildi!')}
+function close(){document.removeEventListener('keydown',onKey);removeEventListener('resize',paint);if(KLE.ov){KLE.ov.remove();KLE.ov=null}KL.tab='main';try{renderHub(true)}catch(_){}}
+const onKey=e=>{if(e.key==='Escape')tryExit()};
+function tryExit(){if(KLE.dirty)q('.klDlg').classList.add('on');else close()}
+window.klOpen=function(){if(KLE.ov)return;KLE.works={};KLE.sel=null;KLE.dirty=false;
+  const ov=KLE.ov=document.createElement('div');ov.id='klFull';
+  ov.innerHTML=`<div class="klTop"><b class="klTitle">🎛️ Tuş Düzeni</b><div class="klChips"></div><button class="klB pri" data-a="save">💾 Kaydet</button><button class="klB" data-a="saveexit">✔ Kaydet ve çık</button><button class="klB x" data-a="exit" aria-label="Kapat">✕</button></div>
+  <div class="klStage"><div class="kljoy">sol başparmak<br>joystick alanı</div><div class="klBtns"></div></div>
+  <div class="klPanel"><div class="klPh" data-a="fold">⚙️ Tuş ayarları <i>▾</i></div><div class="klPb"></div></div>
+  <div class="klToast"></div>
+  <div class="klDlg"><div><h3>Kaydedilmemiş değişiklik var</h3><p>Çıkmadan önce kaydetmek ister misin?</p><button class="klB pri" data-a="saveexit">💾 Kaydet ve çık</button><button class="klB" data-a="discard">Kaydetmeden çık</button><button class="klB" data-a="cancel">Vazgeç</button></div></div>`;
+  (document.getElementById('app')||document.body).appendChild(ov);build();requestAnimationFrame(paint);document.addEventListener('keydown',onKey);addEventListener('resize',paint);
+  ov.addEventListener('pointerdown',e=>{const t=e.target;if(t.closest('.klTop,.klPanel,.klDlg'))return;const b=t.closest('.klb');
+    if(!b){if(KLE.sel){KLE.sel=null;paint();panel()}return}
+    e.preventDefault();const id=b.dataset.k;if(KLE.sel!==id){KLE.sel=id;panel()}
+    KLE.drag={id,size:!!t.closest('.klh'),x:px(e),y:py(e),o:Object.assign({},work(KLE.prof)[id]),m:false};paint();try{b.setPointerCapture(e.pointerId)}catch(_){}});
+  ov.addEventListener('pointermove',e=>{const d=KLE.drag;if(!d)return;const u=q('.klStage').clientHeight/100,dx=(px(e)-d.x)/u,dy=(py(e)-d.y)/u;if(!d.m&&Math.hypot(dx,dy)<.4)return;d.m=true;
+    const o=work(KLE.prof)[d.id];if(d.size){const[mn,mx]=rng(d.id);o.d=Math.max(mn,Math.min(mx,d.o.d+(dx+dy)/2))}else{o.r=d.o.r-dx;o.b=d.o.b-dy}clamp(d.id);mark();paint();sync()});
+  const end=()=>{KLE.drag=null};ov.addEventListener('pointerup',end);ov.addEventListener('pointercancel',end);
+  ov.addEventListener('input',e=>{const id=KLE.sel;if(!id)return;const o=work(KLE.prof)[id];
+    if(e.target.id==='klSz')o.d=+e.target.value;else if(e.target.id==='klOp')o.o=+e.target.value/100;else return;clamp(id);mark();paint();sync()});
+  ov.addEventListener('click',e=>{const t=e.target.closest('[data-a],[data-n],[data-p]');if(!t)return;const w=work(KLE.prof),id=KLE.sel,a=t.dataset.a;
+    if(t.dataset.p){KLE.prof=t.dataset.p;KLE.sel=null;build();return}
+    if(t.dataset.n&&id){const s=.5,o=w[id],n=t.dataset.n;if(n==='l')o.r+=s;if(n==='r')o.r-=s;if(n==='u')o.b+=s;if(n==='d')o.b-=s;clamp(id);mark();paint();return}
+    if(a==='save')saveAll();
+    else if(a==='saveexit'){saveAll();close()}
+    else if(a==='exit')tryExit();
+    else if(a==='discard')close();
+    else if(a==='cancel')q('.klDlg').classList.remove('on');
+    else if(a==='fold')q('.klPanel').classList.toggle('min');
+    else if(a==='resetkey'&&id){Object.assign(w[id],klDefs(KLE.prof)[id],{o:1});mark();paint();sync();say('↺ Tuş sıfırlandı')}
+    else if(a==='resetmode'){KLE.works[KLE.prof]=mk(KLE.prof,true);mark();paint();panel();say('↺ Bu mod varsayılana döndü (Kaydet ile onayla)')}})};
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-klopen]'))klOpen()});
+const st=document.createElement('style');st.textContent=`
+#klFull{position:absolute;inset:0;z-index:300;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;color:#fff;background:radial-gradient(120% 100% at 50% 0,#2f6db5,#0c1830)}
+#klFull .klStage::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.1) 0 1px,transparent 1px 10%),repeating-linear-gradient(90deg,rgba(255,255,255,.1) 0 1px,transparent 1px 7%)}
+#klFull button{font-family:inherit;cursor:pointer}
+.klStage{position:absolute;overflow:hidden;border-radius:16px;border:3px solid rgba(255,255,255,.75);box-shadow:0 10px 30px rgba(0,0,0,.5);background:linear-gradient(#7cc4ff,#bfe6ff 55%,#74be55 56%,#4f9f42)}.klBtns{position:absolute;inset:0}.klb.chip{border-radius:999px;flex-direction:row;gap:5px}.klb.chip small{margin:0}
+.klTop{position:absolute;left:0;right:0;top:0;z-index:6;display:flex;align-items:center;gap:7px;padding:6px 10px;background:rgba(14,29,56,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 3px 14px rgba(0,0,0,.3)}
+.klTitle{font-size:.92rem;font-weight:900;white-space:nowrap}
+.klChips{flex:1;min-width:0;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+.klC{flex:none;border:2px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:5px 11px;font-weight:800;font-size:.74rem;white-space:nowrap}
+.klC.on{background:linear-gradient(#ffe27a,#ffb42e);color:#3a2100;border-color:#fff}
+.klB{flex:none;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.16);color:#fff;border-radius:12px;padding:6px 11px;font-weight:800;font-size:.78rem;white-space:nowrap}
+.klB.pri{background:linear-gradient(#5be07f,#25a84e);border-color:#fff;box-shadow:0 3px 0 #17773a}
+.klB.pri.dirty{animation:klP 1.3s ease-in-out infinite}.klB.x{padding:6px 10px}
+@keyframes klP{50%{box-shadow:0 3px 0 #17773a,0 0 0 6px rgba(91,224,127,.4)}}
+.klHud{position:absolute;left:10px;top:52px;display:flex;gap:5px;font-size:.62rem;font-weight:800;pointer-events:none}.klHud span{background:rgba(255,255,255,.85);color:#1f3348;border:2px solid #1f4e79;border-radius:10px;padding:1px 7px}
+.kljoy{position:absolute;left:3%;bottom:5%;width:32%;height:42%;border:2px dashed rgba(31,51,72,.35);border-radius:18px;font-size:.62rem;font-weight:700;color:rgba(31,51,72,.55);display:grid;place-items:center;text-align:center;pointer-events:none}
+.klPanel{position:absolute;z-index:6;left:14px;top:62px;width:min(236px,42%);max-height:calc(100% - 72px);display:flex;flex-direction:column;border-radius:18px;background:rgba(14,29,56,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,.35);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.klPh{padding:8px 12px;font-weight:900;font-size:.8rem;display:flex;justify-content:space-between;cursor:pointer}.klPanel.min .klPb{display:none}.klPanel.min .klPh i{transform:rotate(-90deg)}
+.klPb{padding:0 12px 10px;overflow:auto;font-size:.78rem}
+.klHint{margin:2px 0 8px;line-height:1.5;opacity:.9}
+.klSel{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.88rem}.klIc{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid #fff;font-size:1rem}
+.klRow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;margin:6px 0;font-weight:800}.klRow output{color:#ffe27a}.klRow input{grid-column:1/3;width:100%;accent-color:#ffd24a;height:22px;margin:0}
+.klNudge{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:8px 0}.klNudge span{font-weight:800;margin-right:2px}
+.klNudge button{width:30px;height:28px;border-radius:9px;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.14);color:#fff;font-size:.8rem}
+.klNudge .klG{width:auto;padding:0 9px;flex:1}
+.klFoot{display:flex;flex-direction:column;gap:5px;margin-top:6px}.klG{border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:6px;font-weight:800;font-size:.72rem}
+.klb{position:absolute;border-radius:50%;background:var(--bg);border:3px solid #1f4e79;box-shadow:0 3px 0 #1f4e79;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:#1f3348;font-weight:800;box-sizing:border-box;cursor:grab;touch-action:none;z-index:2}
+.klb.sq{border-radius:14%}.klb.bar{border-radius:14px;flex-direction:row;gap:5px}.klb .kli{font-size:1.35em}.klb small{font-size:.62em;margin-top:1px;white-space:nowrap}.klb.bar small{margin:0}
+.klb[style*="--bg:#16305e"]{color:#ffd21f}
+.klb.sel{outline:3px solid #ff5d9e;outline-offset:3px;z-index:4}.klb.bad{border-color:#e0302f;box-shadow:0 3px 0 #e0302f}
+.klh{display:none;position:absolute;right:-12%;bottom:-12%;width:30%;min-width:22px;aspect-ratio:1;border-radius:50%;background:#ff5d9e;border:3px solid #fff;cursor:nwse-resize;touch-action:none}.klb.sel .klh{display:block}
+.klToast{position:absolute;left:50%;bottom:14px;transform:translate(-50%,20px);opacity:0;z-index:8;background:rgba(14,29,56,.92);border:2px solid #fff;border-radius:14px;padding:7px 16px;font-weight:800;font-size:.8rem;transition:.25s;pointer-events:none;max-width:90%;text-align:center}.klToast.on{opacity:1;transform:translate(-50%,0)}
+.klDlg{display:none;position:absolute;inset:0;z-index:9;background:rgba(0,0,0,.55);align-items:center;justify-content:center}.klDlg.on{display:flex}
+.klDlg>div{background:#17305a;border:3px solid #fff;border-radius:20px;padding:16px 18px;text-align:center;display:flex;flex-direction:column;gap:8px;max-width:300px}.klDlg h3{margin:0;font-size:1rem}.klDlg p{margin:0 0 4px;font-size:.82rem;opacity:.9}`;
+document.head.appendChild(st)}
 
 /* kart şeridi: seçili kart öne gelir (coverflow) */
 /* atlıkarınca: kartlar bir çember üzerinde, sırtları merkeze dönük; sonsuz döngü */
@@ -10674,7 +10789,7 @@ ANIM.push(dt=>{
     const d=Math.max(80,Math.hypot(L.x-camera.position.x,L.s.position.y-camera.position.y,L.z-camera.position.z));L.s.visible=true;L.m.opacity=a*.95;L.s.scale.set(d*L.k,d*L.k*.2188,1)}
   /* konum rozeti */
   REGUI.tick-=dt;if(REGUI.tick>0)return;REGUI.tick=.3;
-  if(!REGUI.chip){const e=document.createElement('div');e.id='regChip';e.setAttribute('role','status');document.getElementById('hud').appendChild(e);REGUI.chip=e}
+  if(!REGUI.chip){const e=document.createElement('div');e.id='regChip';e.setAttribute('role','status');document.getElementById('hud').appendChild(e);REGUI.chip=e;try{klApply(KL.cur)}catch(_){}}
   const r=regionAt(P.x,P.z),poi=poiAt(P.x,P.z),want=r&&r.n;
   if(REGUI.cur===null)REGUI.cur=want;else if(want!==REGUI.cur){if(REGUI.cand!==want){REGUI.cand=want;REGUI.ct=0}REGUI.ct+=.3;if(REGUI.ct>=1.2){REGUI.cur=want;REGUI.cand=null}}else REGUI.cand=null;
   const txt='📍 '+(poi?poi+' · ':'')+REGUI.cur;
@@ -10723,7 +10838,7 @@ function mmOpen(){
   if(WAR&&WAR.mapOv)try{WAR.mapOv(w)}catch(e){}
   MM.el.classList.add('show');if(!paused&&state.mode==='fly'){paused=true;MM.own=true}}
 {const btn=document.createElement('button');btn.id='advMapBtn';btn.textContent='🗺️';btn.setAttribute('aria-label','Harita');document.getElementById('topright').appendChild(btn);
-  btn.addEventListener('click',e=>{e.stopPropagation();try{unlockAudio();sfx(520,.06,'triangle',.08)}catch(x){}mmOpen()});
+  btn.addEventListener('click',e=>{e.stopPropagation();try{unlockAudio();sfx(520,.06,'triangle',.08)}catch(x){}mmOpen()});try{klApply(KL.cur)}catch(_){}
   const st=document.createElement('style');st.textContent='#advMapBtn{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:3px solid var(--line);background:var(--panel);font-size:1rem;padding:0;line-height:1}';document.head.appendChild(st)}
 ANIM.push(dt=>{if(!NAV.on||state.done||(state.mode!=='fly'&&state.mode!=='walk'&&state.mode!=='ground'))return;const px=state.mode==='walk'?WALK.x:player.pos.x,pz=state.mode==='walk'?WALK.z:player.pos.z;
   if(Math.hypot(px-NAV.x,pz-NAV.z)<20){NAV.on=false;MM.pt=null;try{chime()}catch(e){}toast('🎯 Hedefe Vardınız!',2.4)}});
