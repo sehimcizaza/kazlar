@@ -8035,7 +8035,11 @@ function shopHtml(){
   const chips=`<div class="slotrow"><button class="chip2${slotF==='all'?' on':''}" data-slot="all">Hepsi</button>`+slots.map(sl=>`<button class="chip2${slotF===sl[0]?' on':''}" data-slot="${sl[0]}">${sl[2]} ${sl[1]}</button>`).join('')+`<button class="chip2" data-spin="1">🔄 Döndür</button></div>`;
   const list=SHOP.filter(i=>i.who===who&&(slotF==='all'||i.type===slotF));
   return `<p class="hint2">👀 Parmağınla sürükle: ${who==='g'?'kazı':'karakteri'} her yönden gör. Eşyaya dokununca üstünde denersin.</p>${chips}<div class="sgrid">`+list.map(itemCard).join('')+`</div>`}
-const KZ_VER=218;
+const KZ_VER=221;
+/* görünen sürüm numarası: GitHub'daki version.txt (çevrimdışıysa son bilinen) */
+const KZ_GH={v:(()=>{try{const v=store.get('kz-ghv','1.1');return /^[0-9][0-9.]{0,9}$/.test(v)?v:'1.1'}catch(e){return'1.1'}})()};
+function kzVerShow(){document.querySelectorAll('.kzver').forEach(e=>{e.textContent='Kazanya · sürüm '+KZ_GH.v});document.querySelectorAll('#nwOv h3 small').forEach(e=>{e.textContent='sürüm '+KZ_GH.v})}
+try{fetch('https://raw.githubusercontent.com/sehimcizaza/kazlar/main/version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{t=String(t).trim();if(/^[0-9][0-9.]{0,9}$/.test(t)&&t!==KZ_GH.v){KZ_GH.v=t;try{store.set('kz-ghv',t)}catch(e){}kzVerShow()}}).catch(()=>{})}catch(e){}
 let gfx=store.get('kz-gfx','mid');
 const AQ={on:store.get('kz-autoq',true)!==false,n:0,sum:0,t:0,low:0,steps:0};
 /* ---- uzaklık sisi + sisin ardındaki nesneleri hiç çizmeme (ısınmayı azaltır) ---- */
@@ -8108,7 +8112,7 @@ function settingsHtml(){const o=(a,v,ic,t)=>`<button class="opt${v?' on':''}" da
   <div class="pcard"><h4>Grafik</h4>${row('Kalite',o('gfx="low"',gfx==='low','','Düşük')+o('gfx="mid"',gfx==='mid','','Orta')+o('gfx="high"',gfx==='high','','Yüksek'))}
   ${row('Yavaşlayınca otomatik düşür',o('autoq="1"',AQ.on,'','Açık')+o('autoq="0"',!AQ.on,'','Kapalı'))}
   ${row('Akıcılık (FPS)',o('fps="45"',FPSM.mode==='45','','45')+o('fps="60"',FPSM.mode==='60','','60')+o('fps="90"',FPSM.mode==='90','','90')+o('fps="dyn"',FPSM.mode==='dyn','','Oto'))}
-  <button class="opt gmore" data-gmore>Diğer grafik ayarları ›</button></div><div class="pcard"><h4>Destek</h4><button class="opt gmore" data-report>🐞 Sorun Bildir ›</button><p class="hint2 kzver" data-ver>Kazanya · sürüm ${KZ_VER}</p></div></div>
+  <button class="opt gmore" data-gmore>Diğer grafik ayarları ›</button></div><div class="pcard"><h4>Destek</h4><button class="opt gmore" data-report>🐞 Sorun Bildir ›</button><p class="hint2 kzver" data-ver>Kazanya · sürüm ${KZ_GH.v}</p></div></div>
   <div class="pcol"><div class="pcard"><h4>Ses</h4>${row('Ses',o('snd="on"',!muted,'🔊','Açık')+o('snd="off"',muted,'🔇','Kapalı'))}
   ${row('Titreşim',o('vib="1"',VIBP.on,'📳','Açık')+o('vib="0"',!VIBP.on,'','Kapalı'))}
   <label class="vrow"><span class="pl">Müzik</span><input type="range" data-vol="m" min="0" max="100" step="1" value="${Math.round(VOL.m*100)}"><b>${Math.round(VOL.m*100)}%</b></label>
@@ -8304,7 +8308,7 @@ $('#hubBody').addEventListener('click',e=>{const t=e.target;unlockAudio();let b;
   if((b=t.closest('[data-gfx]'))){setGfx(b.dataset.gfx);return}
   if((b=t.closest('[data-fps]'))){setFps(b.dataset.fps);sfx(600,.08,'triangle',.08);return}
   if((b=t.closest('[data-gmore]'))){openGmore();return}
-  if(t.closest('[data-report]')){try{const body=encodeURIComponent('Sorunu buraya yaz:\n\n\n---\nCihaz: '+navigator.userAgent+'\nEkran: '+innerWidth+'x'+innerHeight+'\nKalite: '+gfx+'\nSürüm: '+KZ_VER);location.href='mailto:sehimci@gmail.com?subject='+encodeURIComponent('Kazonya - Sorun Bildirimi')+'&body='+body}catch(e){}return}
+  if(t.closest('[data-report]')){try{const body=encodeURIComponent('Sorunu buraya yaz:\n\n\n---\nCihaz: '+navigator.userAgent+'\nEkran: '+innerWidth+'x'+innerHeight+'\nKalite: '+gfx+'\nSürüm: '+KZ_GH.v+' (iç '+KZ_VER+')');location.href='mailto:sehimci@gmail.com?subject='+encodeURIComponent('Kazonya - Sorun Bildirimi')+'&body='+body}catch(e){}return}
   if((b=t.closest('[data-pc]'))){pcOpen();return}
     if((b=t.closest('[data-snd]'))){setMuted(b.dataset.snd==='off');return}
   if((b=t.closest('[data-trk]'))){setTrack(b.dataset.trk);if(b.dataset.trk!=='off'&&muted)setMuted(false);if(actx)startMusic();renderHub(true);return}
@@ -8485,6 +8489,8 @@ function dgRain(){const o=document.getElementById('dgOv');if(!o||(window.matchMe
   for(let i=0;i<22;i++){const f=document.createElement('span');f.className='dgf';f.textContent='🪶';f.style.cssText=`left:${(Math.random()*94+1).toFixed(1)}%;font-size:${Math.round(18+Math.random()*18)}px;--t:${(1.5+Math.random()*1.3).toFixed(2)}s;--dl:${(Math.random()*.9).toFixed(2)}s;--rot:${Math.round(-300+Math.random()*600)}deg`;o.appendChild(f);els.push(f)}
   setTimeout(()=>els.forEach(f=>f.remove()),3600)}
 const KZ_NEWS={215:['🔒 Oda kurucusu arkadaşı odadan çıkarabilir, odayı kilitleyebilir','📍 Serbest uçuşta işaret koy, arkadaşların görsün','🎲 Birlikte etkinlik: “İlk kim varır?” ve “Buluşalım”','📡 Bağlantı kopunca oyun kendiliğinden geri bağlanır','📸 Arkadaşla çekilen fotoğrafa renkli çerçeve'],
+  220:['🪿 Yerde iken arkadaşının bekleyen kazının yanına gidip 🪿 düğmesiyle binebilirsin; o kalkınca birlikte uçarsınız'],
+  219:['🧭 Ortak görev: seçtiğin görev arkadaşında da çıkar, hedefler aynı yerde','🪿 Arkadaşının kazına arka arkaya bin (🪿 düğmesi)','🏰 Kale merdiveninin ucuna geniş sahanlık eklendi'],
   216:['🎁 Arkadaşına günde bir kez tüy hediye et','🗓 Haftalık hedefi bitir, haftanın rozetini kazan','🌟 Yeni bir bölgeye ilk girişte adı belirir','🟢 Odadayken bağlantı göstergesi','🔊 Ödüllerde ses ve titreşim (Ayarlar’dan kapatılır)']};
 function nwCheck(){if(state.mode!=='menu'||curScreen!=='hub')return;if(typeof loadedAt!=='undefined'&&Date.now()-loadedAt<3500)return;
   const o0=document.getElementById('dgOv');if(o0&&o0.style.display==='flex')return;if(DG.last!==dgToday())return;
@@ -8496,7 +8502,7 @@ function nwCheck(){if(state.mode!=='menu'||curScreen!=='hub')return;if(typeof lo
   if(!vs.length){store.set('kz-seenver',KZ_VER);return}
   const items=[].concat(...vs.map(v=>KZ_NEWS[v])).slice(0,8);
   if(!o){o=document.createElement('div');o.id='nwOv';(document.getElementById('app')||document.body).appendChild(o)}
-  o.innerHTML=`<div class="nwb"><h3>✨ Yenilikler <small>sürüm ${KZ_VER}</small></h3><ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul><button class="big" data-nwx>Tamam</button></div>`;o.style.display='flex'}
+  o.innerHTML=`<div class="nwb"><h3>✨ Yenilikler <small>sürüm ${KZ_GH.v}</small></h3><ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul><button class="big" data-nwx>Tamam</button></div>`;o.style.display='flex'}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-nwx]');if(!t)return;store.set('kz-seenver',KZ_VER);const o=document.getElementById('nwOv');if(o)o.style.display='none'});
 {const st=document.createElement('style');st.textContent=`#nwOv{position:fixed;inset:0;z-index:99992;background:rgba(10,20,34,.6);display:none;align-items:center;justify-content:center;padding:calc(var(--vh,1vh)*3) calc(var(--vw,1vw)*3);box-sizing:border-box}.nwb{background:#f4f9ff;color:#1f3348;border-radius:20px;padding:calc(var(--vh,1vh)*3) calc(var(--vh,1vh)*4);width:min(calc(var(--vw,1vw)*92),440px);max-height:calc(var(--vh,1vh)*94);overflow:auto;box-sizing:border-box;text-align:left;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:kzPop .32s cubic-bezier(.2,1.2,.4,1) both}.nwb h3{margin:0 0 6px;font-size:clamp(1rem,calc(var(--vh,1vh)*5.4),1.35rem)}.nwb h3 small{font-weight:600;font-size:.6em;opacity:.65}.nwb ul{margin:0 0 10px;padding-left:20px;font-size:clamp(.8rem,calc(var(--vh,1vh)*4),1rem);line-height:1.35;font-weight:700}.nwb li{margin:3px 0}.nwb .big{display:block;margin:0 auto;font-size:clamp(.9rem,calc(var(--vh,1vh)*5.2),1.25rem);padding:calc(var(--vh,1vh)*2) calc(var(--vh,1vh)*8);min-height:44px}`;document.head.appendChild(st)}
 function dgCheck(){if(DG.last===dgToday()||state.mode!=='menu'||curScreen!=='hub'||document.getElementById('dgOv')&&document.getElementById('dgOv').style.display==='flex')return;
@@ -12470,6 +12476,10 @@ function mpData(d,conn){if(!d||typeof d!=='object')return;
   else if(d.t==='ewin'&&!MP.host){if(MP.ev&&MP.ev.id===d.id)mpEvDone(d)}
   else if(d.t==='eend'&&!MP.host){mpEvEnd('⛔ Etkinlik bitti')}
   else if(d.t==='fg'&&q){if(d.to===MP.myId)mpGiftRecv(q);else mpRelay(d,conn)}
+  else if(d.t==='rd'&&q){if(d.to===MP.myId)rdRecv(d,q);else mpRelay(d,conn)}
+  else if(d.t==='at'&&!MP.host&&!ADVT.on&&Number.isInteger(d.i)&&ADVT_SPOTS[d.i]&&ADVT_SPOTS[d.i].k!=='train'){advTrainStart(d.i)}
+  else if(d.t==='ae'&&q){if(ADVT.on)advTrainEnd(!!d.ok,true);mpRelay(d,conn)}
+  else if(d.t==='aq'&&q){try{advQRecv(d,q)}catch(e){console.error('aq',e)}mpRelay(d,conn)}
   else if(d.t==='qc'&&q){mpQShow(q.name,d.i|0);mpRelay(d,conn)}
   else if(d.t==='yq'){try{mpSend({t:'yv',s:y3Share()})}catch(e){}mpRelay(d,conn)}
   else if(d.t==='yv'&&q){if(MP.yAsk&&Date.now()-MP.yAsk<8000){MP.yAsk=0;y3OpenVisit(d.s,q.name,mpCol(q.id))}mpRelay(d,conn)}
@@ -12509,7 +12519,7 @@ function mpBegin(){
   for(const q of MP.ps)mpMakeRemote(q);
   MP.remote=MP.ps[0]?MP.ps[0].remote:null;MP.tgt=null;MP.sendT=0;MP.first=true;
   const u=updates;updates=(dt,inp)=>{if(u)u(dt,inp);mpTick(dt)}}
-function mpTick(dt){MP.sendT-=dt;try{mpMarksTick(dt)}catch(e){}
+function mpTick(dt){MP.sendT-=dt;try{mpMarksTick(dt)}catch(e){}try{rdTick(dt)}catch(e){}
   if(state.mission==='gr'){/* Kaz Koşusu: pist koordinatı (s,l) gönderilir; arkadaşın kazı oyun içinde çizilir */
     if(MP.sendT<=0&&mpLink()&&state.grPl){MP.sendT=.08;const q=state.grPl;mpSend({t:'gp',s:+q.s.toFixed(2),l:+q.l.toFixed(2),hy:+q.hy.toFixed(2),vs:+q.vs.toFixed(2),sl:(q.slide>0||(iceAt(q.s)&&q.hy<.3))?1:0,tm:q.tumble>0?+(1-q.tumble/.9).toFixed(2):0,fin:q.done?1:0})}
     if(MP.remote)MP.remote.visible=false;return}
@@ -12517,6 +12527,7 @@ function mpTick(dt){MP.sendT-=dt;try{mpMarksTick(dt)}catch(e){}
     else mpSend({t:'pos',x:+player.pos.x.toFixed(2),y:+player.pos.y.toFixed(2),z:+player.pos.z.toFixed(2),a:+player.yaw.toFixed(3),p:+player.pitch.toFixed(3),r:+player.roll.toFixed(3),e:Math.round(energy)})}
   let near=null,nd=1e12;const labs=[];
   for(const q of MP.ps){const g=q.remote,d=q.tgt;if(!g||!d)continue;
+    if(KRD.role==='own'&&q===KRD.q&&state.mode==='fly'){g.position.set(player.pos.x+Math.sin(player.yaw)*RD_BACK,player.pos.y+RD_UP,player.pos.z+Math.cos(player.yaw)*RD_BACK);g.rotation.set(player.pitch-.1,player.yaw,player.roll);g.userData.flap(clock*9,.55);g.visible=true;q.first=false;labs.push([q,RD_BACK]);continue}
     if(q.first){g.position.set(d.x,d.y,d.z);g.rotation.set(d.p-.1,d.a,d.r);q.first=false;if(q===MP.ps[0])MP.first=false;g.visible=true}
     if(mpRemoteWalk(q,d,dt)){const rd=g.userData.rd,dw=mpMyPos().distanceTo(rd.position);if(dw<nd){nd=dw;near=q}labs.push([q,dw]);continue}
     const k=1-Math.exp(-dt*9);g.position.x+=(d.x-g.position.x)*k;g.position.y+=(d.y-g.position.y)*k;g.position.z+=(d.z-g.position.z)*k;
@@ -12589,6 +12600,54 @@ function mpEvCheck(){const ev=MP.ev;if(!ev||ev.k!=='meet'||ev.won)return;const a
 function mpEvDone(d){const ev=MP.ev;if(!ev)return;const k=ev.k;mpEvEnd();let r=0,m='';
   if(k==='race'){if(d.w===MP.myId){r=10;m='🏆 Sen kazandın! +10 🪶'}else{r=3;m='🏆 '+(d.n||'Arkadaşın')+' kazandı! +3 🪶'}}else{r=5;m='🤝 Hep birlikte buluştunuz! +5 🪶'}
   feathers+=r;try{saveShop()}catch(e){}toast(m,3.4);try{fanfare()}catch(e){}}
+/* ===== ARKA ARKAYA BİNME: arkadaşın kazına binersin; kazı sahibi sürer ve önde olur ===== */
+const KRD={role:null,q:null,pend:0,ask:null,askT:0},RD_BACK=2.4,RD_UP=1.2;
+function rdSend(a,to){mpSend({t:'rd',a,to})}
+function rdEnd(send,msg){const q=KRD.q;if(send&&q&&mpLink())rdSend('e',q.id);const was=KRD.role;KRD.role=null;KRD.q=null;KRD.pend=0;
+  if(was==='pax'){try{player.speed=26+player.g.speed*5;player.roll=0;invuln=Math.max(invuln,1.2);
+    if(state.mode==='fly'){const gh=Math.max(height(player.pos.x,player.pos.z),0);if(gh>.3&&player.pos.y-gh<5){player.speed=0;startDismount()}}}catch(e){}}
+  if(msg)toast(msg,2.4);rdUi()}
+/* yerde yürürken arkadaşın bekleyen kazının arkasına bin: karakter kazın sırtına geçer, kaz sahibi kalkınca birlikte uçarsınız */
+function rdBoard(){const W=WALK,n=W.nils;if(state.mode!=='walk'||!W.on||!n)return false;
+  n.visible=true;camera.near=.5;camera.updateProjectionMatrix();scene.remove(n);rigGoose.add(n);n.rotation.order='XYZ';n.rotation.set(0,0,0);n.position.set(RIDE.p[0],RIDE.p[1],RIDE.p[2]);n.scale.setScalar(RIDE.s);poseRide(n);
+  {const j=n.userData.j;n.userData.arm={L:{sh:j.shL.quaternion.clone(),el:j.elL.quaternion.clone()},R:{sh:j.shR.quaternion.clone(),el:j.elR.quaternion.clone()}}}
+  W.on=false;W.nils=null;W.gp=null;W.call=null;goCancel();player.tun=-1;player.stun=0;player.roll=0;player.slow=0;player.scr=0;player.hitWall=false;
+  rigGoose.userData.unfold();rigGoose.userData.feet.visible=false;rigGoose.userData.tuck.visible=true;state.mode='fly';
+  setAction('⚡<br>Turbo');brakeBtn.innerHTML='🛑<br>Yavaşla';setSpecial(null);$('#hud').classList.remove('sw');$('#swipeHint').innerHTML='<b>↔</b> sürükle: kamerayı çevir<br>joystick: ilerle';$('#swipeHint').classList.remove('off');
+  try{updateRig(0,true)}catch(e){}return true}
+function rdAskHide(){if(KRD.ask){KRD.ask.remove();KRD.ask=null}}
+function rdAskShow(q){rdAskHide();const e=document.createElement('div');e.id='rdAsk';e.innerHTML='<b>🪿 '+escapeHtml(q.name)+' kazına binmek istiyor</b><div><button data-y="1">✅ Bin</button><button data-n="1">✖ Şimdi olmaz</button></div>';
+  ['pointerdown','touchstart'].forEach(t=>e.addEventListener(t,ev=>ev.stopPropagation()));
+  e.addEventListener('click',ev=>{ev.stopPropagation();const b=ev.target.closest('button');if(!b)return;rdAskHide();
+    if(b.dataset.y&&mpFree()&&(state.mode==='fly'||state.mode==='walk')&&!KRD.role&&MP.ps.includes(q)){KRD.role='own';KRD.q=q;rdSend('y',q.id);toast('🪿 '+q.name+' kazına bindi! Sen sürüyorsun.',2.6);try{chime()}catch(x){}rdUi()}else rdSend('n',q.id)});
+  document.body.appendChild(e);KRD.ask=e;KRD.askT=12;try{mpSnd('ev')}catch(x){}}
+function rdRecv(d,q){const a=d.a;
+  if(a==='q'){if(!mpFree()||(state.mode!=='fly'&&state.mode!=='walk')||KRD.role||KRD.ask){rdSend('n',q.id);return}rdAskShow(q);KRD.askQ=q}
+  else if(a==='y'){if(KRD.pend===q.id&&!KRD.role&&(state.mode==='fly'||(state.mode==='walk'&&rdBoard()))){KRD.pend=0;KRD.role='pax';KRD.q=q;toast('🪿 '+q.name+' kazına bindin! Kazı o sürüyor.',2.8);try{fanfare()}catch(x){}rdUi()}else rdSend('e',q.id)}
+  else if(a==='n'){if(KRD.pend===q.id){KRD.pend=0;toast(q.name+' şimdi binmeni istemiyor',2.2);rdUi()}}
+  else if(a==='e'){if(KRD.q===q)rdEnd(false,'🪿 '+q.name+' ile yolculuk bitti')}
+  else if(a==='c'){if(KRD.ask&&KRD.askQ===q)rdAskHide()}}
+function rdNearGround(){if(state.mode!=='walk'||!WALK.on)return null;let best=null,bd=7;for(const q of MP.ps){const d=q.tgt;if(!q.wk||!d||!isFinite(d.gx))continue;const dd=Math.hypot(WALK.x-d.gx,WALK.z-d.gz);if(dd<bd&&Math.abs(WALK.y+1.85-d.gy)<6){bd=dd;best=q}}return best}
+function rdNear(){let best=null,bd=40;if(state.mode==='walk')return rdNearGround();if(state.mode!=='fly')return null;for(const q of MP.ps){const g=q.remote;if(!g||!g.visible||q.wk)continue;const d=player.pos.distanceTo(g.position);if(d<bd){bd=d;best=q}}return best}
+function rdUi(){const b=document.getElementById('rdBtn');if(!b)return;const on=mpFree()&&(state.mode==='fly'||state.mode==='walk');
+  if(!on){b.style.display='none';return}
+  if(KRD.role){b.style.display='flex';b.textContent='⬇';b.setAttribute('aria-label',KRD.role==='pax'?'Kazdan in':'Arkadaşı indir');b.dataset.m='end';return}
+  if(KRD.pend){b.style.display='flex';b.textContent='⏳';b.dataset.m='wait';b.setAttribute('aria-label','Bekleniyor');return}
+  const q=rdNear();if(q){b.style.display='flex';b.textContent='🪿';b.dataset.m='ask';b.dataset.q=q.id;b.setAttribute('aria-label',q.name+' kazına bin')}else b.style.display='none'}
+function rdTick(dt){
+  if(KRD.askT>0){KRD.askT-=dt;if(KRD.askT<=0){if(KRD.ask&&KRD.askQ)rdSend('n',KRD.askQ.id);rdAskHide()}}
+  if(KRD.pend){KRD.pendT-=dt;if(KRD.pendT<=0){KRD.pend=0;rdUi()}}
+  if(!KRD.role)return;const q=KRD.q;
+  if(!mpFree()||!q||!MP.ps.includes(q)||!q.remote||(KRD.role==='pax'?state.mode!=='fly':(state.mode!=='fly'&&state.mode!=='walk'&&state.mode!=='takeoff'))){rdEnd(true,'🪿 Yolculuk bitti');return}
+  if(KRD.role==='pax'){const g=q.remote,yw=g.rotation.y;
+    player.pos.set(g.position.x+Math.sin(yw)*RD_BACK,g.position.y+RD_UP,g.position.z+Math.cos(yw)*RD_BACK);
+    player.yaw=yw;player.pitch=g.rotation.x+.1;player.roll=g.rotation.z;invuln=Math.max(invuln,.6)}}
+{const st=document.createElement('style');st.textContent=`#rdBtn{position:fixed;top:46%;left:146px;z-index:60;width:38px;height:38px;border-radius:50%;border:2px solid #fff;background:rgba(20,40,70,.55);color:#fff;font-size:18px;display:none;align-items:center;justify-content:center;padding:0}@media (pointer:coarse){#rdBtn{width:44px;height:44px;left:152px}}#rdAsk{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:70;background:rgba(20,40,70,.94);color:#fff;border-radius:16px;padding:10px 14px;text-align:center;font-size:.9rem;max-width:90vw;box-shadow:0 4px 16px rgba(0,0,0,.4)}#rdAsk div{display:flex;gap:8px;justify-content:center;margin-top:8px}#rdAsk button{font:inherit;font-weight:800;border:0;border-radius:10px;padding:8px 12px;min-height:40px;background:#fff;color:#1f3348}`;document.head.appendChild(st);
+  const b=document.createElement('button');b.id='rdBtn';document.body.appendChild(b);['pointerdown','touchstart'].forEach(t=>b.addEventListener(t,e=>e.stopPropagation()));
+  b.addEventListener('click',e=>{e.stopPropagation();const m=b.dataset.m;
+    if(m==='end')rdEnd(true,'⬇ Yolculuk bitti');
+    else if(m==='ask'){const q=MP.byId[+b.dataset.q];if(q&&mpLink()){KRD.pend=q.id;KRD.pendT=14;rdSend('q',q.id);toast('🪿 '+q.name+' kazına binmek için sordun…',2.2);rdUi()}}});
+  setInterval(()=>{try{rdUi()}catch(e){}},500)}
 {const st=document.createElement('style');st.textContent=`#mpPb,#mpEb{position:fixed;top:46%;z-index:60;width:38px;height:38px;border-radius:50%;border:2px solid #fff;background:rgba(20,40,70,.55);color:#fff;font-size:18px;display:none;align-items:center;justify-content:center;padding:0}#mpPb{left:54px}#mpEb{left:100px}#mpEp{position:fixed;left:100px;top:calc(46% + 46px);z-index:61;display:none;flex-direction:column;gap:5px;background:rgba(20,40,70,.88);border-radius:14px;padding:6px}#mpEp button{font:inherit;font-weight:800;font-size:.8rem;border:0;border-radius:10px;padding:8px 10px;min-height:40px;background:#fff;color:#1f3348;text-align:left;white-space:nowrap}@media (pointer:coarse){#mpPb,#mpEb{width:44px;height:44px}#mpEb{left:106px}#mpEp{left:106px;top:calc(46% + 52px)}}`;document.head.appendChild(st);
   const pb=document.createElement('button');pb.id='mpPb';pb.textContent='📍';pb.setAttribute('aria-label','Arkadaşlara yer göster');
   const eb=document.createElement('button');eb.id='mpEb';eb.textContent='🎲';eb.setAttribute('aria-label','Birlikte etkinlik başlat');
@@ -15165,7 +15224,18 @@ function advQMarkers(){/* görünür işaretleri yeniden kur */
   if(sp.t==='collect')sp.pts.forEach((p,i)=>{if(!st.c.includes(i))add(sp.icon,p,i)});
   else if(sp.t==='visit')add(sp.icon,sp.p||new V3(),0,sp.dyn,sp.dy);
   else if(sp.t==='carry')add(st.k?sp.iconB:sp.iconA,st.k?sp.b:sp.a,0)}
-function advQTrack(id){ADV.s.track=id;ADV.ChainTrack=id;advSave();if(ADV.qg)advQMarkers()}
+function advQTrack(id){ADV.s.track=id;ADV.ChainTrack=id;advSave();if(ADV.qg)advQMarkers();advQShare(true)}
+/* ortak görev: ilerleme iki tarafta birleştirilir (geri gitmez); hedefler aynı noktada çıkar */
+function advQKey(id){const st=advQState(id);return id+':'+st.s+':'+st.k+':'+st.c.slice().sort().join(',')+':'+(st.done?1:0)}
+function advQShare(force){if(!mpLink())return;const c=advQCurChain();if(!c)return;const k=advQKey(c.id);if(!force&&k===ADV.shK)return;ADV.shK=k;const st=advQState(c.id);mpSend({t:'aq',id:c.id,s:st.s,k:st.k,c:st.c.slice(),dn:st.done?1:0,tr:force?1:0})}
+function advQRecv(d,q){const D=advQDefs(),c=D.find(x=>x.id===d.id);if(!c||!Number.isInteger(d.s)||!Array.isArray(d.c))return;const st=advQState(c.id);let ch=false,fin=false;
+  const rs=Math.max(0,Math.min(c.steps.length,d.s|0)),rd=!!d.dn||rs>=c.steps.length;
+  if(!st.done&&(rd||rs>st.s)){const was=st.done;st.s=rd?c.steps.length:rs;st.c=d.c.filter(Number.isInteger).slice(0,40);st.k=d.k?1:0;if(rd){st.done=true;fin=!was}ch=true}
+  else if(!st.done&&rs===st.s){for(const i of d.c)if(Number.isInteger(i)&&!st.c.includes(i)){st.c.push(i);ch=true}if(d.k&&!st.k){st.k=1;ch=true}}
+  if(fin){feathers+=10;saveShop();try{fanfare()}catch(e){}advNote(`🏆 ${c.name} birlikte tamamlandı! +10 altın tüy 🪶`,3.4);const n=D.find(x=>!advQState(x.id).done);ADV.s.track=n?n.id:c.id;ADV.ChainTrack=ADV.s.track}
+  else if(d.tr&&ADV.ChainTrack!==c.id&&!st.done){ADV.ChainTrack=c.id;ADV.s.track=c.id;ch=true;advNote(`🧭 ${q.name} görevi seçti: ${c.name}. Birlikte yapın!`,3)}
+  else if(ch)advNote(`🤝 ${q.name} ilerledi: ${st.done?'bitti':c.steps[Math.min(st.s,c.steps.length-1)].txt}`,2.4);
+  if(ch){advSave();if(ADV.qg)advQMarkers();try{advChipUpdate()}catch(e){}}ADV.shK=advQKey(c.id)}
 function advQAdvance(c){const st=advQState(c.id);st.s++;st.c=[];st.k=0;
   if(st.s>=c.steps.length){st.done=true;feathers+=10;saveShop();fanfare();
     const D=advQDefs();if(D.every(x=>advQState(x.id).done)&&!ADV.s.q._all){ADV.s.q._all=true;ADV.s.rainbow++;advNote(`🏆 ${c.name} bitti! +10 🪶 · Tüm görevler tamam: 💎 hazine tüyü!`,4)}
@@ -15229,12 +15299,13 @@ const ADVT_SPOTS=[
 function advTrainTail(){const tr=TRAINS[ADVT.tr%TRAINS.length],s=tr.s-(tr.cars.length-1)*10.4-15,p=railAt(s);return new V3(p.x,p.y+4.5,p.z)}
 function advSpotPos(){const sp=ADVT.spot;if(!sp||sp.k==='train')return advTrainTail();return new V3(sp.x,Math.max(height(sp.x,sp.z),0)+sp.dy,sp.z)}
 function advTrainUpdate(dt,P){ADVT.t+=dt;
-  if(!ADVT.on){if(ADVT.t>ADVT.gap){let i;do{i=Math.floor(Math.random()*ADVT_SPOTS.length)}while(i===ADVT.last&&ADVT_SPOTS.length>1);ADVT.last=i;const sp=ADVT.spot=ADVT_SPOTS[i];
-      ADVT.on=true;ADVT.left=sp.k==='train'?45:70;if(sp.k==='train')ADVT.tr=(ADVT.tr+1)%TRAINS.length;ADVT.mk=advMark('🎁',advSpotPos(),7);scene.add(ADVT.mk);
-      advNote(sp.msgs[Math.floor(Math.random()*sp.msgs.length)]+' '+Math.round(ADVT.left)+' saniyen var!',3.2);chime()}return}
+  if(!ADVT.on){if(ADVT.t>ADVT.gap){if(mpLink()&&!MP.host)return;const rm=mpLink();let i;do{i=Math.floor(Math.random()*ADVT_SPOTS.length)}while((i===ADVT.last||(rm&&ADVT_SPOTS[i].k==='train'))&&ADVT_SPOTS.length>1);advTrainStart(i);if(rm)mpSend({t:'at',i})}return}
   ADVT.left-=dt;const p=advSpotPos();ADVT.mk.position.set(p.x,p.y+Math.sin(ADVT.left*3)*.4,p.z);
   if(P.distanceTo(ADVT.mk.position)<13){advTrainEnd(true)}else if(ADVT.left<=0)advTrainEnd(false)}
-function advTrainEnd(ok){if(ADVT.mk){scene.remove(ADVT.mk);ADVT.mk=null}ADVT.on=false;ADVT.t=0;ADVT.gap=240+Math.random()*300;
+function advTrainStart(i){ADVT.last=i;const sp=ADVT.spot=ADVT_SPOTS[i];if(!sp)return;
+  ADVT.on=true;ADVT.left=sp.k==='train'?45:70;if(sp.k==='train')ADVT.tr=(ADVT.tr+1)%TRAINS.length;ADVT.mk=advMark('🎁',advSpotPos(),7);scene.add(ADVT.mk);
+  advNote(sp.msgs[Math.floor(Math.random()*sp.msgs.length)]+' '+Math.round(ADVT.left)+' saniyen var!',3.2);chime()}
+function advTrainEnd(ok,remote){if(!remote&&mpLink())mpSend({t:'ae',ok:ok?1:0});if(ADVT.mk){scene.remove(ADVT.mk);ADVT.mk=null}ADVT.on=false;ADVT.t=0;ADVT.gap=240+Math.random()*300;
   if(ok){const S=ADV.s;S.blue++;S.trainHits++;feathers+=5;saveShop();advSave();fanfare();advNote('🎁 Işıltı sürprizini yakaladın! 🔵 +1 mavi tüy · +5 🪶',3.4);advChipUpdate()}
   else advNote('💨 Işıltı kayboldu… yeni bir sürpriz başka bir yerde belirebilir.',2.6)}
 
@@ -15262,7 +15333,7 @@ function advQUpdate(dt,P){advQInit();
   ADV_AN.forEach((a,i)=>{const m=ADV.anm[i];if(ADV.s.animals[a.id]){m.visible=false;return}m.position.set(a.p.x,a.p.y+Math.sin(tt*1.6+i)*.4,a.p.z);
     if(P.distanceTo(a.p)<14){ADV.s.animals[a.id]=true;m.visible=false;const n=advAnCount();advSave();chime();advFx(a.p,'255,226,122',16,1.2);
       advNote(n>=ADV_AN.length?`${a.icon} ${a.name} ile tanıştın! Tüm hayvanlar tamam, Defter'den çantanı al 🎒`:`${a.icon} ${a.name} ile tanıştın! (${n}/${ADV_AN.length})`,3);advAward(5,0,true);advChipUpdate()}});
-  advTrainUpdate(dt,P);try{advRQUpdate(dt,P)}catch(e){if(!ADV.rqErr){ADV.rqErr=1;console.error('rq',e)}}try{advPanelUpdate(dt)}catch(e){if(!ADV.pnErr){ADV.pnErr=1;console.error('pn',e)}}}
+  advQShare(false);advTrainUpdate(dt,P);try{advRQUpdate(dt,P)}catch(e){if(!ADV.rqErr){ADV.rqErr=1;console.error('rq',e)}}try{advPanelUpdate(dt)}catch(e){if(!ADV.pnErr){ADV.pnErr=1;console.error('pn',e)}}}
 
 /* ---- Defter bölümleri ---- */
 const ADV_JT=[['main','📖 Genel'],['quests','🧭 Görevler'],['animals','🐾 Hayvanlar'],['photos','📸 Fotoğraflar']];
@@ -16758,7 +16829,12 @@ function* buildDetail(){
     pick(x,zc).add(BG,[x,Y0+h/2-.3,zc],[0,0,0],[run+.04,h+.6,3.1],{col:tint(),ou:rg(0,9),ov:Y0+h/2,rz:rg(0,9)});
     cAdd({x:OX+x,z:OZ+zc,ux:1,uz:0,hu:run/2+.02,hv:1.55,y0:Y0-1,y1:Y0+h,fo:1});
     if(i==8||i==17)Dv.add(BG,[x,Y0+h+.04,zc],[0,0,0],[.9,.1,2.2],{col:gr()})}
-    cAdd({x:OX+x0+NS*run/2,z:OZ+zc,ux:1,uz:0,hu:NS*run/2,hv:1.55,y0:Y0-1,y1:Y0+NS*rn,st:1,N:NS,run:run,rise:rn,yb:Y0})}
+    cAdd({x:OX+x0+NS*run/2,z:OZ+zc,ux:1,uz:0,hu:NS*run/2,hv:1.55,y0:Y0-1,y1:Y0+NS*rn,st:1,N:NS,run:run,rise:rn,yb:Y0})
+  /* merdiven sahanlığı: son basamağın ardında surun tepesine geçen geniş taş zemin */
+  {const hT=NS*rn,lx0=x0+NS*run-.1,ll=6.2,lcx=lx0+ll/2,lz0=-40.1,lz1=-32.9,lcz=(lz0+lz1)/2,lw=lz1-lz0;
+   pick(lcx,lcz).add(BG,[lcx,Y0+hT-.3,lcz],[0,0,0],[ll,.6,lw],{col:tint(),ou:rg(0,9),ov:Y0+hT/2,rz:rg(0,9)});
+   Dv.add(BG,[lcx,Y0+hT+.03,lcz],[0,0,0],[ll-.5,.06,lw-.5],{col:gr()});
+   cAdd({x:OX+lcx,z:OZ+lcz,ux:1,uz:0,hu:ll/2,hv:lw/2,y0:Y0-1,y1:Y0+hT})}}
   yield;
   for(const k of S.dk)Dw.add(BG,[k.x,(k.y0+k.y1)/2,k.z],[0,k.ry,0],[k.w,k.y1-k.y0,.12],{col:[.07,.065,.06]});
   /* 6) kapı kemerleri (taş kamalar) */
