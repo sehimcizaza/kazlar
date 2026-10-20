@@ -35,6 +35,10 @@
 <style id="mp2Css">.gm-card.mp2{width:min(94vw,680px);max-height:94vh;overflow-y:auto;padding:12px 16px 12px}.mp2 h3{text-align:center;margin:0 28px 4px}.mpx{position:sticky;float:right;top:0;margin:-4px -8px 0 0;width:30px;height:30px;border-radius:50%;border:2px solid #9aa7b8;background:#fff;color:#333;font-size:.9rem;line-height:1;padding:0;z-index:2}#mpbox .mp2 .opt{padding:5px 6px;margin:3px 0;font-size:.85rem}#mpbox .mp2 .mpt{margin:2px 0;font-size:.82rem}.mp2 .gm-l{margin-top:2px}.mp2g{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;align-items:start}.mp2c{min-width:0}.mp2g .mp2c:first-child{border-right:2px dashed rgba(0,0,0,.12);padding-right:16px}.mp2 .mpsel{width:100%;font:inherit;font-weight:700;font-size:.9rem;padding:8px 10px;margin:4px 0 6px;border:2px solid #9aa7b8;border-radius:12px;background:#fff;color:#222}.mp2 .optrow.mp2b{margin:4px 0}.mp2 .optrow.mp2b .opt{flex:1;width:auto;padding:8px 6px}.mp2 .mpt{text-align:left}.mp2 .mpcode{text-align:center}@media (max-width:520px){.mp2g{grid-template-columns:1fr}.mp2g .mp2c:first-child{border-right:0;padding-right:0}}</style>
 <style id="profSubCss">#mpbox .opt:disabled{opacity:.45;filter:grayscale(.6)}#mpbox .opt small{font-weight:600;opacity:.8}#hubSub{flex-wrap:wrap}#hubSub .psub{flex:1 0 100%;margin:0 0 4px}.psub{display:flex;gap:8px;margin:2px 0 4px}.psub .chip2{flex:1;justify-content:center;text-align:center}.pjn{display:block}
 /* ===== PROFİL: sahne + tüy sekmeler ===== */
+#hubSheet[data-tab="nest"] #hubRight{background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}
+#hubSheet[data-tab="nest"] #hubBody{padding:0 0 0 10px;overflow:hidden}
+.pfNest :is(h3,h4,.hint2,.pnote){color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.3)}
+.pfn{padding:0}.pfNest{padding:6px 6px 14px 2px}
 #hubSheet.pf #hubPV{display:none!important}
 #hubSheet.pf #hubRight{background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}
 #hubSheet.pf #hubBody,html.short #hubSheet.pf #hubBody{padding:0;overflow:hidden}
@@ -8355,7 +8359,7 @@ function renderHub(keep){
   $('#hubFeathers').textContent='🪶 '+feathers;{const e=$('#hubPts');if(e)e.textContent='⭐ '+PROF.total}
   document.querySelectorAll('#hubTabs .tab').forEach(b=>{const on=b.dataset.tab===(hubTab==='nest'?'profile':hubTab);b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
   if(hubTab==='missions'){sub.style.display='none';sub.innerHTML='';body.innerHTML=missionsHtml()}
-  else if(hubTab==='nest'){sub.style.display='flex';sub.innerHTML=profChips('nest')+nestSubHtml();body.innerHTML=presetKid()?'<p class="hint2" style="padding:10px">🧒 Hazır karakterler kıyafet ya da aksesuar takmaz. Eşya giydirmek için "Ben" karakterini seç.</p><button class="chip2 on" style="margin:0 10px" data-pickben="1">🧒 Ben’i seç</button>':(dolapTab==='col'&&nestSub!=='decor')?colHtml():shopHtml()}
+  else if(hubTab==='nest'){const _nm=body.querySelector('.pfNest'),_nt=(keep&&_nm)?_nm.scrollTop:0;sub.style.display='flex';sub.innerHTML=nestSubHtml();const _nc=presetKid()?'<p class="hint2" style="padding:10px">🧒 Hazır karakterler kıyafet ya da aksesuar takmaz. Eşya giydirmek için "Ben" karakterini seç.</p><button class="chip2 on" style="margin:0 10px" data-pickben="1">🧒 Ben’i seç</button>':(dolapTab==='col'&&nestSub!=='decor')?colHtml():shopHtml();body.innerHTML=`<div class="pf pfn"><div class="pfL"><div class="pfMain pfNest">${_nc}</div></div>${pfTabs('nest')}</div>`;{const m=body.querySelector('.pfNest');if(m&&_nt)m.scrollTop=_nt;try{pfContrast(m)}catch(e){}}}
   else if(hubTab==='settings'){sub.style.display='none';sub.innerHTML='';body.innerHTML=settingsHtml()}
   else if(hubTab==='profile'){sub.style.display='none';sub.innerHTML='';body.innerHTML=profileHtml()}
   else if(hubTab==='journal'){sub.style.display='none';sub.innerHTML='';body.innerHTML=journalHtml()}
