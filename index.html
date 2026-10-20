@@ -103,7 +103,7 @@ html.short #hubSheet:not([data-tab="missions"]) #hubBody{padding-bottom:10px}
 .pft .pfi{margin-left:15px;margin-right:3px;font-size:.9rem}.pft b{font-size:.7rem;white-space:nowrap;text-shadow:0 1px 0 rgba(255,244,214,.7)}
 .pft .pff{display:none}
 
-/* ===== KAZ SAVAŞLARI: düzenli HUD yerleşimi (üst üste binme yok) ===== */
+/* ===== YUMURTA SAVAŞLARI: düzenli HUD yerleşimi (üst üste binme yok) ===== */
 #hud.war #topleft{flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;gap:calc(var(--u)*1.2) calc(var(--u)*1.5)!important;max-width:calc(var(--u)*68)!important}
 #hud.war #topleft>*,#hud.war #topleft>.klp{position:static!important;transform:none!important;margin:0!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;max-width:100%!important;box-sizing:border-box!important;flex:none!important;font-size:calc(var(--u)*3.1)!important;line-height:1.2!important;padding:calc(var(--u)*.8) calc(var(--u)*2.4)!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 #hud.war #topleft>#objective{order:1}#hud.war #topleft>#hearts{order:2}#hud.war #topleft>#warKills{order:3}#hud.war #topleft>#warZone{order:4}#hud.war #topleft>#chaseStat{order:5}#hud.war #topleft>#regChip{order:6;background:rgba(18,34,52,.55);color:#fff}#hud.war #topleft>#warChest{order:7}#hud.war #topleft>#advChip{order:8}
@@ -839,7 +839,7 @@ const RIDERS=[
 (function(){try{if(localStorage.getItem('kz-r9'))return;const old=['elif','mami','nisa','ali','ela','maceraci','kazcobani','peri','macera2','hero'],i=JSON.parse(localStorage.getItem('kz-rider2'));if(i!=null&&old[i]){const n=RIDERS.findIndex(r=>r.id===old[i]);localStorage.setItem('kz-rider2',String(n>=0?n:0))}localStorage.setItem('kz-r9','1')}catch(e){}})();
 const MISSIONS=[
  {id:'chase',icon:'🦅',name:'Amansız Takip',desc:'Kartal yumurtanı kaptı! Tünellerden, köprü altından, ormandan ve kaya sütunlarının arasından peşine düş. Her 100 metrede bir havada asılı kalan altın tüyleri (+2 enerji) topla; balon slalomunda, sıcak hava akımlarında ve rüzgâr halkalarında hızlan, mıknatısla tüyleri çek. 200 m geride kalma! Başta otopilot seni kartala doğru götürür. Kartalın yeşil izinin 21 m çevresindeki koridorda kal: dışına çıkarsan (kestirme yapınca) enerjin her saniye 3 azalır.'},
- {id:'war',icon:'🏹',name:'Kaz Savaşları',desc:'40 kaz, herkes düşman! Havalan, yuvalardaki Güvercin, Kaz ve Deve Kuşu yumurtalarını topla (her türden en fazla 25; hafif olan uzağa gider, ağır olan sert vurur), diğer kazları vur ve yol. Takım seçeneğiyle 2 veya 4 kişilik takımlar kurabilirsin: takım arkadaşların yeşil çizgiyle görünür, birbirinizi vuramazsınız; arkadaşların da botlarla takım olur. Başlangıçta 12 Tüylü Okun var; oklar 20-40 hasar verir ve çok hızlıdır; ama hasar mesafeyle azalır: Tüylü ok 20 metreye kadar tam hasar verir, 100 metrede sıfırlanır; Altın Tüylü 30 / 150 metre, Alevli 40 / 200 metre. Ardışık atışlar arasında 1,5 saniye beklenir. Kalpler enerjini yükseltir. Her 2 dakikada güvenli alan daralır: dışarıda kalırsan enerjin erir. Alt çubuktan Hız ayarla, Roket tuşuyla hızlan, Asılı Kal ile havada sabit dur. Kırmızı halka nişangahın: rakip halkadaysa atışın isabet eder, ama hasar için okun kazın GÖVDESİNE çarpması gerekir (kanat ve binici hasar vermez). Arkadaşlarınla (internetle) de oynanabilir. Vurduğun kazın okları sana geçer. Son kaz sen kal!'},
+ {id:'war',icon:'🏹',name:'Yumurta Savaşları',desc:'40 kaz, herkes düşman! Havalan, yuvalardaki Güvercin, Kaz ve Deve Kuşu yumurtalarını topla (her türden en fazla 25; hafif olan uzağa gider, ağır olan sert vurur), diğer kazları vur ve yol. Takım seçeneğiyle 2 veya 4 kişilik takımlar kurabilirsin: takım arkadaşların yeşil çizgiyle görünür, birbirinizi vuramazsınız; arkadaşların da botlarla takım olur. Başlangıçta 12 Tüylü Okun var; oklar 20-40 hasar verir ve çok hızlıdır; ama hasar mesafeyle azalır: Tüylü ok 20 metreye kadar tam hasar verir, 100 metrede sıfırlanır; Altın Tüylü 30 / 150 metre, Alevli 40 / 200 metre. Ardışık atışlar arasında 1,5 saniye beklenir. Kalpler enerjini yükseltir. Her 2 dakikada güvenli alan daralır: dışarıda kalırsan enerjin erir. Alt çubuktan Hız ayarla, Roket tuşuyla hızlan, Asılı Kal ile havada sabit dur. Kırmızı halka nişangahın: rakip halkadaysa atışın isabet eder, ama hasar için okun kazın GÖVDESİNE çarpması gerekir (kanat ve binici hasar vermez). Arkadaşlarınla (internetle) de oynanabilir. Vurduğun kazın okları sana geçer. Son kaz sen kal!'},
  {id:'ta',icon:'⏱️',name:'Zamana Karşı',desc:'Haritaya dağılmış parlayan balonları süre bitmeden patlat. Her tur zorlaşır.'},
  {id:'lights',icon:'🏮',name:'Işık Festivali',desc:'Fener Yolu: 10 bölümlük ışık macerası! Her bölümde 10 tur, her tur farklı bir ışık görevi; hava, saat ve gökyüzü değişir. İlk bölüm açık, bitirdikçe yenileri açılır. Arkadaşınla oynarken klasik fener halkası yarışı kullanılır.'},
  {id:'gr',icon:'🏁',name:'Kaz Koşusu',desc:'Uçmadan, yerde koşarak 9 kazla yarış! Önce maden tüneli, sonra otomatik hızlanan buz kaydırağı; ardından çitli parkurda zıpla, kay, çamur, kütük, kaya, dere ve tren. İlk üçe giren kupa kaldırır.'},
@@ -1495,7 +1495,7 @@ function crownCore(ty){const R=lrng(300+ty),B=mkBuf();
   else if(ty===1){addBlob(B,[0,8.4,0],3.4,2.9,3.4,[.3,.55,.2],R,.3);addBlob(B,[2,7.4,1],2,1.8,2,[.34,.58,.22],R,.3);addBlob(B,[-2,7.7,-1.2],2.1,1.9,2.1,[.28,.5,.19],R,.3)}
   else addBlob(B,[0,10,0],2.4,4,2.4,[.45,.66,.22],R,.28);return B}
 const TV={ready:false,t:-9,hi:[],lo:[],R:150,FAR:1100};
-const SMK={on:false,in:true,cx:0,cz:0,r2:1e12,f2:1e12,fr:1e9};  /* Kaz Savaşları dumanı: duman dışı / uzak ayrıntılar çizilmez */
+const SMK={on:false,in:true,cx:0,cz:0,r2:1e12,f2:1e12,fr:1e9};  /* Yumurta Savaşları dumanı: duman dışı / uzak ayrıntılar çizilmez */
 {const dm=new THREE.Object3D();
  const trunkMat=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
  const leafMats=[0,1,2].map(k=>new THREE.MeshLambertMaterial({map:mkLeafTex(k),alphaTest:.3,side:THREE.DoubleSide,vertexColors:true}));
@@ -8033,6 +8033,7 @@ function dqHtml(){try{const rq=advRQCheck();
   const evOn=!!evAt(),tabs=`<div class="dqtabs"><button class="${DQT==='g'?'on':''}" data-dqt="g">📅 Görevler</button><button class="${DQT==='e'?'on':''}" data-dqt="e">🎉 Etkinlikler${evOn?' <u class="dqdot"></u>':''}</button></div>`;
   if(DQT==='e')return `<div class="dq3"><div class="dqh">${tabs}</div><div class="dqr dqe">${evHubHtml()}${evListHtml()}</div></div>`;
   return `<div class="dq3"><div class="dqh">${tabs}<em title="12 saatte yenilenir">⏳ ${rqLeft()}</em></div><div class="dqr">${cards}</div></div>`}catch(e){console.error('dq',e);return ''}}
+function mIco(m){return m&&m.id==='war'?'<img alt="" draggable="false" style="width:1.05em;height:1.05em;display:block;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))" src="data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="a" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fffdf5"/><stop offset=".6" stop-color="#f6e3b8"/><stop offset="1" stop-color="#d9b373"/></radialGradient><radialGradient id="b" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffe3b0"/><stop offset=".6" stop-color="#ff9f43"/><stop offset="1" stop-color="#d9611c"/></radialGradient><radialGradient id="c" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff176"/><stop offset="1" stop-color="#ffb300"/></radialGradient></defs><g stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".75"><path d="M44 6l7-4M52 12l8-3M40 2l4-2"/></g><path d="M33 33l-4-8 7 4 2-8 3 7 8-4-4 8 8 2-8 4 5 7-8-3-1 8-5-7-7 5 2-8-8-1 7-5z" fill="url(#c)" stroke="#e08900" stroke-width="1.3" stroke-linejoin="round"/><circle cx="41" cy="33" r="3.2" fill="#fff6a8" opacity=".9"/><g transform="rotate(-18 20 43)"><ellipse cx="20" cy="43" rx="15" ry="19" fill="url(#a)" stroke="#b98a4a" stroke-width="1.8"/><path d="M8 38l5 5 4-6 5 6 4-5 6 5" fill="none" stroke="#8a5a22" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="14" cy="34" rx="3.2" ry="5" fill="#fff" opacity=".55" transform="rotate(20 14 34)"/></g><g transform="rotate(38 47 17)"><ellipse cx="47" cy="17" rx="8.5" ry="11" fill="url(#b)" stroke="#a8480f" stroke-width="1.6"/><ellipse cx="44.5" cy="12.5" rx="2.2" ry="3.4" fill="#fff" opacity=".6"/></g><g fill="#ffd54f" stroke="#e08900" stroke-width=".8"><circle cx="52" cy="46" r="2.4"/><circle cx="26" cy="12" r="1.9"/><circle cx="56" cy="36" r="1.6"/></g></svg>')+'">':m.icon}
 function missionsHtml(){
   const r=RIDERS[sel.rider],g=GEESE[sel.goose],rn=r.custom?heroName:r.name;
   const mpOn=MP.on&&MP.st==='ok';
@@ -8041,9 +8042,9 @@ function missionsHtml(){
   const stT=id=>{const b=bestStars[id]||0,bp=PROF.best[id]||0;return id==='free'?'∞ Sınırsız':(id==='chase'||id==='ta'||id==='war')?'🏆 Rekor: '+(bp||'–'):'★'.repeat(b)+'☆'.repeat(3-b)+(bp?' · ⭐ '+bp:'')};
   const tiles=MAIN_MISSIONS.map(id=>MISSIONS.find(m=>m.id===id)).filter(Boolean).map(m=>{const b=bestStars[m.id]||0,c=MCOL[m.id]||['#a8e0ff','#3a8fd6'];
     const bp=PROF.best[m.id]||0,st=m.id==='free'?'∞':m.id==='chase'||m.id==='ta'||m.id==='war'?'🏆 '+(bp||'–'):'★'.repeat(b)+'☆'.repeat(3-b);
-    return `<button class="mtile${m.id===selMission?' on':''}" data-msel="${m.id}" aria-label="${m.name}" style="--c1:${c[0]};--c2:${c[1]}"><span class="mti">${m.icon}</span><b>${m.name}</b></button>`}).join('');
+    return `<button class="mtile${m.id===selMission?' on':''}" data-msel="${m.id}" aria-label="${m.name}" style="--c1:${c[0]};--c2:${c[1]}"><span class="mti">${mIco(m)}</span><b>${m.name}</b></button>`}).join('');
   const m=MISSIONS.find(x=>x.id===selMission)||MISSIONS[0],c=MCOL[m.id]||['#a8e0ff','#3a8fd6'];
-  const det=`<div class="mdet" style="--c1:${c[1]};--c2:${c[0]}"><div class="mdhead"><span class="mdi">${m.icon}</span><div><h2>${m.name}</h2><div class="mdst">${stT(m.id)}${MPM[m.id]?' · 👥 '+(MPCAP[m.id]||2)+' kişiye kadar':''}</div></div><button class="mdq" data-minfo aria-label="Bilgi" aria-expanded="false">?</button></div>${m.id==='war'?wdiffHtml()+wteamHtml():''}${m.id==='lights'&&!MP.act?lfChapHtml():''}<div class="mdinfo" data-minfo-close role="note"><b>${m.icon} ${m.name}</b><p>${m.desc}</p><small>Kapatmak için dokun</small></div>${head}</div>`;
+  const det=`<div class="mdet" style="--c1:${c[1]};--c2:${c[0]}"><div class="mdhead"><span class="mdi">${mIco(m)}</span><div><h2>${m.name}</h2><div class="mdst">${stT(m.id)}${MPM[m.id]?' · 👥 '+(MPCAP[m.id]||2)+' kişiye kadar':''}</div></div><button class="mdq" data-minfo aria-label="Bilgi" aria-expanded="false">?</button></div>${m.id==='war'?wdiffHtml()+wteamHtml():''}${m.id==='lights'&&!MP.act?lfChapHtml():''}<div class="mdinfo" data-minfo-close role="note"><b>${mIco(m)} ${m.name}</b><p>${m.desc}</p><small>Kapatmak için dokun</small></div>${head}</div>`;
   return `<div class="mscreen m3"><div class="mgrid2">${tiles}</div>${det}${dqHtml()}</div>`}
 function ridersHtml(){return `<button class="chip2" data-wardrobe="kid" style="margin-bottom:10px">👗 Giydir ve mağaza</button><div class="pgrid">`+RIDERS.map((r,i)=>`<div class="pick${i===sel.rider?' sel':''}" role="button" tabindex="0" data-rider="${i}"><div class="art">${riderSVG(r)}</div><b>${r.custom?`<span id="heroLabel">${escapeHtml(heroName)}</span>`:r.name}</b><p>${r.desc}</p>${r.perk?`<p class="perk">⭐ ${r.perk}</p>`:''}${r.custom?`<input id="heroName" maxlength="14" aria-label="Kahramanın adı" placeholder="Adını yaz" value="${heroName==='Ben'?'':escapeHtml(heroName)}">`:''}</div>`).join('')+`</div>`}
 /* ================= KAZIN ADI VE KİŞİLİĞİ ================= */
@@ -8223,7 +8224,7 @@ function pcPanel(){
   const e=pcOverlay(`<div class="pcb wide"><h3>👨‍👩‍👧 Ebeveyn ayarları</h3>
   <div class="pcl">Günlük oyun süresi</div><div class="pcr w">${L.map(v=>`<button class="${PCT.lim===v?'on':''}" data-l="${v}">${v?v+' dk':'Sınırsız'}</button>`).join('')}</div>
   <div class="pcl">Mola hatırlatıcısı</div><div class="pcr w">${B.map(v=>`<button class="${PCT.brk===v?'on':''}" data-b="${v}">${v?v+' dk':'Kapalı'}</button>`).join('')}</div>
-  <div class="pcl">Kaz Savaşları günlük süre sınırı</div><div class="pcr w">${[0,10,20,30].map(v=>`<button class="${PCT.wlim===v?'on':''}" data-w="${v}">${v?v+' dk':'Sınırsız'}</button>`).join('')}</div>
+  <div class="pcl">Yumurta Savaşları günlük süre sınırı</div><div class="pcr w">${[0,10,20,30].map(v=>`<button class="${PCT.wlim===v?'on':''}" data-w="${v}">${v?v+' dk':'Sınırsız'}</button>`).join('')}</div>
   <p class="pci">Bugün oynanan: <b>${Math.floor(PCT.used/60)} dk</b>${PCT.lim?` · Kalan: <b>${Math.ceil(pcLeftSec()/60)} dk</b>`:''}${PCT.wlim?` · Savaş: <b>${Math.floor(PCT.wused/60)}/${PCT.wlim} dk</b>`:''}</p>${wkHtml()}
   <div class="pcr w"><button class="g" data-x="pin">🔑 ${PCT.pin?'PIN değiştir':'PIN koy'}</button>${PCT.pin?'<button class="g" data-x="nopin">PIN kaldır</button>':''}<button class="g" data-x="plus">+15 dk ekle</button><button data-x="ok">Tamam</button></div>
   <small>PIN koyarsan bu ayarlara ve süre eklemeye çocuk giremez. Süre yalnızca oyun açıkken sayılır.</small></div>`,'');
@@ -8244,7 +8245,7 @@ function pcBreakShow(){if(typeof setPause==='function'&&!paused&&state.mode!=='m
   e.onclick=ev=>{const b=ev.target.closest('button');if(b){pcHide();PCT.brkT=0}}}
 function pcWarLimit(){return PCT.wlim&&PCT.wused>=PCT.wlim*60}
 function pcWarShow(){PCT.wlock=true;if(typeof setPause==='function'&&!paused)try{setPause(true)}catch(e){}
-  const e=pcOverlay(`<div class="pcb"><div style="font-size:3rem">🕊️</div><h3>Savaş molası</h3><p>Bugünlük Kaz Savaşları süresi doldu. Fotoğraf çekmek, yuvanı süslemek ya da serbest uçuş yapmak ister misin?</p><div class="pcr"><button data-x="ok">Tamam</button></div></div>`,'');
+  const e=pcOverlay(`<div class="pcb"><div style="font-size:3rem">🕊️</div><h3>Savaş molası</h3><p>Bugünlük Yumurta Savaşları süresi doldu. Fotoğraf çekmek, yuvanı süslemek ya da serbest uçuş yapmak ister misin?</p><div class="pcr"><button data-x="ok">Tamam</button></div></div>`,'');
   e.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;pcHide();try{if(typeof WAR!=='undefined'&&WAR&&state.mission==='war'&&!state.done){setPause(false);WAR.end('dead')}}catch(er){}}}
 setInterval(()=>{if(document.hidden||BG)return;pcEnsureDay();PCT.used++;PCT.brkT++;try{wkTick()}catch(e){}if(PCT.used%20===0)pcSave();
   if(state.mission==='war'&&state.mode!=='menu'&&!state.done&&!paused){PCT.wused++;try{WKS.wd=(WKS.wd|0)+1}catch(e){}if(PCT.wlim&&!PCT.wlock){if(pcWarLimit())pcWarShow();else if(PCT.wlim*60-PCT.wused===60)toast('🕒 Savaş süresi 1 dakika sonra bitecek',3)}}
@@ -8490,14 +8491,14 @@ const ACH=[
  {id:'modes',i:'🧭',n:'Gezgin',d:'Farklı oyun modlarını dene',t:[5,8,11]},
  {id:'stars',i:'⭐',n:'Yıldız Toplayıcı',d:'Toplam puan kazan',t:[2000,15000,75000]},
  {id:'lvl',i:'🪽',n:'Kanat Ustası',d:'Seviye atla',t:[10,50,100]},
- {id:'warP',i:'🏹',n:'Savaş Meydanı',d:'Kaz Savaşları oyna',t:[10,50,100]},
+ {id:'warP',i:'🏹',n:'Savaş Meydanı',d:'Yumurta Savaşları oyna',t:[10,50,100]},
  {id:'warK',i:'🏠',n:'Yuvaya Gönderici',d:'Rakip kazları yuvalarına gönder',t:[5,30,150]},
- {id:'warW',i:'🏆',n:'Savaş Şampiyonu',d:'Kaz Savaşları kazan',t:[5,25,50]},
+ {id:'warW',i:'🏆',n:'Savaş Şampiyonu',d:'Yumurta Savaşları kazan',t:[5,25,50]},
  {id:'photos',i:'📸',n:'Fotoğrafçı',d:'Uçarken fotoğraf çek',t:[5,30,120]},
  {id:'nestI',i:'🌼',n:'Yuva Süsleyici',d:'Yuvana dekor ve eşya al',t:[8,25,60]},
  {id:'q',i:'🎯',n:'Görev Avcısı',d:'Günlük görevleri tamamla',t:[25,100,400]},
  {id:'stk',i:'🦢',n:'Leylek Avcısı',d:'Hazine bekçisi leylekleri düşür',t:[10,50,100]},
- {id:'tre',i:'💎',n:'Hazine Avcısı',d:'Kaz Savaşları hazine sandığını al',t:[5,20,50]},
+ {id:'tre',i:'💎',n:'Hazine Avcısı',d:'Yumurta Savaşları hazine sandığını al',t:[5,20,50]},
  {id:'egg',i:'🥚',n:'Yumurta Avcısı',d:'Yuvalardan yumurta topla',t:[150,800,3000]},
  {id:'warB',i:'🎖️',n:'Savaş Yıldızı',d:'Savaşta bir kategoride (kaz, hasar, süre) birinci ol',t:[10,50,100]},
  {id:'lf',i:'🏮',n:'Işık Ustası',d:'Fener Yolu bölümlerini tamamla',t:[10,25,50]},
@@ -8513,7 +8514,7 @@ const ACH=[
  {id:'snk',i:'🔭',n:'Keskin Göz',d:'Uzak mesafeden kaz vur',t:[20,60,150]},
  {id:'mxb',i:'⚡',n:'Yıldırım Gönderici',d:'7 saniye içinde art arda kaz gönder (en yüksek seri)',t:[2,3,5]},
  {id:'warKM',i:'🎯',n:'Maç Avcısı',d:'Tek maçta en çok kazı yuvaya gönder',t:[3,6,10]},
- {id:'warWH',i:'🔥',n:'Zorlu Şampiyon',d:'Zor modda Kaz Savaşı kazan',t:[3,10,25]},
+ {id:'warWH',i:'🔥',n:'Zorlu Şampiyon',d:'Zor modda Yumurta Savaşı kazan',t:[3,10,25]},
  {id:'cup',i:'🥇',n:'Kupa Kazı',d:'Haftalık Kaz Kupası kazan',t:[1,5,15]},
  {id:'str',i:'📆',n:'Ateş Serisi',d:'Günlük görevleri art arda tamamla (gün)',t:[3,7,21]}];
 const ACHS=Object.assign({c:{},g:{}},store.get('kz-ach',null)||{});
@@ -8683,7 +8684,7 @@ function resArtSvg(o){const win=o.win,sad=win===false,cf=['#e2456b','#f2c14e','#
     s+=sc(115,150,'🪿 Sen · '+o.my,'#3fb0ff')+sc(365,150,'🦆 '+nm+' · '+(o.their==null?'…':o.their),'#ff9a2e')}
   else{s+=resChar('k',46,40,130)+resChar('g',170,30,170)+`<text x="400" y="104" text-anchor="middle" font-size="${sad?54:62}">${sad?'🌙':win?'🏆':'⭐'}</text>`;if(o.badge)s+=sc(400,142,o.badge,'#e8a20c')}
   return s+'</svg>'}
-/* ---- Kaz Savaşları bitiş ekranı: tam ekran zafer/sonuç sahnesi (3B dünya çizilmez) ---- */
+/* ---- Yumurta Savaşları bitiş ekranı: tam ekran zafer/sonuç sahnesi (3B dünya çizilmez) ---- */
 let VICTORY=false;
 let VPOD=null;
 
@@ -8923,7 +8924,7 @@ function profileHtml0(){const r=RIDERS[sel.rider],nm=r.custom?heroName:r.name,lv
   achSync();const got=ACH.reduce((t,a)=>t+(achTier(a)>0?1:0),0),cs=COSI.filter(d=>cosHas(d[0])).length;
   const rows=MISSIONS.filter(m=>m.id!=='free').map(m=>{const b=PROF.best[m.id]||0,n=PROF.plays[m.id]||0,st=bestStars[m.id]||0;
     const ex=m.id==='ta'?` · tur ${store.get('kz-ta-round',0)||'–'}`:m.id==='chase'?'':` · ${'★'.repeat(st)}${'☆'.repeat(3-st)}`;
-    return `<div><span class="pi">${m.icon}</span><b>${m.name}<br><small>${n} kez oynandı${ex}</small></b><em>${b?'⭐ '+b:'–'}</em></div>`}).join('');
+    return `<div><span class="pi">${mIco(m)}</span><b>${m.name}<br><small>${n} kez oynandı${ex}</small></b><em>${b?'⭐ '+b:'–'}</em></div>`}).join('');
   let main;const P=x=>`<div class="prof">${x}</div>`;
   if(profSub==='stage'){const sp=cosSel('sp'),sd=sp&&cosDef(sp);
     main=`<div class="pfS"><div class="stgBox">${(STG.bad||typeof THREE==='undefined')?'<div class="stgfb">🧒🪿</div>':''}<button class="stgPz" data-stgpz="1">🎭 ${sd?escapeHtml(sd[2]):'Varsayılan poz'} · değiştir</button></div>${pfVitHtml()}</div>`}
@@ -8941,18 +8942,18 @@ const QH=[
  [/Mod rekorları/,'🏆 Mod rekorları','Her oyun modundaki en yüksek puanın, kaç kez oynadığın ve aldığın yıldızlar burada. Görevi daha hızlı bitirirsen daha çok puan alırsın; puanlar toplam puanına eklenir.'],
  [/Rozetler/,'🏅 Rozetler','Her rozetin bronz, gümüş ve altın seviyesi var. Bir seviyeye ulaşınca altın tüy kazanırsın (5, 15, 30). Kartın altındaki çubuk bir sonraki seviyeye ne kadar kaldığını gösterir.'],
  [/Görünümüm/,'✨ Görünümüm','Başarılarınla yeni görünümler aç: isim yazısı, çerçeve, unvan, nişangâh, uçuş izi ve daha fazlası. Hepsi sadece süstür, oyunu kolaylaştırmaz, kimseyi geçmez. Başkalarının ekranında senin nişangâhın görünmez. Kilitli bir karta dokunursan üstteki kutuda önizlemesini görürsün.'],
- [/Galibiyet Duruşları/,'🏆 Galibiyet Duruşları','Kaz Savaşlarını kazanınca sonuç ekranında seçtiğin gerçek karakterin ve kazın seçtiğin duruşu sergiler. Kartlara dokunursan duruşu canlı izlersin. Hepsi zor kilitlerle açılır; sadece süstür.'],
+ [/Galibiyet Duruşları/,'🏆 Galibiyet Duruşları','Yumurta Savaşlarını kazanınca sonuç ekranında seçtiğin gerçek karakterin ve kazın seçtiğin duruşu sergiler. Kartlara dokunursan duruşu canlı izlersin. Hepsi zor kilitlerle açılır; sadece süstür.'],
  [/Vitrin/,'🏅 Vitrin','Altı rozetini burada sergilersin. Boş bir kutuya dokunup kazandığın rozetlerden birini seç; dolu kutuya dokunursan değiştirir ya da çıkarırsın. Arkadaşların odada vitrinini görür.'],
  [/Temalar/,'🎨 Temalar','Bir temanın üç parçasını (isim, nişangâh, iz) da açarsan tek dokunuşla hepsini uygularsın. Dört temayı tamamlarsan 🎖 Tema Ustası unvanı açılır.'],
  [/İsim yazısı/,'✍️ İsim yazısı','Adının rengi ve efekti. Arkadaşların seni bu yazıyla görür.'],
  [/İsim çerçevesi/,'🖼️ İsim çerçevesi','Adının etrafındaki çerçeve. Açtıkça daha gösterişlileri gelir.'],
  [/Unvan/,'🎖️ Unvan','Adının altında görünen yazı. Belirli sayıda leylek, hazine, yumurta, kupa gibi başarıya ulaşınca açılır.'],
- [/Nişangâh/,'🎯 Nişangâh','Kaz Savaşları nişangâhının şekli. Boyutu hep aynıdır, kimseye avantaj sağlamaz. Başkaları senin nişangâhını görmez.'],
+ [/Nişangâh/,'🎯 Nişangâh','Yumurta Savaşları nişangâhının şekli. Boyutu hep aynıdır, kimseye avantaj sağlamaz. Başkaları senin nişangâhını görmez.'],
  [/Uçuş izi/,'💨 Uçuş izi','Uçarken kazının arkasında kalan iz: duman, kalp, yıldız tozu gibi.'],
  [/Aura/,'🌟 Aura','Kazının etrafında yumuşak bir ışık hâlesi oluşturur.'],
  [/Zafer efekti/,'🎉 Zafer efekti','Bir oyunu kazanınca ekranda yağan süsler.'],
- [/Elenme efekti/,'💥 Elenme efekti','Kaz Savaşları\'nda elenince ekranda çıkan efekt.'],
- [/Yuvaya gönderme bildirimi/,'🏠 Yuvaya gönderme bildirimi','Kaz Savaşları\'nda birini yuvasına gönderince çıkan yazının stili.'],
+ [/Elenme efekti/,'💥 Elenme efekti','Yumurta Savaşları\'nda elenince ekranda çıkan efekt.'],
+ [/Yuvaya gönderme bildirimi/,'🏠 Yuvaya gönderme bildirimi','Yumurta Savaşları\'nda birini yuvasına gönderince çıkan yazının stili.'],
  [/Yuvaya gönderme animasyonu/,'🎬 Yuvaya gönderme animasyonu','Rakibi yuvasına gönderirken oynayan görsel animasyon. Bazıları özel vuruşlar yapınca açılır (havada asılı kaz, roket, dalış gibi).'],
  [/Yuva kapı tabelası/,'🪧 Yuva kapı tabelası','Yuvamın kapısında asılı duran isim tabelası.'],
  [/Baca dumanı/,'🏠 Baca dumanı','Yuvamın bacasından çıkan dumanın rengi.'],
@@ -9021,7 +9022,7 @@ function chxChips(r){const c=cmFor(r.id);
 function heroLevelHtml(){const h=hxInfo();return `<div class="hxl"><b>${h.title} · Seviye ${h.L}/50</b><div class="pbar"><i style="width:${h.L>=50?100:Math.round(h.cur/h.need*100)}%"></i></div><small>${h.L>=50?'En üst seviye!':'Sonraki seviyeye '+(h.need-h.cur)+' XP'} · 🎮 ${HX.games} oyun · 🌀 ${HX.slalom} slalom · 🏆 ${HX.cups} kupa</small></div>`}
 function endCleanup(){document.documentElement.classList.remove('inwar');try{lfReset()}catch(e){}GQW=false;GR_ICONS.forEach(o=>o.visible=false);mObjs.forEach(o=>scene.remove(o));mObjs=[];setStorm(0);rain.visible=false;if(rig)rig.visible=true;rigGoose&&rigGoose.userData.unfold();if(rigGoose)rigGoose.userData.feet.visible=false;updates=null;CHASE=null;TA=null;if(WAR){try{WAR.cleanup()}catch(e){}WAR=null}chaseCleanup();{const v=document.getElementById('corrVig'),w=document.getElementById('corrWarn');if(v)v.style.opacity='0';if(w)w.classList.remove('on')}if(NESTOBJ.eggs)NESTOBJ.eggs.children.forEach(e=>e.visible=true);setSpecial(null);WALK.on=false;if(WALK.nils&&WALK.nils.parent===scene)scene.remove(WALK.nils);WALK.nils=null;DM.on=false}
 function startMission(id){
-  if(id==='war'&&!MP.net&&pcWarLimit()){toast('🕊️ Bugünlük Kaz Savaşları süresi doldu',3);return}
+  if(id==='war'&&!MP.net&&pcWarLimit()){toast('🕊️ Bugünlük Yumurta Savaşları süresi doldu',3);return}
   victOff();
   if(paused)setPause(false);
   MP.act=false;
@@ -9687,7 +9688,7 @@ function setupChase(){
   };
 }
 /* ---- free flight ---- */
-/* ===================== KAZ SAVAŞLARI ===================== */
+/* ===================== YUMURTA SAVAŞLARI ===================== */
 function setupWar(){
   const DFL={easy:{aim:1.1,spd:1,rea:1.1,dg:0,hunt:150,sk:[.36,.98],zt:1,zs:1,dps:1.2,fire:.78,sight:1.22,n:'Kolay'},med:{aim:.85,spd:1.04,rea:1,dg:.05,hunt:110,sk:[.6,.988],zt:.85,zs:.9,dps:1.65,fire:.62,sight:1.36,n:'Orta'},hard:{aim:.5,spd:1.12,rea:.75,dg:.18,hunt:60,sk:[.9,.997],zt:.7,zs:.8,dps:2.2,fire:.46,sight:1.52,n:'Zor'}},DF=DFL[wdiff()]||DFL.med;
   const N=40,MAXBAG=75,STACK=10,SPD=100,LIFE=3.2,HITR=3.1,BASE=26+player.g.speed*5,HUD=document.getElementById('hud');
@@ -10461,7 +10462,7 @@ function setupWar(){
     mapT-=dt;if(mapT<=0){mapT=.05;try{drawMap()}catch(e){if(!window._mapErr){window._mapErr=1;console.error('map',e)}}}
     /* arayüz */
     hudT-=dt;if(hudT<=0){hudT=.25;matesOn();
-      setObjective('Kaz Savaşları',TM?`🪿 Hayatta ${alive}/${N} · 🟢 Takım ${E.filter(o=>o.alive&&o.team===me.team).length}/${E.filter(o=>o.team===me.team).length} · 🪶 ${me.kills}`:`🪿 Hayatta ${alive}/${N} · 🏠 Yuvasına gönderilen ${me.kills}`);
+      setObjective('Yumurta Savaşları',TM?`🪿 Hayatta ${alive}/${N} · 🟢 Takım ${E.filter(o=>o.alive&&o.team===me.team).length}/${E.filter(o=>o.team===me.team).length} · 🪶 ${me.kills}`:`🪿 Hayatta ${alive}/${N} · 🏠 Yuvasına gönderilen ${me.kills}`);
       killChip.textContent=`🪿 ${alive}/${N} · 🏠 ${me.kills}`;
       zoneChip.textContent=Z.phase==='wait'?`🔵 Alan ${Z.stage+1} · daralmaya ${mmss(Z.wd-Z.t)}`:`⚠️ Alan daralıyor ${mmss(Z.sd-Z.t)}`;
       const outside=Math.hypot(player.pos.x-Z.cx,player.pos.z-Z.cz)>Z.r;zoneChip.style.background=outside?'rgba(200,40,40,.85)':'';zoneChip.style.color=outside?'#fff':'';
@@ -10519,7 +10520,7 @@ function setupWar(){
     ADV.noRQ=!(kind==='win'||!!tw||rank<=10||me.kills>=3);try{$('#resGain').textContent+=' · '+advAward(Math.max(8,Math.min(40,me.kills*4+(N+1-rank))),kind==='win'?1:0)}catch(e){}ADV.noRQ=false
     if(ghost&&!matchDone&&kind!=='win'&&!tw)setTimeout(()=>toast('⏳ Maç henüz bitmedi! Bu anlık durum, kesin sıralama maç bitince belli olur.',4),900);
     setTimeout(()=>{showTop();$('#hud').classList.remove('show');
-      $('#resTitle').textContent=kind==='win'?(TM?'😄 Takımın kazandı!':'😄 Kaz Savaşları galibi!'):tw?'😄 Takımın kazandı!':kind==='host'?'🔌 Ev sahibi ayrıldı':kind==='zone'?'😢 Alanın dışında kaldın':'😢 Elendin';$('#resStars').textContent='⭐ '+sc;
+      $('#resTitle').textContent=kind==='win'?(TM?'😄 Takımın kazandı!':'😄 Yumurta Savaşları galibi!'):tw?'😄 Takımın kazandı!':kind==='host'?'🔌 Ev sahibi ayrıldı':kind==='zone'?'😢 Alanın dışında kaldın':'😢 Elendin';$('#resStars').textContent='⭐ '+sc;
       {const ts=TM?teamStand():null,ti=ts?ts.findIndex(q=>q.t===me.team)+1:0;$('#resMsg').textContent=(ghost&&!matchDone&&kind!=='win'&&!tw?'⏳ Maç henüz bitmedi · ':'')+(TM?`Takım: ${TEAMS[me.team]?TEAMS[me.team].name:''} · Takım sırası: ${ti}/${ts.length} · Bireysel sıra: ${rank}/${N}`:`Sıralaman: ${rank}/${N}`)+` · 🏠 Yuvasına gönderilen kaz: ${me.kills} · ⏱ ${mmss(surv)}${A&&A.rec?' · 🏆 Yeni rekor!':''}`}
       setResArt({win:kind==='win'||!!tw||rank<=10,badge:kind==='win'?'🏆 Birinci!':rank+'. sıra'});setResPts(sc,A);showScreen('resultScreen');
       try{const w_=kind==='win'||!!tw;cosRes(w_||rank<=10);setTimeout(()=>{try{cosVict(w_)}catch(e){}},700);victShow({win:w_,pod:podData,rank,mates:TM?Math.max(0,(TEAMS[me.team]&&TEAMS[me.team].mem?TEAMS[me.team].mem.length:1)-1):0,title:$('#resTitle').textContent,sc,msg:$('#resMsg').textContent,gain:$('#resGain').textContent+(A?' · Toplam: '+PROF.total:''),top:topHtml(),det:detHtml()})}catch(er){console.error('vict',er)}},1900)}
@@ -10537,8 +10538,8 @@ function setupWar(){
   WAR={end:k=>{if(GST){if(!over&&!SP.on)meOut(k==='zone'?'zone':'dead',null)}else if(me.alive)kill(me,null,k==='zone'?'zone':'dead');else if(!over&&!SP.on)end(k)},cleanup,mapOv,peerLeft,gearF:()=>hold?0:Math.pow(.7,4-gearI),get hold(){return hold},get me(){return me},E,Z};
   {const _u=updates;updates=(dt0)=>{const n=(SP.on&&SP.ff)?4:1;for(let i=0;i<n;i++){_u(dt0);if(fin||!SP.on)break}}}
   if(NET)MP.war=onMsg;if(HST)sendWi(true);
-  setObjective('Kaz Savaşları','🪿 Hayatta '+N+'/'+N+' · 🏠 Yuvasına gönderilen 0');
-  toast(TM?`🏹 Kaz Savaşları · Takım: ${TEAMS[me.team].name} (${TEAMS[me.team].mem.length} kişi) · ${DF.n}`:'🏹 Kaz Savaşları! Herkes düşman · '+DF.n,2.8);
+  setObjective('Yumurta Savaşları','🪿 Hayatta '+N+'/'+N+' · 🏠 Yuvasına gönderilen 0');
+  toast(TM?`🏹 Yumurta Savaşları · Takım: ${TEAMS[me.team].name} (${TEAMS[me.team].mem.length} kişi) · ${DF.n}`:'🏹 Yumurta Savaşları! Herkes düşman · '+DF.n,2.8);
   hudT=0}
 
 function setupFree(){setObjective('Serbest uçuş','Alçaktan uç, kalpleri topla (+25 enerji). Karaya yaklaşıp alçal ve yavaşla: "Kazdan in" düğmesi çıkar: yürü, evlere gir, yüz! Zehirli ağaç -20, tren -30, yapı -10.');state.target=null}
@@ -12775,7 +12776,7 @@ function mpSend(o){try{if(MP.host){for(const c of MP.cons)if(c.open)c.send(o)}el
 const mpLink=()=>MP.host?MP.cons.some(c=>c.open):!!(MP.conn&&MP.conn.open);
 function mpRelay(d,from){if(!MP.host||!from||!from.__p)return;const o=Object.assign({},d,{f:from.__p.id});for(const c of MP.cons)if(c!==from&&c.open)try{c.send(o)}catch(e){}}
 function mpPeer(id,d){const v=vitClean(d.v);const u=/^[A-Z0-9]{6}$/.test(d.u)?d.u:'';try{frlSeen(u,String(d.n||'').slice(0,14))}catch(e){}return{id,u,v,name:String(d.n||'Arkadaş').slice(0,14),g:d.g|0,w:Array.isArray(d.w)?d.w.filter(x=>typeof x==='string').slice(0,10):[],r:Math.max(0,Math.min(RIDERS.length-1,d.r|0)),kw:Array.isArray(d.kw)?d.kw.filter(x=>typeof x==='string').slice(0,10):[],tgt:null,gtgt:null,remote:null,first:true,theirs:0}}
-/* eski tek-rakip alanları ilk rakibe bağlı kalır (Kaz Savaşları, Kaz Koşusu, Zamana Karşı bunları kullanır) */
+/* eski tek-rakip alanları ilk rakibe bağlı kalır (Yumurta Savaşları, Kaz Koşusu, Zamana Karşı bunları kullanır) */
 function mpAlias(){const q=MP.ps[0];MP.oppName=q?q.name:'';MP.oppG=q?q.g:0;MP.oppW=q?q.w:[];MP.oppR=q?q.r:0;MP.oppKW=q?q.kw:[];MP.tgt=q?q.tgt:null;MP.gtgt=q?q.gtgt:null;if(MP.host)MP.conn=MP.cons.find(c=>c.open)||null}
 function mpRoster(){if(!MP.host)return;const l=[{i:0,u:MPUID,v:vitSend(),n:mpName(),g:gBaseIdx(),w:gooseWear(),r:sel.rider,kw:Object.values(EQ.k||{}).filter(Boolean).slice(0,10)}].concat(MP.ps.map(q=>({i:q.id,u:q.u,v:q.v,n:q.name,g:q.g,w:q.w,r:q.r,kw:q.kw})));mpSend({t:'roster',l})}
 function dressKid(r,ids){for(const slot of['top','bottom','feet','back','neck','eyes','hat','hand']){const it=(ids||[]).map(itemById).find(x=>x&&x.who==='k'&&x.type===slot);if(it)try{addKidItem(r,it)}catch(e){}}}
@@ -13104,7 +13105,7 @@ function mpHtml(){gftCheck();const ok=MP.st==='ok'&&mpLink(),n=1+MP.ps.length;le
   if(ok){
     {const me=`<span class="mpchip"><span style="color:${mpCol(MP.myId)}">●</span> ${escapeHtml(mpName())}<span class="mpv">${vitIcons(vitSend())}</span></span>`,others=MP.ps.map(q=>`<span class="mpchip"><span style="color:${mpCol(q.id)}">●</span> ${escapeHtml(q.name)}<span class="mpv">${vitIcons(q.v)}</span><button class="mpg" data-mpgift="${q.id}" aria-label="${escapeHtml(q.name)} için tüy hediyesi">${GIFTD.sent[q.id]?'✓':'🎁'}</button>${q.u&&!FRL[q.u]?`<button class="mpg" data-mpfa="${q.id}" aria-label="${escapeHtml(q.name)} arkadaş ekle">➕</button>`:''}${MP.host?`<button class="mpk" data-mpkick="${q.id}" aria-label="${escapeHtml(q.name)} odadan çıkar">✕</button>`:''}</span>`);
       L+=`<p class="mpt">🟢 Odada ${n} kişi${MP.host?` · kod <b>${MP.code}</b>`:''}${MP.lock?' · 🔒':''}</p><div class="mpchips">${[me].concat(others).join('')}</div>`}
-    if(MP.host)L+=`<div class="gm-l">Ne oynayalım?</div><div class="mp2games">`+[['gr','🏁 Kaz Koşusu (yarış)'],['lights','🏮 Işık Festivali yarışı'],['fish','🐟 Balık Avı (ortak)'],['ta','⏱ Zamana Karşı (ortak)'],['war','🏹 Kaz Savaşları (botlarla'+(wteam()?' · '+wteam()+' kişilik takım':'')+')'],['free','☁️ Birlikte serbest uçuş']].map(([id,t])=>{const cap=MPCAP[id],good=n<=cap;return `<button class="opt" data-mpstart="${id}"${good?'':' disabled'}><span>${t}${cap<MPMAX?` <small>· en fazla ${cap} kişi</small>`:''}${good?'':' <small>(odada çok kişi var)</small>'}</span></button>`}).join('')+`</div><button class="opt" data-mpa="lock"><span>${MP.lock?'🔓 Kilidi aç':'🔒 Odayı kilitle'}</span></button>`;
+    if(MP.host)L+=`<div class="gm-l">Ne oynayalım?</div><div class="mp2games">`+[['gr','🏁 Kaz Koşusu (yarış)'],['lights','🏮 Işık Festivali yarışı'],['fish','🐟 Balık Avı (ortak)'],['ta','⏱ Zamana Karşı (ortak)'],['war','🏹 Yumurta Savaşları (botlarla'+(wteam()?' · '+wteam()+' kişilik takım':'')+')'],['free','☁️ Birlikte serbest uçuş']].map(([id,t])=>{const cap=MPCAP[id],good=n<=cap;return `<button class="opt" data-mpstart="${id}"${good?'':' disabled'}><span>${t}${cap<MPMAX?` <small>· en fazla ${cap} kişi</small>`:''}${good?'':' <small>(odada çok kişi var)</small>'}</span></button>`}).join('')+`</div><button class="opt" data-mpa="lock"><span>${MP.lock?'🔓 Kilidi aç':'🔒 Odayı kilitle'}</span></button>`;
     else L+=`<p class="mpt">Oyunu ev sahibi seçiyor…</p>`;
     R+=mpQuickHtml()+mpExtraHtml();
     R+=`<div class="optrow mp2b">${MP.host?`<button class="opt" data-mpa="share"><span>📤 Kodu paylaş</span></button>`:''}<button class="opt" data-mpa="leave"><span>${MP.host?'Odayı kapat':'Odadan ayrıl'}</span></button></div>`+close}
@@ -13922,7 +13923,7 @@ function y3Click(e){const b=e.target.closest('button');if(!b)return;const d=b.da
 hmOpen=function(){try{y3Open()}catch(e){console.error('y3',e);y3T('Yuvam açılamadı',2)}};
 
 /* ---- Haftalık Kaz Kupası ---- */
-const CUPM=[['ta','⏱️','Zamana Karşı'],['chase','🦅','Amansız Takip'],['war','🏹','Kaz Savaşları'],['gr','🏁','Kaz Koşusu'],['lights','🏮','Işık Festivali']];
+const CUPM=[['ta','⏱️','Zamana Karşı'],['chase','🦅','Amansız Takip'],['war','🏹','Yumurta Savaşları'],['gr','🏁','Kaz Koşusu'],['lights','🏮','Işık Festivali']];
 const CUP=Object.assign({w:'',m:{},n:0},store.get('kz-cup',null)||{});
 function cupEnsure(){const w=fwWeek();if(CUP.w!==w){CUP.w=w;CUP.m={};store.set('kz-cup',CUP)}}
 function cupMark(id,ok){if(!ok||!CUPM.some(c=>c[0]===id))return;cupEnsure();if(CUP.m[id])return;CUP.m[id]=1;const c=CUPM.find(x=>x[0]===id),n=Object.keys(CUP.m).length;
@@ -14101,7 +14102,7 @@ function medalShow(id,o){o=o||{};const th=o.th||cosSel('an');if(!th||!MEDALS[id]
 }
 
 
-/* ---- Kaz Savaşları istatistikleri ---- */
+/* ---- Yumurta Savaşları istatistikleri ---- */
 const WST=store.get('kz-wst',null)||{};
 function wstRec(d,r){const q=WST[d]=WST[d]||{g:0,w:0,t10:0,rk:0,k:0,sh:0,ht:0,sv:0,dm:0,bk:0,br:99,ls:0};
  q.g++;q.w+=r.w;q.t10+=r.t10;q.rk+=r.rk;q.k+=r.k;q.sh+=r.sh;q.ht+=r.ht;q.sv+=r.sv;q.dm+=r.dm;q.bk=Math.max(q.bk,r.k);q.br=Math.min(q.br,r.rk);q.ls=Math.max(q.ls,r.sv);store.set('kz-wst',WST)}
@@ -14109,11 +14110,11 @@ function wstHtml(d){const q=WST[d],T=[['easy','Kolay'],['med','Orta'],['hard','Z
  const mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0'),pc=(a,b)=>b>0?Math.round(a*100/b)+'%':'—';
  const row=(i,l,v)=>`<div class="wsr"><span>${i} ${l}</span><b>${v}</b></div>`;
  let h=`<div class="wstTabs">${T.map(t=>`<button class="${t[0]===d?'on':''}" data-wstd="${t[0]}">${t[1]}</button>`).join('')}</div>`;
- if(!q||!q.g)h+=`<p class="wsEmpty">Bu zorlukta henüz oyun yok. Bir Kaz Savaşı oyna, kayıtlar burada görünsün!</p>`;
+ if(!q||!q.g)h+=`<p class="wsEmpty">Bu zorlukta henüz oyun yok. Bir Yumurta Savaşı oyna, kayıtlar burada görünsün!</p>`;
  else h+=row('🎮','Oynanan oyun',q.g)+row('🏆','Başarı oranı (galibiyet)',pc(q.w,q.g)+' · '+q.w+' galibiyet')+row('🔟','İlk 10\'a girme',pc(q.t10,q.g))+row('🎯','İsabet oranı',pc(q.ht,q.sh)+' ('+q.ht+'/'+q.sh+')')+row('⏱','Ortalama hayatta kalma',mm(q.sv/q.g))+row('🏠','Toplam gönderilen kaz',q.k)+row('📈','Maç başına ortalama kaz',(q.k/q.g).toFixed(1))+row('🔥','En çok kaz (tek maç)',q.bk)+row('🥇','En iyi sıralama',q.br+'. ')+row('📊','Ortalama sıralama',(q.rk/q.g).toFixed(1)+'.')+row('🕒','En uzun hayatta kalma',mm(q.ls))+row('🏹','Verilen toplam hasar',q.dm);
  return h}
 function wstOpen(d){let o=document.getElementById('wstOv');if(!o){o=document.createElement('div');o.id='wstOv';document.body.appendChild(o)}
- o.innerHTML=`<div class="wstBox"><button class="wstX" data-wstx>✕</button><h3>📊 Kaz Savaşları İstatistikleri</h3>${wstHtml(d)}</div>`;o.style.display='flex'}
+ o.innerHTML=`<div class="wstBox"><button class="wstX" data-wstx>✕</button><h3>📊 Yumurta Savaşları İstatistikleri</h3>${wstHtml(d)}</div>`;o.style.display='flex'}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-wst],[data-wstd],[data-wstx],#wstOv');if(!t)return;
  if(t.dataset.wstd){wstOpen(t.dataset.wstd);return}
  if(t.dataset.wstx!==undefined||t.id==='wstOv'){if(t.id==='wstOv'&&e.target!==t)return;document.getElementById('wstOv').style.display='none';return}
@@ -14128,8 +14129,8 @@ const COS=Object.assign({sel:{},g:0,w:0,seen:null},store.get('kz-cos',null)||{})
 const cosSave=()=>store.set('kz-cos',COS);
 const COSST={cup:()=>CUP.n|0,games:()=>PROF.games|0,lf:()=>ACHS.c.lf|0,wr:()=>COS.g>=30?Math.round(COS.w*100/COS.g):0,q:()=>ACHS.c.q|0,mp:()=>ACHS.c.mp|0,nest:()=>ACHS.c.nestI|0,warW:()=>ACHS.c.warW|0,warK:()=>ACHS.c.warK|0,streak:()=>stBest(),ev:()=>evCount(),lvl:()=>lvlOf(PROF.total).L,warG:()=>ACHS.c.warG|0,cls:()=>ACHS.c.cls|0,lsk:()=>ACHS.c.lsk|0,stk:()=>ACHS.c.stk|0,tre:()=>ACHS.c.tre|0,egg:()=>ACHS.c.egg|0,hvk:()=>ACHS.c.hvk|0,rkk:()=>ACHS.c.rkk|0,dvk:()=>ACHS.c.dvk|0,snk:()=>ACHS.c.snk|0,mxb:()=>ACHS.c.mxb|0,warKM:()=>ACHS.c.warKM|0,warWH:()=>ACHS.c.warWH|0,photos:()=>ACHS.c.photos|0};
 const cmx=(k,v)=>{if((ACHS.c[k]|0)<v){ACHS.c[k]=v;store.set('kz-ach',ACHS)}};
-const COSLB={lf:'ışık bölümü tamamla',cup:'haftalık kupa kazan',games:'oyun oyna',wr:'% başarı oranı (en az 30 oyunda)',q:'görev tamamla',mp:'kez arkadaşla oyna',nest:'yuva eşyası al',warW:'Kaz Savaşı kazan',warK:'kazı yuvasına gönder',streak:'gün üst üste görev bitir',ev:'bayram etkinliğine katıl',lvl:'. seviyeye ulaş',warG:'Kaz Savaşları oyna',cls:'kazı gaga mesafesinde yuvaya gönder',lsk:'kez canın azken kaz gönder',stk:'leylek düşür',tre:'hazine sandığı al',egg:'yumurta topla',hvk:'kazı havada asılı kalarak vur',rkk:'kazı roketle uçarken vur',dvk:'kazı dalarken vur',snk:'kazı uzak mesafeden vur',mxb:'kazı 7 sn içinde yuvaya gönder',warKM:'kazı tek maçta yuvaya gönder',warWH:'kez Zor modda Kaz Savaşı kazan',photos:'fotoğraf çek'};
-const COSLOT=[['nk','✍️ İsim yazısı'],['fr','🖼️ İsim çerçevesi'],['tt','🎖️ Unvan'],['xh','🎯 Nişangâh (Kaz Savaşları)'],['tr','💨 Uçuş izi'],['au','🌟 Aura'],['vf','🎉 Zafer efekti'],['vp','🏆 Galibiyet Duruşları'],['sp','🎭 Sahne Pozları'],['xe','💥 Elenme efekti'],['kn','🏠 Yuvaya gönderme bildirimi'],['an','🎬 Yuvaya gönderme animasyonu (Kaz Savaşları)'],['sg','🪧 Yuva kapı tabelası'],['rs','🏠 Baca dumanı']];
+const COSLB={lf:'ışık bölümü tamamla',cup:'haftalık kupa kazan',games:'oyun oyna',wr:'% başarı oranı (en az 30 oyunda)',q:'görev tamamla',mp:'kez arkadaşla oyna',nest:'yuva eşyası al',warW:'Yumurta Savaşı kazan',warK:'kazı yuvasına gönder',streak:'gün üst üste görev bitir',ev:'bayram etkinliğine katıl',lvl:'. seviyeye ulaş',warG:'Yumurta Savaşları oyna',cls:'kazı gaga mesafesinde yuvaya gönder',lsk:'kez canın azken kaz gönder',stk:'leylek düşür',tre:'hazine sandığı al',egg:'yumurta topla',hvk:'kazı havada asılı kalarak vur',rkk:'kazı roketle uçarken vur',dvk:'kazı dalarken vur',snk:'kazı uzak mesafeden vur',mxb:'kazı 7 sn içinde yuvaya gönder',warKM:'kazı tek maçta yuvaya gönder',warWH:'kez Zor modda Yumurta Savaşı kazan',photos:'fotoğraf çek'};
+const COSLOT=[['nk','✍️ İsim yazısı'],['fr','🖼️ İsim çerçevesi'],['tt','🎖️ Unvan'],['xh','🎯 Nişangâh (Yumurta Savaşları)'],['tr','💨 Uçuş izi'],['au','🌟 Aura'],['vf','🎉 Zafer efekti'],['vp','🏆 Galibiyet Duruşları'],['sp','🎭 Sahne Pozları'],['xe','💥 Elenme efekti'],['kn','🏠 Yuvaya gönderme bildirimi'],['an','🎬 Yuvaya gönderme animasyonu (Yumurta Savaşları)'],['sg','🪧 Yuva kapı tabelası'],['rs','🏠 Baca dumanı']];
 const COSI=[
  ['nk_col','nk','Mavi geçişli','🔵','games',10],['nk_green','nk','Yeşil yazı','🍃','nest',8],['nk_comic','nk','Çizgi film yazısı','💬','q',10],['nk_purple','nk','Mor geçişli','🟣','mp',3],
  ['nk_pink','nk','Pembe kalpli','💗','mp',10],['nk_neon','nk','Neon yeşil','💚','q',40],['nk_script','nk','El yazısı','✒️','games',40],['nk_outline','nk','Çizgili yazı','🔤','nest',16],
@@ -16093,7 +16094,7 @@ function advPanelHide(){if(!ADV.pn)return;ADV.pn.btn.style.display='none';ADV.pn
 #advNote.on{opacity:1;transform:translate(-50%,0)}`;document.head.appendChild(st)}
 
 /* ================= TUŞ DÜZENİ: her moddaki tuşları kullanıcı yerleştirir ================= */
-const KL_PROFS=[['fly','🪿 Uçuş modları'],['gr','🏁 Kaz Koşusu'],['war','🏹 Kaz Savaşları']];
+const KL_PROFS=[['fly','🪿 Uçuş modları'],['gr','🏁 Kaz Koşusu'],['war','🏹 Yumurta Savaşları']];
 const klProf=id=>id==='war'?'war':id==='gr'?'gr':'fly';
 const klDims=()=>{const lw=(window.ORI&&ORI.lw)||innerWidth,lh=(window.ORI&&ORI.lh)||innerHeight;return{lw,lh}};
 const klW=()=>{const{lw,lh}=klDims();return lw/lh*100};
