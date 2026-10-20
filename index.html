@@ -9694,9 +9694,9 @@ function setupWar(){
   const peerOfSlot=i=>HST?MP.byId[N-i]:(i===mySlot?MP.byId[0]:MP.byId[N-i]);
   const mpTo=(r,o)=>{try{const c=r&&r.peer&&r.peer.conn;if(c&&c.open)c.send(o)}catch(e){}};
   /* yumurtalar: hafif olan uzağa gider ama az vurur; ağır olan kısa menzilli ama sert vurur */
-  const AM=[{n:'Güvercin Yumurtası',ic:'🥚',col:0xbfe3ff,css:'#bfe3ff',lo:10,hi:18,gl:2.6,fr:70,mr:220,sz:.55,eg:'<i class="eg" style="--s:.62em;--c:#bfe3ff"></i>'},
-    {n:'Kaz Yumurtası',ic:'🥚',col:0xffe9a3,css:'#ffe9a3',lo:19,hi:25,gl:3.6,fr:50,mr:150,sz:.85,eg:'<i class="eg" style="--s:.86em;--c:#ffe9a3"></i>'},
-    {n:'Deve Kuşu Yumurtası',ic:'🥚',col:0xff9a4a,css:'#ff9a4a',lo:26,hi:33,gl:5,fr:30,mr:95,sz:1.3,eg:'<i class="eg" style="--s:1.12em;--c:#ff9a4a"></i>'}];
+  const AM=[{n:'Güvercin Yumurtası',ic:'🥚',col:0xbfe3ff,css:'#bfe3ff',lo:12,hi:21,gl:2.6,fr:84,mr:264,sz:.55,eg:'<i class="eg" style="--s:.62em;--c:#bfe3ff"></i>'},
+    {n:'Kaz Yumurtası',ic:'🥚',col:0xffe9a3,css:'#ffe9a3',lo:22,hi:29,gl:3.6,fr:60,mr:180,sz:.85,eg:'<i class="eg" style="--s:.86em;--c:#ffe9a3"></i>'},
+    {n:'Deve Kuşu Yumurtası',ic:'🥚',col:0xff9a4a,css:'#ff9a4a',lo:30,hi:38,gl:5,fr:36,mr:114,sz:1.3,eg:'<i class="eg" style="--s:1.12em;--c:#ff9a4a"></i>'}];
   const MAXPER=25;
   const Rn=Math.random,rr=(a,b)=>a+(b-a)*Rn(),gs=()=>(Rn()+Rn()+Rn()-1.5)*2,cl=(v,a,b)=>Math.max(a,Math.min(b,v));
   const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -11372,7 +11372,7 @@ function planTakeoff(){const P=player,ty0=P.pos.y;let bestYaw=P.yaw,bestBoost=0,
   for(const boost of[0,14,30,50]){for(const o of offs){const r=test(P.yaw+o,boost);if(!r){bestYaw=P.yaw+o;bestBoost=boost;found=true;break}if(r>bestScore&&boost===0){bestScore=r;if(!found){bestYaw=P.yaw+o}}}if(found)break}
   if(!found){bestBoost=50}
   return{yaw:bestYaw,boost:bestBoost}}
-function prepareTakeoff(){const P=player;let tb=0;try{const pl=planTakeoff();if(Math.abs(angDiff(pl.yaw,P.yaw))>.01)P.yaw=pl.yaw;tb=pl.boost}catch(e){}
+function prepareTakeoff(){const P=player;let tb=0;
   const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),sx=P.pos.x-fx*40,sz=P.pos.z-fz*40;
   takeoff={t:0,sx,sz,fx,fz,ty:P.pos.y+tb,splash:0};P.pos.set(sx,gy(sx,sz)+1.85,sz);P.pitch=0;P.roll=0;P.speed=0;P.slow=0;
   rigGoose.userData.fold();rigGoose.userData.feet.visible=true;rigGoose.userData.tuck.visible=false;updateRig(0,false)}
@@ -11384,7 +11384,7 @@ function updateTakeoff(dt){const T=takeoff,P=player,D=2.6,t=(T.t+=dt);
     rig.position.copy(P.pos);rig.rotation.set(P.pitch-.1*(1-lift),P.yaw,0);
     rigGoose.userData.flap(t*(11+8*t/D),.5+.45*Math.min(1,t/D*1.5));
     if(t>.35){rigGoose.userData.feet.visible=false;rigGoose.userData.tuck.visible=true}
-    if(t>=D){takeoff=null;state.mode='fly';SMART.on=8;P.speed=26+P.g.speed*5;P.pitch=.25;P.scr=0;P.hitWall=false;try{P.pos.y=Math.max(P.pos.y,solidTop(P.pos.x,P.pos.z,P.pos.y,true)+4)}catch(e){}invuln=Math.max(invuln,2.2)}
+    if(t>=D){takeoff=null;state.mode='fly';SMART.on=0;P.speed=26+P.g.speed*5;P.pitch=.25;P.scr=0;P.hitWall=false;try{P.pos.y=Math.max(P.pos.y,solidTop(P.pos.x,P.pos.z,P.pos.y,true)+4)}catch(e){}invuln=Math.max(invuln,2.2)}
     return}
   const d=13*t*t/D,x=T.sx+T.fx*d,z=T.sz+T.fz*d,g=T.gb!==undefined?Math.max(gy(x,z),T.gb*Math.max(0,1-d/14)):gy(x,z);
   const lift=t<1.5?0:Math.min(1,(t-1.5)/(D-1.5)),tgt=Math.max(T.ty,g+10);
@@ -11393,7 +11393,7 @@ function updateTakeoff(dt){const T=takeoff,P=player,D=2.6,t=(T.t+=dt);
   rigGoose.userData.flap(t*(9+10*t/D),.35+.55*Math.min(1,t/D*1.5));rigGoose.userData.run(t*24,1-lift);
   if(lift>.6){rigGoose.userData.feet.visible=false;rigGoose.userData.tuck.visible=true}
   if(lift<.5){T.splash-=dt;if(T.splash<=0){T.splash=.09;burst(new V3(x,g+.3,z),height(x,z)<.2?splashMat:dustMat,4,.6)}}
-  if(t>=D){takeoff=null;state.mode='fly';SMART.on=8;P.speed=26+P.g.speed*5;P.pitch=.25;P.scr=0;P.hitWall=false;try{P.pos.y=Math.max(P.pos.y,solidTop(P.pos.x,P.pos.z,P.pos.y,true)+4)}catch(e){}invuln=Math.max(invuln,2.2)}}
+  if(t>=D){takeoff=null;state.mode='fly';SMART.on=0;P.speed=26+P.g.speed*5;P.pitch=.25;P.scr=0;P.hitWall=false;try{P.pos.y=Math.max(P.pos.y,solidTop(P.pos.x,P.pos.z,P.pos.y,true)+4)}catch(e){}invuln=Math.max(invuln,2.2)}}
 
 /* ---------------- kazın üstündeki karakter bazen bir yeri işaret eder ---------------- */
 const POINT={active:false,t:0,dur:2.6,next:5,arm:1,tp:null};
@@ -12497,7 +12497,7 @@ function blockedAt(x,y,z,tm){const g=GR+.7;
   if(tm!==false){const gr=ground(x,z);if(y<gr+g+1.2&&height(x,z)>.12)return 1;const ct=coneTop(x,z);if(y<ct+g){const ti=tunnelInfo(CONE,{x,y,z});if(!(ti.r<CAVE_RM-2&&Math.abs(ti.al)<CONE.half+CAVE_EXT+90))return 2}}
   for(const p of PROPS){const hr=(p.hr||p.r*.72)+g;if(Math.abs(x-p.x)>hr||Math.abs(z-p.z)>hr)continue;const bot=p.bot!==undefined?p.bot:ground(p.x,p.z)-1;if(y<p.top+g&&y>bot-g)return 3}
   _smp.x=x;_smp.y=y;_smp.z=z;if(treeHit(_smp))return 4;if(iceNear(x,y,z))return 5;return 0}
-function smartFly(dt,inp){const P=player;
+function smartFly(dt,inp){const P=player;SMART.on=0;SMART.turn=0;SMART.pt=0;SMART.rk=0;return 0;/* akıllı uçma kapatıldı */
   if(!(SMART.on>0)){SMART.turn=0;SMART.pt=0;SMART.rk=0;return 0}SMART.on-=dt;   /* akıllı kaz yalnız ilk kalkıştan sonraki birkaç saniye */
   if(SMART.rk>0)SMART.rk-=dt;
   if(state.mission!=='free'||state.mode!=='fly'||P.tun>=0||P.rtun||P.stun>0||inp.brake||P.speed<16||ROCK.held||DROP.held||HOLD.on||ADV.realm){SMART.turn=0;SMART.pt=0;SMART.rk=0;return 0}
@@ -12526,7 +12526,6 @@ function flyStep(dt,inp){
   let pt=inp.y*(hov?1.05:.62)*(1-(hov?0:slow)*.85);
   const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw);
   const here=solidTop(P.pos.x,P.pos.z,P.pos.y,true),ahead=Math.max(solidTop(P.pos.x+fx*24,P.pos.z+fz*24,P.pos.y,true),solidTop(P.pos.x+fx*12,P.pos.z+fz*12,P.pos.y,true));
-  if(ahead>here+1.2&&P.pos.y<ahead+2.8&&P.tun<0&&slow<.6)pt=Math.max(pt,.55);
   {const sm=smartFly(dt,inp);if(sm>0&&sm>pt)pt=sm}
   if(P.pos.y>(ADV.realm?3000:270*C.ceil))pt=Math.min(pt,0);
   const dropOk=DROP.held&&DROP.ch>0&&!ROCK.held&&P.tun<0&&!P.rtun&&!(P.stun>0)&&state.mode==='fly'&&(P.pos.y-here)>16+P.speed*.6;
