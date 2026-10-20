@@ -12528,7 +12528,7 @@ function flyStep(dt,inp){
   const here=solidTop(P.pos.x,P.pos.z,P.pos.y,true),ahead=Math.max(solidTop(P.pos.x+fx*24,P.pos.z+fz*24,P.pos.y,true),solidTop(P.pos.x+fx*12,P.pos.z+fz*12,P.pos.y,true));
   {const sm=smartFly(dt,inp);if(sm>0&&sm>pt)pt=sm}
   if(P.pos.y>(ADV.realm?3000:270*C.ceil))pt=Math.min(pt,0);
-  const dropOk=DROP.held&&DROP.ch>0&&!ROCK.held&&P.tun<0&&!P.rtun&&!(P.stun>0)&&state.mode==='fly'&&(P.pos.y-here)>16+P.speed*.6;
+  const dropOk=DROP.held&&DROP.ch>0&&!ROCK.held&&P.tun<0&&!P.rtun&&!(P.stun>0)&&state.mode==='fly'&&(P.pos.y-here)>6+P.speed*.05;
   if(!((ROCK.held||SMART.rk>0)&&ROCK.ch>0&&P.tun<0&&!P.rtun&&P.pos.y<262*C.ceil)&&!dropOk)P.pitch+=(pt-P.pitch)*Math.min(1,dt*(DROP.rec>0?7:2.5));
   P.roll+=(-inp.x*.7*(1-slow*.6)-P.roll)*Math.min(1,dt*3);
   {const was=ROCK.on;ROCK.on=(ROCK.held||SMART.rk>0)&&ROCK.ch>0&&P.tun<0&&!P.rtun&&!(P.stun>0)&&P.pos.y<262*C.ceil&&state.mode==='fly';
