@@ -98,6 +98,18 @@ html.short #hubSheet:not([data-tab="missions"]) #hubBody{padding-bottom:10px}
 .pft:active{transform:translateY(2px)}
 .pft .pfi{margin-left:15px;margin-right:3px;font-size:.9rem}.pft b{font-size:.7rem;white-space:nowrap;text-shadow:0 1px 0 rgba(255,244,214,.7)}
 .pft .pff{display:none}
+
+/* ===== KAZ SAVAŞLARI: düzenli HUD yerleşimi (üst üste binme yok) ===== */
+#hud.war #topleft{flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;gap:calc(var(--u)*1.2) calc(var(--u)*1.5)!important;max-width:calc(var(--u)*68)!important}
+#hud.war #topleft>*,#hud.war #topleft>.klp{position:static!important;transform:none!important;margin:0!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;max-width:100%!important;box-sizing:border-box!important;flex:none!important;font-size:calc(var(--u)*3.1)!important;line-height:1.2!important;padding:calc(var(--u)*.8) calc(var(--u)*2.4)!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
+#hud.war #topleft>#objective{order:1}#hud.war #topleft>#hearts{order:2}#hud.war #topleft>#warKills{order:3}#hud.war #topleft>#warZone{order:4}#hud.war #topleft>#chaseStat{order:5}#hud.war #topleft>#regChip{order:6;background:rgba(18,34,52,.55);color:#fff}#hud.war #topleft>#warChest{order:7}#hud.war #topleft>#advChip{order:8}
+#hud.war #topright{max-width:calc(var(--u)*62)!important}
+#hud.war #topright>.klp,#hud.war #trRow>.klp{position:static!important;transform:none!important;margin:0!important;right:auto!important;bottom:auto!important}
+#hud.war #warFeed{top:calc(var(--u)*24)!important;right:calc(var(--u)*29)!important;z-index:2}
+html.inwar #warOut,#hud.war #warOut{top:18vh!important}
+html.inwar #warLock,#hud.war #warLock{top:calc(var(--vh)*46)!important}
+html.inwar #cosKb{top:27%!important}
+html.inwar #medBox{top:33%!important}
 </style>
 </head><body>
 <!doctype html>
@@ -8101,7 +8113,7 @@ function shopHtml(){
   const chips=`<div class="slotrow"><button class="chip2${slotF==='all'?' on':''}" data-slot="all">Hepsi</button>`+slots.map(sl=>`<button class="chip2${slotF===sl[0]?' on':''}" data-slot="${sl[0]}">${sl[2]} ${sl[1]}</button>`).join('')+`<button class="chip2" data-spin="1">🔄 Döndür</button></div>`;
   const list=SHOP.filter(i=>i.who===who&&(slotF==='all'||i.type===slotF));
   return `<p class="hint2">👀 Parmağınla sürükle: ${who==='g'?'kazı':'karakteri'} her yönden gör. Eşyaya dokununca üstünde denersin.</p>${chips}<div class="sgrid">`+list.map(itemCard).join('')+`</div>`}
-const KZ_VER=245;
+const KZ_VER=246;
 /* görünen sürüm numarası: GitHub'daki version.txt (çevrimdışıysa son bilinen) */
 const KZ_GH={v:(()=>{try{const v=store.get('kz-ghv','1.1');return /^[0-9][0-9.]{0,9}$/.test(v)?v:'1.1'}catch(e){return'1.1'}})()};
 function kzVerShow(){document.querySelectorAll('.kzver').forEach(e=>{e.textContent='Kazanya · sürüm '+KZ_GH.v});document.querySelectorAll('#nwOv h3 small').forEach(e=>{e.textContent='sürüm '+KZ_GH.v})}
