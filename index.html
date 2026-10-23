@@ -1942,7 +1942,7 @@ const HAR=(()=>{const z=LH.z+62;let x=LH.x-30;while(x<LH.x+260&&height(x,z)>.3)x
 /* ---------------- renderer & scene ---------------- */
 const canvas=$('#c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:(()=>{const a=store.get('kz-aa',null);return a===null?store.get('kz-gfx','mid')==='high':a!==false})()});   /* kenar yumuşatma: kayıtlı tercih yoksa yalnız Yüksek grafikte açık (ısınma) */
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(62,1,.5,5000);
 const FOG_CLEAR=new THREE.Color(0xc4e4f7),FOG_STORM=new THREE.Color(0x4d5a66);
@@ -8950,6 +8950,7 @@ function kzVerFetch(){const urls=['https://raw.githubusercontent.com/sehimcizaza
 kzVerFetch();document.addEventListener('visibilitychange',()=>{if(!document.hidden)kzVerFetch()});setInterval(kzVerFetch,600000);
 let gfx=store.get('kz-gfx','mid');
 const AQ={on:store.get('kz-autoq',true)!==false,n:0,sum:0,t:0,low:0,steps:0};
+const RS={on:store.get('kz-drs',false)===true,s:1,pr:1,ema:0,bad:0,okT:0,chT:0,upT:-1e9,wait:12000};
 /* ---- uzaklık sisi + sisin ardındaki nesneleri hiç çizmeme (ısınmayı azaltır) ---- */
 const DCL={t:0,list:null,lt:-9,hid:new Set()};
 function fogMaxD(){return gfx==='low'?650:gfx==='high'?1150:900}
@@ -8962,11 +8963,19 @@ function fogDistCull(){const fg=scene.fog;if(!fg)return;const FM=fogMaxD();if(fg
     const cx=bs.center.x,cy=bs.center.y,cz=bs.center.z,wx=e[0]*cx+e[4]*cy+e[8]*cz+e[12],wy=e[1]*cx+e[5]*cy+e[9]*cz+e[13],wz=e[2]*cx+e[6]*cy+e[10]*cz+e[14];
     const dx=wx-cp.x,dy=wy-cp.y,dz=wz-cp.z,d=Math.sqrt(dx*dx+dy*dy+dz*dz)-r;
     if(d>CD){if(o.visible){o.visible=false;DCL.hid.add(o)}}else if(d<CD-60&&DCL.hid.has(o)){o.visible=true;DCL.hid.delete(o)}}}
-function applyGfx(){const q={low:{pr:1,hi:70,far:700},mid:{pr:1.5,hi:130,far:1000},high:{pr:1.75,hi:190,far:1250}}[gfx]||{pr:1.5,hi:130,far:1000};renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,q.pr));TV.R=q.hi;TV.FAR=q.far;TV.t=-9;resize()}
-function setGfx(v){gfx=v;store.set('kz-gfx',v);applyGfx();if(curScreen==='hub')renderHub(true)}
+function applyGfx(){const q={low:{pr:1,hi:70,far:700},mid:{pr:1.5,hi:130,far:1000},high:{pr:1.6,hi:190,far:1250}}[gfx]||{pr:1.5,hi:130,far:1000};RS.pr=Math.round(Math.min(window.devicePixelRatio||1,Math.max(Math.min(q.pr,gfx==='high'?1.3:1.2),q.pr*RS.s))*20)/20;renderer.setPixelRatio(RS.pr);TV.R=q.hi;TV.FAR=q.far;TV.t=-9;resize()}
+function setGfx(v){gfx=v;RS.s=1;RS.bad=0;RS.ema=0;store.set('kz-gfx',v);applyGfx();if(curScreen==='hub')renderHub(true)}
 /* --- FPS sınırı: 45/60/90/120 veya Dinamik (menüde 30, oyunda 30-60 arası kendini ayarlar) --- */
-const FPS_OK=['45','60','90','dyn'];
+const FPS_OK=['40','45','60','90','dyn'];
 const FPSM={mode:(v=>FPS_OK.includes(v)?v:'60')(String(store.get('kz-fps','60'))),lastT:0,lvl:60,ema:16.7,bad:0,okT:0,hold:0};
+/* --- dinamik çözünürlük: yoğun sahnede çizim ölçeğini küçük adımlarla düşürür, sakinleşince yavaşça geri çıkarır (ısınmayı azaltır) --- */
+function rsTick(now,el){
+  if(!RS.on||FPSM.mode==='dyn'||state.mode==='menu'||paused||document.hidden||BG||state.time<6||gfx==='low'){RS.ema=0;RS.bad=0;RS.okT=now;return}
+  const iv=1000/fpsTarget();if(!RS.ema)RS.ema=iv;RS.ema+=(Math.min(el,iv*3)-RS.ema)*.06;
+  if(now-RS.chT<2500)return;
+  if(RS.ema>iv*1.2){if(!RS.bad)RS.bad=now;else if(now-RS.bad>1200&&RS.s>.8){RS.s=Math.max(.8,Math.round((RS.s-.08)*100)/100);RS.bad=0;RS.chT=now;RS.okT=now;if(now-RS.upT<30000)RS.wait=Math.min(120000,RS.wait*2);rsSet()}}
+  else{RS.bad=0;if(RS.ema<iv*1.04&&RS.s<1&&now-RS.okT>RS.wait){RS.s=Math.min(1,Math.round((RS.s+.04)*100)/100);RS.okT=now;RS.chT=now;RS.upT=now;rsSet()}}}
+function rsSet(){const q={mid:1.5,high:1.6}[gfx]||1,pr=Math.round(Math.min(window.devicePixelRatio||1,Math.max(Math.min(q,gfx==='high'?1.3:1.2),q*RS.s))*20)/20;if(pr!==RS.pr){RS.pr=pr;renderer.setPixelRatio(pr)}}
 function fpsTarget(){if(paused)return 20;if(FPSM.mode==='dyn')return state.mode==='menu'?30:FPSM.lvl;return +FPSM.mode||60}
 function dynFps(now,el){
   if(state.mode==='menu'||paused){FPSM.ema=1000/FPSM.lvl;FPSM.bad=0;FPSM.okT=now;return}
@@ -9000,7 +9009,7 @@ function perfTick(now,t0){PERF.cpu+=performance.now()-t0;PERF.n++;
     let tr=0;for(let ty=0;ty<3;ty++)tr+=TV.hi[ty].T.count+TV.lo[ty].T.count;let pr=0;for(const pc of CU_PROPS)pr+=pc.n||0;
     let aa='?';try{aa=renderer.getContext().getContextAttributes().antialias?'AA açık':'AA kapalı'}catch(e){}
     const rd=PERF.rend/PERF.n;
-    PERF.el.textContent='FPS '+fps.toFixed(0)+' (hedef '+fpsTarget()+')  CPU '+cpu.toFixed(1)+' ms (render '+rd.toFixed(1)+')\n'+
+    PERF.el.textContent='FPS '+fps.toFixed(0)+' (hedef '+fpsTarget()+', çöz. '+RS.pr+')  CPU '+cpu.toFixed(1)+' ms (render '+rd.toFixed(1)+')\n'+
       'çizim '+inf.calls+'  üçgen '+(inf.triangles/1000).toFixed(0)+'k\n'+
       'ağaç '+tr+'  çim/çalı/kaya '+pr+'  gizli '+DC.hidden+'+grup '+DC.ghid+'+kaz '+FL.lod+'/'+DC.list.length+'\n'+
       'DPR '+renderer.getPixelRatio().toFixed(2)+'  '+renderer.domElement.width+'x'+renderer.domElement.height+'  '+aa+'\n'+
@@ -9012,6 +9021,7 @@ function autoQ(now,el){if(!AQ.on||state.mode==='menu'||paused||document.hidden||
   AQ.n++;AQ.sum+=Math.min(el,500);if(now-AQ.t<1000)return;const fps=1000/(AQ.sum/AQ.n);AQ.n=0;AQ.sum=0;AQ.t=now;
   if(fps<22)AQ.low++;else if(fps>=26)AQ.low=0;
   if(AQ.low>=10&&gfx!=='low'&&AQ.steps<2){AQ.low=0;AQ.steps++;const nv=gfx==='high'?'mid':'low';setGfx(nv);toast('📉 Telefon zorlandı: grafik '+(nv==='mid'?'Orta':'Düşük')+' yapıldı (Ayarlar > Grafik)',3.2)}}
+try{applyGfx()}catch(e){}
 function setFps(v){if(!FPS_OK.includes(v))return;FPSM.mode=v;store.set('kz-fps',v);FPSM.lastT=0;FPSM.lvl=60;FPSM.ema=16.7;FPSM.bad=0;FPSM.okT=0;FPSM.hold=0;if(curScreen==='hub')renderHub(true)}
 function settingsHtml(){const o=(a,v,ic,t)=>`<button class="opt${v?' on':''}" data-${a}>${ic?`<b>${ic}</b>`:''}<span>${t}</span></button>`;
   const row=(l,seg)=>`<div class="prow"><span class="pl">${l}</span><div class="seg">${seg}</div></div>`;
@@ -9019,7 +9029,7 @@ function settingsHtml(){const o=(a,v,ic,t)=>`<button class="opt${v?' on':''}" da
   return `<div class="pst"><div class="pcol"><div class="pcard"><h4>Kontrol</h4>${row('Yön kontrolü',o('ctrl="joy"',ctrlMode==='joy','🕹️','Joystick')+o('ctrl="pad"',ctrlMode==='pad','🔘','Tuşlar'))}${row('Kamera görüşü',o('cfov="-6"',CA.fov===-6,'','Dar')+o('cfov="0"',CA.fov===0,'','Normal')+o('cfov="8"',CA.fov===8,'','Geniş'))}${row('Kamera uzaklığı',o('carm="0.8"',CA.arm===.8,'','Yakın')+o('carm="1"',CA.arm===1,'','Normal')+o('carm="1.25"',CA.arm===1.25,'','Uzak'))}</div>
   <div class="pcard"><h4>Grafik</h4>${row('Kalite',o('gfx="low"',gfx==='low','','Düşük')+o('gfx="mid"',gfx==='mid','','Orta')+o('gfx="high"',gfx==='high','','Yüksek'))}
   ${row('Yavaşlayınca otomatik düşür',o('autoq="1"',AQ.on,'','Açık')+o('autoq="0"',!AQ.on,'','Kapalı'))}
-  ${row('Akıcılık (FPS)',o('fps="45"',FPSM.mode==='45','','45')+o('fps="60"',FPSM.mode==='60','','60')+o('fps="90"',FPSM.mode==='90','','90')+o('fps="dyn"',FPSM.mode==='dyn','','Oto'))}
+  ${row('Akıcılık (FPS)',o('fps="40"',FPSM.mode==='40','','40')+o('fps="45"',FPSM.mode==='45','','45')+o('fps="60"',FPSM.mode==='60','','60')+o('fps="90"',FPSM.mode==='90','','90')+o('fps="dyn"',FPSM.mode==='dyn','','Oto'))}
   <button class="opt gmore" data-gmore>Diğer grafik ayarları ›</button></div><div class="pcard"><h4>Destek</h4><button class="opt gmore" data-report>🐞 Sorun Bildir ›</button><p class="hint2 kzver" data-ver>kazonya · sürüm ${KZ_GH.v}</p></div></div>
   <div class="pcol"><div class="pcard"><h4>Ses</h4>${row('Ses',o('snd="on"',!muted,'🔊','Açık')+o('snd="off"',muted,'🔇','Kapalı'))}
   ${row('Titreşim',o('vib="1"',VIBP.on,'📳','Açık')+o('vib="0"',!VIBP.on,'','Kapalı'))}
@@ -9086,10 +9096,12 @@ function gmoreHtml(){const o=(a,v,t)=>`<button class="opt${v?' on':''}" data-${a
   return `<div class="gm-card"><h3>⚙️ Diğer Grafik Ayarları</h3>
   <div class="gm-l">Uzak gizleme</div><div class="optrow">${o('dc="0"',DC.lvl===0,'Kapalı')}${o('dc="1"',DC.lvl===1,'Normal')}${o('dc="2"',DC.lvl===2,'Güçlü')}</div>
   <div class="gm-l">Kenar yumuşatma <small>(yeniden açınca geçerli)</small></div><div class="optrow">${o('aa="on"',aaPref,'Açık')}${o('aa="off"',!aaPref,'Kapalı')}</div>
+  <div class="gm-l">Dinamik çözünürlük <small>(ısınmayı azaltır, sahne yoğunsa biraz yumuşar)</small></div><div class="optrow">${o('drs="on"',RS.on,'Açık')}${o('drs="off"',!RS.on,'Kapalı')}</div>
   <button class="big gm-x" data-gclose>Tamam</button></div>`}
 function openGmore(){let m=document.getElementById('gmore');if(!m){m=document.createElement('div');m.id='gmore';document.body.appendChild(m);
   m.addEventListener('click',e=>{const t=e.target;let b;if(t===m||t.closest('[data-gclose]')){m.classList.remove('show');return}
     if((b=t.closest('[data-aa]'))){aaPref=b.dataset.aa==='on';store.set('kz-aa',aaPref);m.innerHTML=gmoreHtml();return}
+    if((b=t.closest('[data-drs]'))){RS.on=b.dataset.drs==='on';store.set('kz-drs',RS.on);RS.s=1;RS.bad=0;RS.ema=0;applyGfx();m.innerHTML=gmoreHtml();return}
     if((b=t.closest('[data-dc]'))){setDC(+b.dataset.dc);m.innerHTML=gmoreHtml();return}})}
   m.innerHTML=gmoreHtml();m.classList.add('show')}
 
@@ -13649,9 +13661,11 @@ function camFly(dt){
 const arrowEl=$('#arrow'),distEl=$('#dist'),timerEl=$('#timer'),stamFill=$('#stamFill'),compass=$('#compass');
 const camDir=new V3();
 const _hudP=new V3();
+/* Kandil Dede / Zehra Nine / Ayaz görevi sırasında kendi yön oku çıkar: sabit kırmızı ok gizlenir (ikisi farklı yeri gösterir) */
+function npcQuestNavOn(){try{return !!(CLD&&CLD.c2&&CLD.chip&&CLD.chip.style.display!=='none'&&CLD.c2.style.display==='flex'&&state.mission==='free'&&!state.done)}catch(e){return false}}
 function updateHud(){
   const t=(NAV.on&&NAV.p&&(state.mission==='free'||!state.target)&&state.mode!=='ground')?NAV.p:state.target;
-  if(t&&!state.done){compass.style.visibility='visible';camera.getWorldDirection(camDir);
+  if(t&&!state.done&&!npcQuestNavOn()){compass.style.visibility='visible';camera.getWorldDirection(camDir);
     const p=state.mode==='ground'||state.mode==='groundDone'?camera.position:state.mode==='walk'?_hudP.set(WALK.x,WALK.y,WALK.z):player.pos;
     const cy=Math.atan2(-camDir.x,-camDir.z),ty=Math.atan2(-(t.x-p.x),-(t.z-p.z));const d=angDiff(ty,cy);
     arrowEl.style.transform=`rotate(${-d}rad)`;
@@ -20464,7 +20478,7 @@ function ksBuild(){return;try{
 function ksTarget(){const q=KSS.cur&&ksQ(KSS.cur);if(!q)return null;try{const w=q.tg();return{x:w[0],z:w[1],q}}catch(e){return null}}
 function ksStart(id){KSS.cur=id;KSS.prog=0;KSS.st=0;ksSave()}
 function ksPick(){const free=KS_QS.filter(q=>q.id!==KSS.last&&q.id!==KSS.cur);return free[Math.floor(Math.random()*free.length)]}
-function ksDone(q){KSS.n=(KSS.n|0)+1;KSS.last=q.id;KSS.cur=null;KSS.prog=0;KSS.st=0;ksSave();feathers+=q.gold;try{saveShop()}catch(e){}
+function ksDone(q){KSF.qd=null;KSF.qdT=0;KSS.n=(KSS.n|0)+1;KSS.last=q.id;KSS.cur=null;KSS.prog=0;KSS.st=0;ksSave();feathers+=q.gold;try{saveShop()}catch(e){}
   try{fanfare()}catch(e){}toast('🧭 Görev tamam: '+q.n+'! +'+q.gold+' 🪶',3.4);try{icAch('icKsf',KSS.n)}catch(e){}KSF.mode='cheer';KSF.mt=0}
 /* görev ilerlemesi */
 function ksQuestTick(dt){const T=ksTarget();KSF.qd=null;if(!T)return;const walk=state.mode==='walk'&&WALK.on,fly=state.mode==='fly';if(!(walk||fly))return;
@@ -22269,7 +22283,7 @@ function loop(now){
   {const iv=1000/fpsTarget(),el=now-FPSM.lastT;
    if(el<iv-1){requestAnimationFrame(loop);return}
    FPSM.lastT=el>iv*2.5?now:FPSM.lastT+iv;
-   if(FPSM.mode==='dyn')dynFps(now,el);try{autoQ(now,el)}catch(e){}}
+   if(FPSM.mode==='dyn')dynFps(now,el);try{rsTick(now,el);autoQ(now,el)}catch(e){}}
   const _pt=PERF.on?performance.now():0;
   if(paused){last=now;if(now-(DCL.pauT||0)>250){DCL.pauT=now;renderer.render(scene,camera)}requestAnimationFrame(loop);return}
   const dt=Math.min(.05,(now-last)/1000);last=now;clock+=dt;
@@ -23371,7 +23385,7 @@ function rqStep(q,P,dt){const a=q.atoms[q.i];if(!a)return;const A=RQA[a.k];
   if(ok){q.i++;if(q.i>=q.atoms.length)rqDone(q);else{chime();advNote('🎲 Sıradaki: '+q.atoms[q.i].t,2.6);advSave()}}}
 function advRQUpdate(dt,P){const rq=advRQCheck();ADV.rqT=(ADV.rqT||0)+dt;
   /* görev yönlendirici: pusula en yakın görev işaretine döner (ada hedefi varsa ona dokunmaz) */
-  if(state.mode==='fly'&&ADV.rm&&P){let bp=null,bd=1e9;for(const m of ADV.rm){const d=P.distanceTo(m.p);if(d<bd&&d<=1000){bd=d;bp=m.p}}
+  if(state.mode==='fly'&&ADV.rm&&P){let bp=null,bd=1e9;for(const m of ADV.rm){const d=P.distanceTo(m.p);if(d<bd&&d<=6000){bd=d;bp=m.p}}
     if(bp){if(!state.target||state.target===ADV.gt){state.target=bp;if(ADV.gt!==bp){ADV.gt=bp;ADV.gtHint=0}if(bd<110&&!ADV.gtHint){ADV.gtHint=1;advNote('🎯 Görev yakında! Turuncu işarete uç',2.2)}}}
     else if(ADV.gt&&state.target===ADV.gt){state.target=null;ADV.gt=null}}
   for(const q of rq.list){if(!q.done)rqStep(q,P,dt)}
@@ -25071,15 +25085,16 @@ KS_QS.forEach(q=>q.isl='ice');
  A('green','bahce','Yeşil Tünel Bahçesi','Yeşil Tünel Bahçesi’ne ulaş',70,0,50);
  A('green','yayla','Yayla','Yayla’ya ulaş',80,0,50);
  A('green','karli','Karlıdağ','Karlıdağ’ın eteğine ulaş',90,0,55)})();
+try{if(KSS.cur){KSS.cur=null;KSS.prog=0;KSS.st=0;ksSave()}}catch(e){}   /* ustalar ve Defne artık görev vermiyor: eski kayıtlı görev temizlenir */
 const KZD={isl:null,open:false,t:0,err:0};
 const KZGR={green:['Merhaba küçük kaşif! Ben Kandil Dede. Fenerlerimi yakacak kanatlı dostlar arıyorum.','Hoş geldin! Atölyemin ışığı hep yanık, içeri süzül.'],desert:['Gel bakalım yavrum! Çölün sırlarını bilirim, sen de bana yardım et.','Selam civciv kaz! Kumların üstünde yıldızlar seni bekliyor.'],ice:['Selam dostum! Buzun üstünde işler hep heyecanlı.','Pamuk seni gördü, kuyruğunu salladı! Bana yardım eder misin?']};
 function kzBox(){if(KSF.box&&KSF.box.isConnected)return KSF.box;const bx=document.createElement('div');bx.id='ksfBox';document.getElementById('hud').appendChild(bx);KSF.box=bx;
   bx.addEventListener('pointerdown',e=>{e.stopPropagation();const b=e.target.closest('[data-ks]');if(!b)return;e.preventDefault();kzAct(b.dataset.ks)});bx.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});return bx}
 function kzHtml(isl,msg,btns){const n=KZNPC[isl];return`<div class="kh"><span class="ka">${n.ic}</span><b>${n.name}</b><button class="kx" data-ks="x" aria-label="Kapat">✕</button></div><p>${msg}</p><div class="kb2">${btns.map(b=>`<button data-ks="${b[0]}">${b[1]}</button>`).join('')}</div>`}
-function kzShow(isl){const bx=kzBox();KZD.isl=isl;KZD.open=true;KSF.open=true;const q=KSS.cur&&ksQ(KSS.cur);let msg,btns=[];
+function kzShow(isl){const bx=kzBox();KZD.isl=isl;KZD.open=true;KSF.open=true;const q=null;let msg,btns=[];
   const gr=KZGR[isl];
   if(q){msg=`Görevin: <b>${q.t}</b>. İstersen başka bir görev de verebilirim. Işık Yolu’nu da başlatabiliriz!`;btns.push(['ok','Tamam'],['sw','🔄 Başka görev'])}
-  else{msg=(KSS.met?'Yine sen! ':gr[Math.floor(Math.random()*gr.length)]+' ')+(KSS.n>0?`Şimdiye kadar ${KSS.n} görev tamamladın, süpersin! `:'')+'Sana küçük bir görev verebilirim ya da “Işık Yolu” yolculuğuna çıkabiliriz.';btns.push(['go','🧭 Görev ver'])}
+  else{msg=(KSS.met?'Yine sen! ':gr[Math.floor(Math.random()*gr.length)]+' ')+(KSS.n>0?`Şimdiye kadar ${KSS.n} görev tamamladın, süpersin! `:'')+'“Işık Yolu” yolculuğuna çıkmak ister misin?'}
   btns.push(['ly','🕯️ Işık Yolu']);if(isl==='ice')btns.push(['how','❄️ Nasıl ısınırım?']);if(!q)btns.push(['x','Sonra']);
   KSS.met=1;try{kzNpcReact(isl,'nod')}catch(e){}bx.innerHTML=kzHtml(isl,msg,btns);bx.classList.add('on')}
 function kzClose(){if(KSF.box)KSF.box.classList.remove('on');KZD.open=false;KSF.open=false}
@@ -25096,7 +25111,7 @@ function ksTick(dt){
   if(state.mission!=='free'){if(KZD.open)kzClose();KSF.qd=null;return}
   const walk=state.mode==='walk'&&WALK.on,fly=state.mode==='fly';
   if(!(walk||fly)||state.done){if(KZD.open)kzClose();return}
-  ksQuestTick(dt);
+  ksQuestTick(dt);if(KSF.qd)KSF.qdT=performance.now();
   if(CLD.cq&&KSF.qd){const a=KSF.qd,x=walk?WALK.x:player.pos.x,z=walk?WALK.z:player.pos.z,dir=new V3();camera.getWorldDirection(dir);
     const cy=Math.atan2(-dir.x,-dir.z),br=Math.atan2(-(a.x-x),-(a.z-z)),rel=angDiff(br,cy);
     const s=a.n+(a.d>0?' · '+Math.round(a.d)+' m':'');if(CLD.qs!==s){CLD.qs=s;CLD.cq.textContent=s}
