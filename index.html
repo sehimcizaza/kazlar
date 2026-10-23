@@ -1966,13 +1966,14 @@ const sunDisc=new THREE.Mesh(new THREE.CircleGeometry(70,24),new THREE.MeshBasic
 scene.add(sunDisc);
 
 function mkDetailTex(){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d'),R=lrng(77);g.fillStyle='#808080';g.fillRect(0,0,256,256);
-  for(let i=0;i<260;i++){const x=R()*256,y=R()*256,r=6+R()*18,v=Math.floor(106+R()*44),gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba('+v+','+v+','+v+',.55)');gr.addColorStop(1,'rgba('+v+','+v+','+v+',0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)}
-  for(let i=0;i<5200;i++){const v=Math.floor(R()*255);g.fillStyle='rgba('+v+','+v+','+v+',.16)';g.fillRect(R()*256,R()*256,1+R()*2,1+R()*3)}
+  for(let i=0;i<260;i++){const x=R()*256,y=R()*256,r=6+R()*18,v=Math.floor(106+R()*44);for(let ox=-256;ox<=256;ox+=256)for(let oy=-256;oy<=256;oy+=256){const X=x+ox,Y=y+oy;if(X+r<0||X-r>256||Y+r<0||Y-r>256)continue;const gr=g.createRadialGradient(X,Y,0,X,Y,r);gr.addColorStop(0,'rgba('+v+','+v+','+v+',.55)');gr.addColorStop(1,'rgba('+v+','+v+','+v+',0)');g.fillStyle=gr;g.fillRect(X-r,Y-r,r*2,r*2)}}
+  for(let i=0;i<5200;i++){const v=Math.floor(R()*255),x=R()*256,y=R()*256,w=1+R()*2,h=1+R()*3;g.fillStyle='rgba('+v+','+v+','+v+',.16)';for(let ox=-256;ox<=256;ox+=256)for(let oy=-256;oy<=256;oy+=256){const X=x+ox,Y=y+oy;if(X+w<0||X>256||Y+h<0||Y>256)continue;g.fillRect(X,Y,w,h)}}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t}
 const DETAIL_TEX=mkDetailTex();
-function withDetail(mat,k){k=k||.8;mat.onBeforeCompile=sh=>{sh.uniforms.detailMap={value:DETAIL_TEX};
+const GPU={value:0},DTU={value:1};   /* zemin çimen deseni / detay dokusu açık-kapalı (Diğer grafik ayarları) */
+function withDetail(mat,k){k=k||.8;mat.onBeforeCompile=sh=>{sh.uniforms.detailMap={value:DETAIL_TEX};sh.uniforms.uGP=GPU;sh.uniforms.uDT=DTU;
   sh.vertexShader='varying vec3 vWP;varying vec3 vWN;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvWP=(modelMatrix*vec4(position,1.0)).xyz;vWN=normalize(mat3(modelMatrix)*normal);');
-  sh.fragmentShader='uniform sampler2D detailMap;varying vec3 vWP;varying vec3 vWN;\n'+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n{vec3 an=pow(abs(normalize(vWN)),vec3(4.0));an/=(an.x+an.y+an.z);float dA=texture2D(detailMap,vWP.xz*0.11).r,dB=texture2D(detailMap,vWP.xz*0.53).r,dC=texture2D(detailMap,vWP.zy*0.13).r,dD=texture2D(detailMap,vWP.xy*0.13).r;float dt=(dA*0.6+dB*0.4)*an.y+dC*an.x+dD*an.z;diffuseColor.rgb*=(1.0-'+k.toFixed(2)+'*0.5)+dt*'+k.toFixed(2)+';}')};return mat}
+  sh.fragmentShader='uniform sampler2D detailMap;uniform float uGP;uniform float uDT;varying vec3 vWP;varying vec3 vWN;\n'+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n{vec3 an=pow(abs(normalize(vWN)),vec3(4.0));an/=(an.x+an.y+an.z);float dA=texture2D(detailMap,vWP.xz*0.11).r,dB=texture2D(detailMap,vWP.xz*0.53).r,dC=texture2D(detailMap,vWP.zy*0.13).r,dD=texture2D(detailMap,vWP.xy*0.13).r;float dt=(dA*0.6+dB*0.4)*an.y+dC*an.x+dD*an.z;diffuseColor.rgb*=mix(1.0,(1.0-'+k.toFixed(2)+'*0.5)+dt*'+k.toFixed(2)+',uDT);}')};return mat}
 const DIRTC=new THREE.Color(.6,.45,.28);
 // terrain
 hillInit();
@@ -1980,7 +1981,7 @@ const TSEG=432;let tGeo=new THREE.PlaneGeometry(SIZE,SIZE,TSEG,TSEG);tGeo.rotate
 {const p=tGeo.attributes.position,cols=new Float32Array(p.count*3),c=new THREE.Color(),g1=new THREE.Color(.45,.71,.3),g2=new THREE.Color(.31,.56,.22),mead=new THREE.Color(.7,.76,.36),ball=new THREE.Color(.55,.5,.44),snowC=new THREE.Color(.94,.96,.99),tmp=new THREE.Color();
  const gx1=TSEG+1,cs=SIZE/TSEG,HH=new Float32Array(p.count);for(let i=0;i<p.count;i++)HH[i]=height(p.getX(i),p.getZ(i));
  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),h=HH[i];p.setY(i,h);const ix=i%gx1,iz=(i/gx1)|0,hx=HH[iz*gx1+Math.min(gx1-1,ix+1)]-HH[iz*gx1+Math.max(0,ix-1)],hz=HH[Math.min(TSEG,iz+1)*gx1+ix]-HH[Math.max(0,iz-1)*gx1+ix],s=Math.hypot(hx,hz)/(2*cs);
-  {c.copy(g1).lerp(g2,fbm(x/60,z/60));const m=fbm(x/35+9,z/35+2);if(m>.6)c.lerp(mead,Math.min(1,(m-.6)*2.5));
+  {c.copy(g1).lerp(g2,fbm(x/60,z/60));const m=fbm(x/35+9,z/35+2);{const w=sm(.42,.95,m)*.85;if(w>0)c.lerp(mead,w)}   /* çayır lekeleri: yumuşak geçiş (keskin kare/üçgen kenarlar görünmesin) */
    c.lerp(tmp.setRGB(.26,.45,.22),sm(26,52,h));                                   // yamaç ormanı
    c.lerp(tmp.setRGB(.5,.47,.42),sm(78,112,h));                                   // kaya
    c.lerp(tmp.setRGB(.95,.96,.98),sm(132,152,h));                                 // kar
@@ -2031,20 +2032,20 @@ const terrainMat=withDetail(new THREE.MeshLambertMaterial({vertexColors:true}),.
 for(int i=0;i<4;i++){vec4 A=uCVa[i],B=uCVb[i];if(B.x>0.){vec2 d=vWP.xz-A.xy;float al=dot(d,A.zw);if(abs(al)<B.x){float lat=d.x*A.w-d.y*A.z,dy=vWP.y-B.y;if(lat*lat+dy*dy<B.z*B.z)discard;}}}
 for(int i=0;i<4;i++){vec4 A=uRTa[i],B=uRTb[i];vec2 d=vWP.xz-A.xy;float t=dot(d,A.zw);if(t>0.&&t<B.x){float l=d.x*A.w-d.y*A.z;float ry=mix(B.y,B.z,clamp(t/B.x,0.,1.));float dy=vWP.y-ry;float k=abs(l)/4.6;if(k<1.&&dy>-.6&&dy<2.7+4.5*sqrt(1.-k*k))discard;}}
 {float gr=smoothstep(.0,.06,diffuseColor.g-diffuseColor.r*.98)*smoothstep(.72,.95,normalize(vWN).y);
- if(gr>0.){vec2 p=vWP.xz;float d=length(vWP-cameraPosition),fade=1.-smoothstep(60.,240.,d);
-  float n1=vn(p*.035),n2=vn(p*.16+7.);
-  vec3 tint=mix(vec3(.78,1.04,.7),vec3(1.16,1.04,.6),smoothstep(.4,.75,n1));tint*=.8+.4*n2;
+ if(gr>0.){vec2 p=vWP.xz;float d=length(vWP-cameraPosition),fade=1.-smoothstep(60.,240.,d),fs=1.-smoothstep(5.,30.,d),ff=1.-smoothstep(25.,100.,d);
+  vec2 pr=vec2(p.x*.8-p.y*.6,p.x*.6+p.y*.8);pr+=(vec2(vn(pr*.021+5.),vn(pr*.021+11.))-.5)*18.;float n1=vn(pr*.035)*.62+vn(pr*.083+3.)*.38,n2=vn(pr*.16+7.);
+  vec3 tint=mix(vec3(.88,1.03,.8),vec3(1.1,1.03,.7),smoothstep(.24,.76,n1));tint*=.92+.16*n2;
   vec3 col=diffuseColor.rgb*tint;
   if(fade>0.){
    float n3=vn(p*.9+3.);
    float bl=vn(vec2(p.x*7.,p.y*1.3)+vn(p*.3)*4.),bl2=vn(vec2(p.y*6.,p.x*1.7)+9.);
    float streak=.82+.34*(bl*.6+bl2*.4);
-   col=diffuseColor.rgb*tint*mix(1.,streak,fade);
+   col=diffuseColor.rgb*tint*mix(1.,streak,fs);
    float wf=step(.93,n3);if(wf>0.)wf*=step(.5,vn(p*2.3));
-   col=mix(col,vec3(1.,.96,.88),wf*fade*.85);
-   col=mix(col,vec3(1.,.82,.25),step(.955,vn(p*1.1+20.))*fade*.85);
+   col=mix(col,vec3(1.,.96,.88),wf*ff*.85);
+   col=mix(col,vec3(1.,.82,.25),step(.955,vn(p*1.1+20.))*ff*.85);
   }
-  diffuseColor.rgb=mix(diffuseColor.rgb,col,gr);}}`;
+  diffuseColor.rgb=mix(diffuseColor.rgb,col,gr*uGP);}}`;
   sh.uniforms.uRTa={value:RTU_A};sh.uniforms.uRTb={value:RTU_B};sh.uniforms.uCVa={value:CVU_A};sh.uniforms.uCVb={value:CVU_B};sh.fragmentShader='uniform vec4 uRTa[4];uniform vec4 uRTb[4];uniform vec4 uCVa[4];uniform vec4 uCVb[4];\n'+hdr+sh.fragmentShader.replace('#include <color_fragment>',code)}}
 const terrainMesh=(()=>{const ia=tGeo.index.array,pa=tGeo.attributes.position,NT=8,tw=SIZE/NT,bk=Array.from({length:NT*NT},()=>[]);
   for(let i=0;i<ia.length;i+=3){const a=ia[i],b=ia[i+1],c=ia[i+2],cx=(pa.getX(a)+pa.getX(b)+pa.getX(c))/3,cz=(pa.getZ(a)+pa.getZ(b)+pa.getZ(c))/3,tx=Math.max(0,Math.min(NT-1,Math.floor((cx+SIZE/2)/tw))),tz=Math.max(0,Math.min(NT-1,Math.floor((cz+SIZE/2)/tw)));bk[tz*NT+tx].push(a,b,c)}
@@ -10591,7 +10592,7 @@ function setupChase(){
 /* ---- free flight ---- */
 /* ===================== YUMURTA SAVAŞLARI ===================== */
 function setupWar(){
-  const DFL={easy:{aim:1.1,spd:1,rea:1.1,dg:0,hunt:150,sk:[.36,.98],zt:1,zs:1,dps:1.2,fire:.78,sight:1.22,n:'Kolay'},med:{aim:.85,spd:1.04,rea:1,dg:.05,hunt:110,sk:[.6,.988],zt:.85,zs:.9,dps:1.65,fire:.62,sight:1.36,n:'Orta'},hard:{aim:.5,spd:1.12,rea:.75,dg:.18,hunt:60,sk:[.9,.997],zt:.7,zs:.8,dps:2.2,fire:.46,sight:1.52,n:'Zor'}},DF=DFL[wdiff()]||DFL.med;
+  const DFL={easy:{aim:1.03,spd:1,rea:1.02,dg:.03,hunt:135,sk:[.40,.98],zt:.95,zs:.95,dps:1.26,fire:.78,sight:1.22,n:'Kolay'},med:{aim:.80,spd:1.04,rea:.94,dg:.08,hunt:100,sk:[.64,.988],zt:.81,zs:.86,dps:1.73,fire:.62,sight:1.36,n:'Orta'},hard:{aim:.47,spd:1.12,rea:.71,dg:.2,hunt:54,sk:[.92,.997],zt:.67,zs:.76,dps:2.3,fire:.46,sight:1.52,n:'Zor'}},DF=DFL[wdiff()]||DFL.med;
   const IS=warIsl(),TRS=IS.d?warTrees():trees;
   const N=40,MAXBAG=75,STACK=10,SPD=100,LIFE=3.2,HITR=3.1,BASE=26+player.g.speed*5,HUD=document.getElementById('hud');
   const NET=(MP.act&&MP.conn&&MP.conn.open)?(MP.host?'h':'g'):'',GST=NET==='g',HST=NET==='h';
@@ -10762,7 +10763,7 @@ function setupWar(){
   function shoot(o,dir,ty,hom,fd){
     let a=null;for(const q of ARR)if(!q.on){a=q;break}if(!a)return false;
     if(o.isMe)MED.sh=(MED.sh||0)+1;
-    a.on=true;a.life=LIFE;a.dist=0;a.own=o;a.ty=ty;a.hom=hom||null;a.dmg=fd||Math.round(rr(AM[ty].lo,AM[ty].hi));
+    a.on=true;a.life=LIFE;a.dist=0;a.own=o;a.ty=ty;a.hom=hom||null;a.dmg=fd||Math.round(rr(AM[ty].lo,AM[ty].hi)*1.05);
     a.pos.set(o.pos.x,o.pos.y+1.7,o.pos.z).addScaledVector(dir,3);a.vel.copy(dir).multiplyScalar(SPD);
     armA(a,ty);
     a.g.position.copy(a.pos);a.g.lookAt(a.pos.x+a.vel.x,a.pos.y+a.vel.y,a.pos.z+a.vel.z);a.g.visible=true;nearShotSfx(o);return true}
@@ -11292,7 +11293,8 @@ function setupWar(){
   function standings(){const al=E.filter(o=>o.alive).length,L=E.map(o=>{
       const C=o.kills*100+(o.dmgOut||0)*.5+(o.stkDmg||0)*2;                       /* savaş puanı: gerçek katkı */
       const raw=(o.alive?outN:Math.max(0,(o.out||1)-1))*5+(o.alive?Math.max(0,o.hp||0)*.3:0)+survPts(o)+(!TM&&o.alive&&al===1?250:0);
-      const bonus=Math.min(raw,C*.4);                                              /* hayatta kalma/sıra/sağlık bonusu savaş puanının en çok %35'i: kaçarak puan toplanmaz */
+      const place=(o.alive||TM)?0:Math.max(1,outN-(o.out||outN)+1),tail=(place>=1&&place<=5)?[70,45,30,20,12][place-1]:0;   /* son elenen: 1. sıra, ondan önceki: 2. ... (yalnız bireysel) */
+      const bonus=Math.min(raw,C*.4)+Math.min(tail,C*.5);                                              /* hayatta kalma/sıra/sağlık bonusu savaş puanının en çok %35'i: kaçarak puan toplanmaz */
       return{o,C,bonus,pts:Math.round(C+bonus+(TM&&matchDone&&o.team===wTeam?100:0))}});
     L.sort((a,b)=>b.pts-a.pts||(b.o.alive-a.o.alive)||((b.o.out||0)-(a.o.out||0)));L.forEach((r,i)=>r.rk=i+1);return L}
   function teamStand(){const S=standings(),m=new Map();for(const r of S){let q=m.get(r.o.team);if(!q){q={t:r.o.team,pts:0,kills:0,al:0,n:0};m.set(r.o.team,q)}q.pts+=r.pts;q.kills+=r.o.kills;q.n++;if(r.o.alive)q.al++}return[...m.values()].sort((a,b)=>b.pts-a.pts||b.al-a.al)}
