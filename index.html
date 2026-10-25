@@ -9962,7 +9962,7 @@ let TA=null,TA_SP=null;
 const TA_N=20,TA_PTS=[10,15,20,25,30],TA_PTS2=[10,16,22,30,40];
 const TA_COST={air:1.5,low:2.5,river:3,tree:4,bridge:5,cave:7};        // hizalanma/yavaşlama için tahmini ek saniye
 const TA_NAME={air:'gökyüzü',low:'yere yakın',river:'nehir üstü',tree:'ağaçların arası',bridge:'köprü altı',cave:'mağara içi'};
-const taTime=r=>{const t=Math.max(120,Math.round(245*Math.pow(.785,r-1)));return MP.act?Math.round(t*.7):t};
+const taTime=r=>{const t=Math.max(60,200-5*(r-1));return MP.act?Math.round(t*.7):t};   /* tur 1 = 200 sn, her tur 5 sn kısalır; kalan süre sonraki tura AKTARILMAZ */
 const TA_W=r=>r<=1?{air:1}:r===2?{air:.6,low:.4}:r===3?{air:.35,low:.3,tree:.35}:r===4?{air:.2,low:.25,tree:.3,bridge:.1,river:.15}:
   r===5?{air:.1,low:.2,tree:.3,bridge:.12,river:.1,cave:.18}:{air:.05,low:.15,tree:.3,bridge:.15,river:.1,cave:.25};
 function taAvoid(x,z){if(x<-905||z<-850)return false;if(x>725||Math.abs(z)>725)return true;if(x<-725&&Math.abs(z-WF.z)>260)return true;if(Math.hypot(x-HOME.x,z-HOME.z)<40)return true;
@@ -10107,7 +10107,42 @@ function taPlan(r,from,hist){hist=hist||[];let TC=null;try{TC=taTourC(r);if(TC&&
     const sc=(list.length<TA_N-3?1e4:0)+(est<=goal?goal-est:(est-goal)*3)+miss*30;
     if(!best||sc<best.sc)best={list,est,T,sc,R,C:{x:C.x,z:C.z,id:C.id,k:C.k}};if(est<=goal&&est>goal*.7&&list.length>=TA_N-3&&!miss)break}
   return best}
-const TA_COLS=[0x2f6bff,0xffd60a,0xff7b00,0xff5ccf,0xb15cff];   // >5m açık · 5m 1 engel · 5m çok engel · 3m 1 engel · 3m çok engel (yeşil yok)
+const TC_={B:0x2f6bff,C:0x00c8e8,T:0x00b894,O:0xff7b00,P:0xff5ccf,V:0xb15cff,N:0x3a3bd8,M:0xff2e93,L:0x9be000};
+/* her tur: ad, simge, 5 renk (kolaydan zora), baskı deseni, şekil, bomba sayısı, dönüş hızı çarpanı. Sarı yok (çölde görünmüyordu); koyu kontur her zeminde ayırt ettirir */
+const TA_TH=[
+ {n:'Bahar Esintisi',i:'🌸',pal:[TC_.B,TC_.T,TC_.O,TC_.P,TC_.V],pat:'',sh:'',bomb:0,spd:1},
+ {n:'Çizgili Şenlik',i:'🎪',pal:[TC_.B,TC_.O,TC_.P,TC_.V,TC_.N],pat:'stripe',sh:'',bomb:0,spd:1},
+ {n:'Puantiyeli Parti',i:'🎉',pal:[TC_.T,TC_.B,TC_.P,TC_.M,TC_.V],pat:'dots',sh:'',bomb:1,spd:1},
+ {n:'Yıldız Yağmuru',i:'⭐',pal:[TC_.B,TC_.C,TC_.O,TC_.P,TC_.V],pat:'',sh:'star',bomb:0,spd:1},
+ {n:'Kalpli Tur',i:'💗',pal:[TC_.V,TC_.P,TC_.M,TC_.O,TC_.N],pat:'',sh:'heart',bomb:1,spd:1},
+ {n:'Karga Avı',i:'🐦',pal:[TC_.N,TC_.T,TC_.B,TC_.M,TC_.V],pat:'zig',sh:'',bomb:0,spd:1.15},
+ {n:'Dönen Dünya',i:'🌀',pal:[TC_.C,TC_.B,TC_.V,TC_.P,TC_.M],pat:'stripe',sh:'',bomb:1,spd:1.5},
+ {n:'Bomba Tarlası',i:'💣',pal:[TC_.B,TC_.T,TC_.N,TC_.P,TC_.V],pat:'dots',sh:'',bomb:3,spd:1.1},
+ {n:'Şeker Dükkânı',i:'🍬',pal:[TC_.P,TC_.C,TC_.V,TC_.M,TC_.N],pat:'stripe',sh:'',bomb:1,spd:1.25},
+ {n:'Yıldız Ustası',i:'🌟',pal:[TC_.N,TC_.B,TC_.V,TC_.M,TC_.P],pat:'',sh:'star',bomb:2,spd:1.2},
+ {n:'Hızlı Rüzgâr',i:'💨',pal:[TC_.C,TC_.T,TC_.B,TC_.V,TC_.M],pat:'zig',sh:'',bomb:1,spd:1.7},
+ {n:'Kalp Atışı',i:'💞',pal:[TC_.P,TC_.M,TC_.V,TC_.B,TC_.N],pat:'',sh:'heart',bomb:2,spd:1.3},
+ {n:'Puantiyeli Fırtına',i:'🌪️',pal:[TC_.T,TC_.B,TC_.V,TC_.M,TC_.N],pat:'dots',sh:'',bomb:3,spd:1.4},
+ {n:'Buzlu Karga',i:'🐦',pal:[TC_.B,TC_.N,TC_.V,TC_.P,TC_.M],pat:'stripe',sh:'',bomb:0,spd:1.2},
+ {n:'Gökkuşağı',i:'🌈',pal:[TC_.B,TC_.T,TC_.O,TC_.P,TC_.V],pat:'stripe',sh:'',bomb:2,spd:1.35},
+ {n:'Yıldız Çetesi',i:'✨',pal:[TC_.B,TC_.T,TC_.P,TC_.V,TC_.M],pat:'',sh:'star',bomb:3,spd:1.4},
+ {n:'Dev Sürat',i:'🚀',pal:[TC_.T,TC_.B,TC_.V,TC_.M,TC_.N],pat:'zig',sh:'',bomb:2,spd:1.9},
+ {n:'Kalp Kasırgası',i:'💘',pal:[TC_.V,TC_.P,TC_.M,TC_.B,TC_.N],pat:'',sh:'heart',bomb:4,spd:1.5},
+ {n:'Neon Gecesi',i:'🟣',pal:[TC_.T,TC_.L,TC_.M,TC_.V,TC_.P],pat:'dots',sh:'',bomb:4,spd:1.6},
+ {n:'Büyük Final',i:'🏆',pal:[TC_.B,TC_.T,TC_.P,TC_.V,TC_.M],pat:'',sh:'star',bomb:5,spd:1.7}];
+/* her turun sürprizi: gold=Altın balon (kaçar) · seq=Sıralı balonlar · rain=Balon yağmuru · shy=Ürkek balonlar · hawk=Şahin pususu · crow=Karga (tur 6/14) */
+const TA_EV=[['gold'],['seq'],['rain'],['shy'],['hawk'],['crow'],['gold','shy'],['seq','hawk'],['rain','shy'],['gold','hawk'],['seq','shy'],['rain','hawk'],['gold','shy'],['crow','seq'],['shy','rain','gold'],['hawk2','seq'],['shy','rain','seq'],['gold','hawk','seq'],['shy','rain','hawk2'],['gold','seq','rain','shy','hawk2']];
+const taEv=r=>TA_EV[Math.max(0,Math.min(r,TA_EV.length)-1)];
+/* balon SAYISI korunur: rota süreye sığmıyorsa balonlar (sabit nokta olmayanlar) merkeze doğru yaklaştırılır; hâlâ sığmazsa süre gerektiği kadar uzar */
+function taSqueeze(list,from,T0){const v=26+player.g.speed*5,fixed=b=>b.typ==='cave'||b.typ==='bridge'||b.typ==='river';
+  const est=()=>{let px=from.x,pz=from.z,e=0;for(const b of list){e+=Math.hypot(b.x-px,b.z-pz)/v+TA_COST[b.typ];px=b.x;pz=b.z}return e};
+  const need=()=>Math.ceil(est()*1.3+8);let e0=need();if(e0<=T0)return T0;
+  const mv=list.filter(b=>!fixed(b));if(mv.length>=3){let cx=0,cz=0;for(const b of mv){cx+=b.x;cz+=b.z}cx/=mv.length;cz/=mv.length;mv.forEach(b=>{b.ox=b.x;b.oz=b.z;b.oy=b.y});
+    for(let k=.9;k>=.4&&need()>T0;k-=.06){for(const b of mv){const nx=cx+(b.ox-cx)*k,nz=cz+(b.oz-cz)*k,ny=b.oy+(ground(nx,nz)-ground(b.ox,b.oz));
+      if(Math.hypot(nx-b.x,nz-b.z)<.5||!taFree(nx,ny,nz,b.typ))continue;
+      if(list.some(o=>o!==b&&Math.hypot(o.x-nx,o.z-nz)<13&&Math.abs(o.y-ny)<10))continue;b.x=nx;b.y=ny;b.z=nz}}}
+  return Math.max(T0,need())}
+const taTh=r=>TA_TH[Math.max(0,Math.min(r,TA_TH.length)-1)];
 const TA_DIRS=(()=>{const a=[];for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++)for(let z=-1;z<=1;z++)if(x||y||z){const l=Math.hypot(x,y,z);a.push([x/l,y/l,z/l])}return a})();
 /* balonun d metre çevresindeki farklı engellerin sayısı (zemin/yapı, her ağaç, her cisim, tünel duvarı ayrı sayılır) */
 function taObs(x,y,z,d){const S=new Set();
@@ -10121,52 +10156,161 @@ function taObs(x,y,z,d){const S=new Set();
       else if(t.type===1){const ey=yy-8.4*s,r=4.3*s+d;if(hd*hd+ey*ey<r*r)hit=true;else if(hd<.75*s+d&&yy>-d&&yy<6*s)hit=true}
       else{const a1=3.1*s+d,b1=5*s+d,ey=yy-10*s;if(hd*hd/(a1*a1)+ey*ey/(b1*b1)<1)hit=true;else if(hd<.4*s+d&&yy>-d&&yy<9*s)hit=true}
       if(hit)S.add(t)}}
-  for(const p of PROPS){if(p.air)continue;const hr=(p.hr||p.r*.72)+d;if(Math.abs(x-p.x)>hr||Math.abs(z-p.z)>hr)continue;const bot=p.bot!==undefined?p.bot:ground(p.x,p.z)-1;if(y<p.top+d&&y>bot-d)S.add(p)}
+  for(const p of PROPS){const hr=(p.hr||p.r*.72)+d;if(Math.abs(x-p.x)>hr||Math.abs(z-p.z)>hr)continue;const bot=p.bot!==undefined?p.bot:ground(p.x,p.z)-1;if(y<p.top+d&&y>bot-d)S.add(p)}
   return S.size}
 function taCat(x,y,z){const n3=taObs(x,y,z,3);if(n3>=2)return 4;if(n3===1)return 3;const n5=taObs(x,y,z,5);return n5>=2?2:n5===1?1:0}
+/* ERİŞİM ZORLUĞU: balonun etrafındaki 16 yaklaşma yolundan (8 yatay + 8 yukarıdan eğik) kaçı 21 m'den balona kadar açık? Az yol = zor balon */
+function taBlk(x,y,z){return solidTop(x,z,y,true)>y-1.4||!!treeHit({x,y,z})||!!propHit({x,y,z})}
+const TA_AD=(()=>{const a=[];for(let k=0;k<8;k++){const t=k/8*6.2832;a.push([Math.cos(t),0,Math.sin(t)],[Math.cos(t)*.7,.7,Math.sin(t)*.7])}return a})();
+function taAccess(x,y,z){let open=0;for(const[dx,dy,dz]of TA_AD){let ok=true;for(let d=3;d<=21;d+=3){if(taBlk(x+dx*d,y+dy*d,z+dz*d)){ok=false;break}}if(ok)open++}return open}
+function taDiff(b){let c=taCat(b.x,b.y,b.z),a=0;try{const o=taAccess(b.x,b.y,b.z);a=o>=14?0:o>=11?1:o>=7?2:o>=3?3:4}catch(e){console.error('erişim',e)}
+  let ci=Math.max(c,a)+((c>=2&&a>=2)?1:0);if(b.typ==='cave')ci=Math.max(ci,3);else if(b.typ==='river'||b.typ==='bridge')ci=Math.max(ci,2);return Math.min(4,ci)}
 let TA_RES=null;
 function taRes(){if(TA_RES)return TA_RES;featherParts();
   const bg=new THREE.SphereGeometry(1.25,16,12);bg.scale(1,1.2,1);const kg=new THREE.ConeGeometry(.28,.4,8);kg.rotateX(Math.PI);const sg=new THREE.CylinderGeometry(.03,.03,2.4,4);
   const ag=new THREE.ConeGeometry(.75,1.5,4);ag.rotateX(Math.PI);const sh=new THREE.BoxGeometry(.4,1.3,.4);sh.translate(0,1.3,0);
   const am=new THREE.MeshBasicMaterial({color:0xffd21f,depthTest:false,depthWrite:false,transparent:true,opacity:.95,fog:false});
-  const mats=TA_COLS.map(c=>({b:new THREE.MeshLambertMaterial({color:c,emissive:c,emissiveIntensity:.45}),g:new THREE.SpriteMaterial({map:GLOW_MAT.map,color:c,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}),cf:new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide})}));
-  const ams=TA_COLS.map(c=>{const m=am.clone();m.color.setHex(c);return m});
-  return TA_RES={bg,kg,sg,ag,sh,am,ams,mats,str:new THREE.MeshBasicMaterial({color:0xeeeeee}),tex:{}}}
+  return TA_RES={bg,kg,sg,ag,sh,am,mt:{},geo:{},str:new THREE.MeshBasicMaterial({color:0xeeeeee}),tex:{},ol:new THREE.MeshBasicMaterial({color:0x0e1a40,side:THREE.BackSide,fog:false})}}
+/* baskılı doku: tek renk zemin + beyaz desen */
+function taTex(hex,pat){const R=taRes(),k='p'+hex+pat;if(R.tex[k])return R.tex[k];const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
+  g.fillStyle='#'+hex.toString(16).padStart(6,'0');g.fillRect(0,0,128,128);g.fillStyle='rgba(255,255,255,.88)';g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=7;
+  if(pat==='stripe'){for(let x=0;x<128;x+=32)g.fillRect(x,0,16,128)}
+  else if(pat==='dots'){for(let y=16;y<128;y+=32)for(let x=(y/32|0)%2?32:16;x<144;x+=32){g.beginPath();g.arc(x,y,8,0,6.283);g.fill()}}
+  else if(pat==='zig'){for(let y=18;y<128;y+=32){g.beginPath();for(let x=0;x<=128;x+=16)x?g.lineTo(x,y+((x/16)%2?12:-12)):g.moveTo(x,y-12);g.stroke()}}
+  const t=new THREE.CanvasTexture(c);return R.tex[k]=t}
+function taMt(hex,pat,sh){const R=taRes(),k=hex+'|'+(sh?'':pat);if(R.mt[k])return R.mt[k];let bm;
+  if(!sh&&pat){const t=taTex(hex,pat);bm=new THREE.MeshLambertMaterial({color:0xffffff,map:t,emissive:0xffffff,emissiveMap:t,emissiveIntensity:.5})}
+  else bm=new THREE.MeshLambertMaterial({color:hex,emissive:hex,emissiveIntensity:.45});
+  return R.mt[k]={b:bm,g:new THREE.SpriteMaterial({map:GLOW_MAT.map,color:hex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}),cf:new THREE.MeshBasicMaterial({color:hex,side:THREE.DoubleSide})}}
+function taShapeGeo(sh){const R=taRes();if(R.geo[sh])return R.geo[sh];const s=new THREE.Shape();
+  if(sh==='heart'){s.moveTo(0,-1.25);s.bezierCurveTo(-.2,-.95,-1.45,-.4,-1.45,.4);s.bezierCurveTo(-1.45,1.05,-.5,1.4,0,.8);s.bezierCurveTo(.5,1.4,1.45,1.05,1.45,.4);s.bezierCurveTo(1.45,-.4,.2,-.95,0,-1.25)}
+  else{for(let i=0;i<10;i++){const a=Math.PI/2+i*Math.PI/5,r=i%2?.8:1.8,x=Math.cos(a)*r,y=Math.sin(a)*r;i?s.lineTo(x,y):s.moveTo(x,y)}s.closePath()}
+  const g=new THREE.ExtrudeGeometry(s,{depth:.8,bevelEnabled:true,bevelThickness:.35,bevelSize:.3,bevelSegments:2,curveSegments:10});g.translate(0,0,-.4);return R.geo[sh]=g}
 function taEmoji(e){const R=taRes();if(R.tex[e])return R.tex[e];const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.font='92px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(e,64,70);return R.tex[e]=new THREE.CanvasTexture(c)}
 const TA_CI={cave:0,tree:1,air:2,low:3,river:4,bridge:5},TA_ICON={air:'Gökyüzü',low:'Yere yakın',river:'Nehir',tree:'Ağaç',bridge:'Köprü',cave:'Mağara'};
 /* kameradan balona görüş hattı arazi/yapı tarafından kapalı mı? (ok soluklaşsın) */
 function taOcc(p){const c=camera.position,dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d=Math.hypot(dx,dy,dz);if(d<30)return false;const n=Math.min(22,Math.max(4,Math.ceil(d/22)));
   for(let i=1;i<n;i++){const t=i/n,x=c.x+dx*t,y=c.y+dy*t,z=c.z+dz*t;if(solidTop(x,z,y,true)>y+1.5)return true}return false}
-function taMake(b,r){const R=taRes(),ci=taCat(b.x,b.y,b.z),M_=R.mats[ci],g=new THREE.Group();
-  const bm=new THREE.Mesh(R.bg,M_.b);g.add(bm);const kn=new THREE.Mesh(R.kg,M_.b);kn.position.y=-1.55;g.add(kn);const st=new THREE.Mesh(R.sg,R.str);st.position.y=-2.9;g.add(st);
+function taMake(b,r){const R=taRes(),th=taTh(r),g=new THREE.Group();
+  Object.assign(b,{fade:1,occ:false,losT:Math.random()*.2,c:new V3(b.x,b.y,b.z),ph:Math.random()*6.28,on:true,rad:0});
+  const ci=taDiff(b),col=th.pal[ci],M_=taMt(col,th.pat,th.sh),geo=th.sh?taShapeGeo(th.sh):R.bg;
+  const bm=new THREE.Mesh(geo,M_.b);if(th.sh)bm.scale.setScalar(1.12);g.add(bm);
+  const ol=new THREE.Mesh(geo,R.ol);ol.scale.setScalar(th.sh?1.2:1.09);g.add(ol);   /* koyu kontur: çöl/kar/ağaç önünde de seçilsin */
+  const kn=new THREE.Mesh(R.kg,M_.b);kn.position.y=-1.55;g.add(kn);const st=new THREE.Mesh(R.sg,R.str);st.position.y=-2.9;g.add(st);
   const gl=new THREE.Sprite(M_.g);gl.scale.setScalar(6.5);g.add(gl);g.position.set(b.x,b.y,b.z);addM(g);
-  const am=R.ams[ci].clone(),ar=new THREE.Group();ar.add(new THREE.Mesh(R.ag,am),new THREE.Mesh(R.sh,am));ar.children.forEach(m=>m.renderOrder=20);ar.renderOrder=20;addM(ar);
+  const am=R.am.clone();am.color.setHex(col);const ar=new THREE.Group();ar.add(new THREE.Mesh(R.ag,am),new THREE.Mesh(R.sh,am));ar.children.forEach(m=>m.renderOrder=20);ar.renderOrder=20;addM(ar);
   let top=Math.max(solidTop(b.x,b.z,1e4),coneTop(b.x,b.z));if(b.typ==='tree')top=Math.max(top,ground(b.x,b.z)+19);if(b.typ==='bridge'){const q=railNear(b.x,b.z);if(q)top=Math.max(top,q.e+1)}
-  Object.assign(b,{g,gl,ar,am,fade:1,occ:false,losT:Math.random()*.2,ci,ay:Math.max(b.y+5,top+6),c:new V3(b.x,b.y,b.z),ph:Math.random()*6.28,on:true,rad:0});
+  Object.assign(b,{g,gl,ar,am,ci,mt:M_,hard:ci>=3,ay:Math.max(b.y+5,top+6)});
   if(r>=6){/* 5. turdan sonra: küçük daire çizer */
     const u=b.u?new V3(b.u[0],b.u[1],b.u[2]):new V3(1,0,0),v=b.u?new V3(0,1,0):new V3(0,0,1);let rad=b.om||(b.typ==='air'?6:b.typ==='low'?4.5:3.2);
     const ok=rd=>{for(let k=0;k<10;k++){const a=k/10*6.283,p=b.c.clone().addScaledVector(u,Math.cos(a)*rd).addScaledVector(v,Math.sin(a)*rd);if(!taFree(p.x,p.y,p.z,b.typ))return false}return true};
-    while(rad>1.1&&!ok(rad))rad*=.7;if(rad>1.1){b.rad=rad;b.U=u;b.V=v;b.w=(.55+Math.random()*.45)*(Math.random()<.5?-1:1)}}
+    while(rad>1.1&&!ok(rad))rad*=.7;if(rad>1.1){b.rad=rad;b.U=u;b.V=v;b.w=(.55+Math.random()*.45)*(Math.random()<.5?-1:1)*th.spd}}
   return b}
+/* bomba balon: oksuz, siyah; patlatmak 5 hasar */
+function taBombMake(x,y,z){const R=taRes(),g=new THREE.Group();
+  const bm=new THREE.Mesh(R.bg,new THREE.MeshLambertMaterial({color:0x15151c,emissive:0x330806,emissiveIntensity:.8}));g.add(bm);
+  const ol=new THREE.Mesh(R.bg,R.ol);ol.scale.setScalar(1.09);g.add(ol);
+  const kn=new THREE.Mesh(R.kg,bm.material);kn.position.y=-1.55;g.add(kn);const st=new THREE.Mesh(R.sg,R.str);st.position.y=-2.9;g.add(st);
+  const sk=new THREE.Sprite(new THREE.SpriteMaterial({map:taEmoji('☠️'),transparent:true,depthWrite:false,fog:false}));sk.scale.setScalar(2.1);sk.position.set(0,.1,0);g.add(sk);
+  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW_MAT.map,color:0xff2a10,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));gl.scale.setScalar(8);g.add(gl);
+  g.position.set(x,y,z);addM(g);return{g,gl,x,y,z,on:true,ph:Math.random()*6.28,tk:0}}
 function setupTA(){
   const best0=store.get('kz-ta-best',0);const hist=[];let round=0,total=0,rpts=0,popped=0,poppedAll=0,gotF=0,drinks=0,list=[],fx=[];
-  const M2=!!MP.act;let ro=0,sumPop=0,sumRB=0,obT=0;const R0=(!M2&&TARES>1)?TARES:1;TARES=null;TARSM=R0>1;
+  const M2=!!MP.act;let ro=0,sumPop=0,sumRB=0,obT=0,bombs=[],streak=0,hstreak=0,lastHit=HITN,rndHit=HITN;const R0=(!M2&&TARES>1)?TARES:1;TARES=null;TARSM=R0>1;
   const RR=rider().id==='elif'?9.5:6.5;
   const bar=(()=>{let e=document.getElementById('taBar');if(!e){e=document.createElement('div');e.id='taBar';e.style.cssText='position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(56px + env(safe-area-inset-top,0px));display:flex;gap:6px;align-items:center;font-weight:800;font-size:12px;color:#fff;text-shadow:0 1px 0 #14364f;background:rgba(10,30,50,.58);border-radius:12px;padding:3px 9px;white-space:nowrap;max-width:calc(var(--vw)*100 - 190px);overflow:hidden;z-index:11';document.getElementById('hud').appendChild(e)}e.style.display='flex';return e})();
-  const PT=M2?TA_PTS2:TA_PTS,legend=[0,1,2,3,4].map(t=>`<span style="display:inline-flex;align-items:center;gap:2px"><i style="width:10px;height:10px;border-radius:50%;background:#${TA_COLS[t].toString(16).padStart(6,'0')};border:1px solid #fff;display:inline-block"></i>${PT[t]}</span>`).join('');
-  const barUpd=()=>{bar.innerHTML=`<span>🎈 ${popped}/${list.length}</span><span>⭐ ${total+rpts}</span><span>×${(1+.04*(round-1)).toFixed(2)}</span>`+(M2?`<span>👥 ${MP.theirs}</span><span>❤ ${Math.round(energy)}/${MP.tgt&&MP.tgt.e!==undefined?MP.tgt.e:'?'}</span>`:'')+`<span style="opacity:.5">|</span>`+legend};
+  const PT=M2?TA_PTS2:TA_PTS,th_=()=>taTh(round),legend=()=>th_().pal.map((c,t)=>`<span style="display:inline-flex;align-items:center;gap:2px"><i style="width:10px;height:10px;border-radius:50%;background:#${c.toString(16).padStart(6,'0')};border:1px solid #fff;display:inline-block"></i>${PT[t]}</span>`).join('');
+  const barUpd=()=>{bar.innerHTML=`<span>🎈 ${popped}/${list.length}</span><span>⭐ ${total+rpts}</span><span>×${(1+.04*(round-1)).toFixed(2)}</span>`+(M2?`<span>👥 ${MP.theirs}</span><span>❤ ${Math.round(energy)}/${MP.tgt&&MP.tgt.e!==undefined?MP.tgt.e:'?'}</span>`:'')+`<span style="opacity:.5">|</span>`+legend()};
   const obj=()=>{barUpd();if(M2)mpLive(total+rpts,MP.theirs);setObjective((M2?'👥 ':'')+'⏱ Zamana Karşı · Tur '+round+'/'+TA_FIN,M2?`🎈 ${popped}/${list.length} · ⭐ Sen ${total+rpts} · Arkadaş ${MP.theirs} · ❤ ${Math.round(energy)}/${MP.tgt&&MP.tgt.e!==undefined?MP.tgt.e:'?'}`:`🎈 ${popped}/${list.length} · ⭐ ${total+rpts}${best0?' · Rekor '+best0:''}`)};
-  const clear=()=>{crowKill();for(const b of list){scene.remove(b.g);scene.remove(b.ar)}list=[]};
+  const clear=()=>{crowKill();for(const b of list){scene.remove(b.g);scene.remove(b.ar)}list=[];for(const q of bombs)scene.remove(q.g);bombs=[];evClear()};
   const ser=b=>({typ:b.typ,x:b.x,y:b.y,z:b.z,u:b.u||null,om:b.om||0,ph:b.ph,rad:b.rad||0,w:b.w||0,U:b.U?[b.U.x,b.U.y,b.U.z]:null,V:b.V?[b.V.x,b.V.y,b.V.z]:null});
   const next=()=>{clear();round++;rpts=0;ro=0;popped=0;try{if(!M2&&(round===6||round===14)&&(store.get('kz-ta-ck',0)|0)<round)store.set('kz-ta-ck',round)}catch(e){}
     if(M2&&!MP.host){state.time=0;state.limit=0;setObjective('👥 ⏱ Zamana Karşı · Tur '+round,'Ev sahibi balonları hazırlıyor…');return}
     const P=taPlan(round,player.pos,hist);if(P.C)hist.push(P.C);
-    list=P.list.map(b=>taMake(b,round));state.time=0;state.limit=P.T||taTime(round);if(M2)mpSend({t:'tr',r:round,lim:state.limit,l:list.map(ser)});obj();
+    /* süre: tur 1 = 200 sn, her tur -5 sn. Balon sayısı düşmez; gerekirse balonlar birbirine yaklaştırılır */
+    {const T0=taTime(round);let T1=T0;try{T1=taSqueeze(P.list,player.pos,T0)}catch(e){console.error('sıkıştır',e)}P.T=T1}
+    list=P.list.map(b=>taMake(b,round));state.time=0;state.limit=P.T;rndHit=HITN;if(!M2){taBombs();evPlan()}if(M2)mpSend({t:'tr',r:round,lim:state.limit,l:list.map(ser)});obj();
     {let tc=null;try{tc=taTourC(round)}catch(e){}const pv=(()=>{try{return round>1?taTourC(round-1):null}catch(e){return null}})();
-      const nm=tc&&tc.name?' · '+tc.ico+' '+tc.name:'';toast((tc&&pv&&tc.isl&&pv.isl!==tc.isl&&tc.kind==='island'?(tc.isl==='desert'?'🏜️ Çöl Adası! ':'❄️ Buz Adası! '):'')+'🎈 Tur '+round+'/'+TA_FIN+nm+': '+list.length+' balon'+(round>=6?' (dönüyorlar)':'')+(round>=TA_FIN?' · FİNAL!':''),2.4)}};
+      const nm=tc&&tc.name?' · '+tc.ico+' '+tc.name:'';toast((tc&&pv&&tc.isl&&pv.isl!==tc.isl&&tc.kind==='island'?(tc.isl==='desert'?'🏜️ Çöl Adası! ':'❄️ Buz Adası! '):'')+'🎈 Tur '+round+'/'+TA_FIN+nm+': '+list.length+' balon'+(round>=6?' (dönüyorlar)':'')+(round>=TA_FIN?' · FİNAL!':''),2.4);const th=taTh(round);taBanner(th.i+' '+th.n,(bombs.length?'💣 '+bombs.length+' bomba var — oku yok, dikkat!':th.pat||th.sh?'Bu turun balonları '+(th.sh==='heart'?'kalp':th.sh==='star'?'yıldız':th.pat==='stripe'?'çizgili':th.pat==='dots'?'puantiyeli':'zikzaklı')+'!':'Tur '+round),false)}};
+  /* ---- BOMBA BALONLAR: oku yok, patlatmak 5 hasar; tur sayacına girmez ---- */
+  const taBombs=()=>{const th=taTh(round),n=th.bomb;if(!n||!list.length)return;let made=0;
+    for(let t=0;t<60&&made<n;t++){const b=list[(Math.random()*list.length)|0],a=Math.random()*6.283,d=16+Math.random()*20,x=b.x+Math.cos(a)*d,z=b.z+Math.sin(a)*d,y=Math.max(ground(x,z)+5,b.y+(Math.random()-.5)*10);
+      if(Math.hypot(x-player.pos.x,z-player.pos.z)<45||!taFree(x,y,z,'air'))continue;
+      if(list.some(o=>Math.hypot(o.x-x,o.z-z)<14&&Math.abs(o.y-y)<12)||bombs.some(o=>Math.hypot(o.x-x,o.z-z)<25))continue;
+      bombs.push(taBombMake(x,y,z));made++}};
+  const bombBoom=q=>{q.on=false;scene.remove(q.g);const p=q.g.position.clone();burst(p,dustMat,22,1.5);burst(p,taMt(0xff5a1a,'','').cf,16,1.3);sfx(90,.4,'sawtooth',.16);setTimeout(()=>sfx(60,.35,'square',.12),70);vib([80,40,120]);
+    energy=Math.max(0,energy-5);HITN++;lastHit=HITN;streak=0;hstreak=0;shake=Math.max(shake,.4);k1Mood('ouch',1.3);updateHearts();floatUp(p,'💥');toast('💣 BOMBA! -5 enerji',1.2);
+    if(energy<=0)TA.end('energy')};
+  /* ---- SERİ / ANİMASYON ---- */
+  const taBanner=(txt,sub,hard)=>{let e=document.getElementById('taSeri');if(!e){const st=document.createElement('style');st.textContent=`#taSeri{position:absolute;left:50%;top:calc(var(--vh,1vh)*22);transform:translateX(-50%);z-index:12;pointer-events:none;text-align:center;opacity:0;white-space:nowrap}#taSeri b{display:block;font-weight:900;font-size:clamp(1.3rem,calc(var(--vh,1vh)*8),2.6rem);line-height:1;color:#fff;text-shadow:0 3px 0 #b3261e,0 0 18px #ff9f1a;-webkit-text-stroke:1px #7a1a10}#taSeri i{display:block;font-style:normal;font-weight:800;font-size:clamp(.78rem,calc(var(--vh,1vh)*3.8),1.1rem);line-height:1.1;color:#fff;margin-top:5px;text-shadow:0 2px 0 rgba(0,0,0,.5)}#taSeri.n.on{animation:taSn 1.6s ease-out}@keyframes taSn{0%{opacity:0;transform:translateX(-50%) scale(.3)}14%{opacity:1;transform:translateX(-50%) scale(1.25)}28%{transform:translateX(-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-26px) scale(1)}}#taSeri.h b{background:linear-gradient(90deg,#ff5ccf,#b15cff,#2f6bff,#00c8e8,#ff5ccf);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;-webkit-text-stroke:0;text-shadow:none;filter:drop-shadow(0 0 9px #fff) drop-shadow(0 3px 0 #2a1060);animation:taSg .8s linear infinite}@keyframes taSg{to{background-position:300% 0}}#taSeri.h.on{animation:taSh 2.2s ease-out}@keyframes taSh{0%{opacity:0;transform:translateX(-50%) rotate(-14deg) scale(.2)}11%{opacity:1;transform:translateX(-50%) rotate(7deg) scale(1.5)}20%{transform:translateX(-50%) rotate(-4deg) scale(1.1)}30%{transform:translateX(-50%) rotate(0) scale(1.25)}84%{opacity:1;transform:translateX(-50%) scale(1.15)}100%{opacity:0;transform:translateX(-50%) translateY(-36px) scale(1.35)}}`;document.head.appendChild(st);e=document.createElement('div');e.id='taSeri';document.getElementById('hud').appendChild(e)}
+    e.className='';void e.offsetWidth;e.innerHTML='<b></b><i></i>';e.firstChild.textContent=txt;e.lastChild.textContent=sub||'';e.className=(hard?'h':'n')+' on'};
+  const SERN={3:['🔥 SERİ ×3','Hasarsız devam!'],5:['⚡ SERİ ×5','Müthiş gidiyorsun!'],8:['🌟 SERİ ×8','Durdurulamıyor!'],12:['👑 SERİ ×12','Efsane kaz!']};
+  const serFx=(p,hard,lv)=>{const col=taMt(hard?0xb15cff:0xff7b00,'','').cf;
+    if(hard){burst(p,col,30,1.6);burst(p,taMt(0x00c8e8,'','').cf,24,1.2);burst(p,taMt(0xff5ccf,'','').cf,24,1.4);setTimeout(()=>{if(TA)burst(p,col,18,2)},160);[784,988,1175,1568,1976].forEach((f,i)=>setTimeout(()=>sfx(f,.14,'triangle',.11),i*70));vib([30,30,30,30,90]);floatUp(p.clone().add(new V3(0,2,0)),'💎')}
+    else{burst(p,col,18+lv*3,1.2);[523,659,784,1046].slice(0,2+Math.min(2,lv)).forEach((f,i)=>setTimeout(()=>sfx(f,.12,'triangle',.1),i*60));floatUp(p.clone().add(new V3(0,2,0)),'🔥')}};
+  /* ---- SÜRPRİZ OLAYLAR (çok oyunculuda kapalı) ---- */
+  let evq=[],golds=[],minis=[],hawks=[],sq=null;
+  const evClear=()=>{for(const o of golds)scene.remove(o.g),o.ar&&scene.remove(o.ar);for(const o of minis)scene.remove(o.g),o.ar&&scene.remove(o.ar);for(const o of hawks)scene.remove(o.g);golds=[];minis=[];hawks=[];sq=null;evq=[]};
+  const taNum=n=>{const R=taRes(),k='n'+n;if(R.tex[k])return R.tex[k];const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(64,64,52,0,6.283);g.fill();g.lineWidth=8;g.strokeStyle='#14213d';g.stroke();g.fillStyle='#14213d';g.font='bold 80px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(n),64,70);return R.tex[k]=new THREE.CanvasTexture(c)};
+  const arrowOf=col=>{const R=taRes(),am=R.am.clone();am.color.setHex(col);const ar=new THREE.Group();ar.add(new THREE.Mesh(R.ag,am),new THREE.Mesh(R.sh,am));ar.children.forEach(m=>m.renderOrder=20);ar.renderOrder=20;addM(ar);return{ar,am}};
+  const balloonG=(col,sc,glow)=>{const R=taRes(),M_=taMt(col,'',''),g=new THREE.Group();g.add(new THREE.Mesh(R.bg,M_.b));const ol=new THREE.Mesh(R.bg,R.ol);ol.scale.setScalar(1.09);g.add(ol);
+    const kn=new THREE.Mesh(R.kg,M_.b);kn.position.y=-1.55;g.add(kn);const st=new THREE.Mesh(R.sg,R.str);st.position.y=-2.9;g.add(st);const gl=new THREE.Sprite(M_.g);gl.scale.setScalar(glow||6.5);g.add(gl);g.scale.setScalar(sc);addM(g);return{g,gl,M_}};
+  const fwdV=()=>[-Math.sin(player.yaw),-Math.cos(player.yaw)];
+  const evPts=(p,pts,em,msg)=>{pts=Math.round(pts*(1+.04*(round-1)));rpts+=pts;sumPop+=pts;floatUp(p,em);toast(msg.replace('#',pts),1.3);obj();return pts};
+  const evFire=k=>{if(state.done||!list.length||list.every(b=>!b.on))return;
+    if(k==='gold'){const f=fwdV(),a=(Math.random()-.5)*1.5,c=Math.cos(a),sn=Math.sin(a),d=80+Math.random()*40,dx=f[0]*c-f[1]*sn,dz=f[0]*sn+f[1]*c;let x=player.pos.x+dx*d,z=player.pos.z+dz*d;
+      const y=Math.max(solidTop(x,z,500),ground(x,z))+22+Math.random()*10,B=balloonG(0xffffff,1.25,15),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:taEmoji('✨'),transparent:true,depthWrite:false,fog:false}));sp.scale.setScalar(5);sp.position.y=.3;B.g.add(sp);B.g.position.set(x,y,z);
+      B.gl.material=B.gl.material.clone();B.gl.material.color.setHex(0xffd84a);const A=arrowOf(0xffffff);golds.push({g:B.g,gl:B.gl,ar:A.ar,x,y,z,t:0,h:Math.atan2(dx,dz),on:true});
+      taBanner('🌟 ALTIN BALON!','Kaçıyor! 25 sn içinde yakala · +120 puan, +5 tüy',true);screech();[1047,1319,1568].forEach((f,i)=>setTimeout(()=>sfx(f,.15,'triangle',.1),i*90))}
+    else if(k==='rain'){const f=fwdV(),rx=-f[1],rz=f[0],pal=taTh(round).pal;let n=0;
+      for(let i=0;i<10;i++){const d=35+Math.random()*80,l=(Math.random()-.5)*110,x=player.pos.x+f[0]*d+rx*l,z=player.pos.z+f[1]*d+rz*l,y=Math.max(solidTop(x,z,500),ground(x,z))+26+Math.random()*34;
+        const B=balloonG(pal[i%5],.6,5);B.g.position.set(x,y,z);minis.push({g:B.g,gl:B.gl,kind:'rain',x,y,z,t:0,ph:Math.random()*6,vy:2+Math.random()*1.5,on:true});n++}
+      taBanner('🎈 BALON YAĞMURU!','10 küçük balon yağıyor · hepsi +80 bonus',false);sfx(880,.2,'triangle',.1)}
+    else if(k==='seq'){const f=fwdV(),rx=-f[1],rz=f[0],pal=taTh(round).pal,sd=Math.random()<.5?-1:1,arr=[];
+      for(let i=0;i<5;i++){const d=55+i*30,l=Math.sin(i*1.15)*28*sd,x=player.pos.x+f[0]*d+rx*l,z=player.pos.z+f[1]*d+rz*l;let y=Math.max(solidTop(x,z,500),ground(x,z))+7+Math.abs(Math.sin(i*.8))*10;
+        for(let g=0;g<6&&!taFree(x,y,z,'air');g++)y+=6;
+        const B=balloonG(pal[i%5],.8,7),nm=new THREE.Sprite(new THREE.SpriteMaterial({map:taNum(i+1),transparent:true,depthWrite:false,fog:false}));nm.scale.setScalar(3.2);nm.position.y=2.6;B.g.add(nm);B.g.position.set(x,y,z);
+        const A=arrowOf(0xffffff);arr.push({g:B.g,gl:B.gl,ar:A.ar,kind:'seq',i,x,y,z,t:0,ph:i,on:true});}
+      minis.push(...arr);sq={arr,i:0,t:0,lim:26};taBanner('🔢 SIRALI BALONLAR!','1\'den 5\'e sırayla patlat · 26 sn · +150 bonus',false);sfx(660,.2,'triangle',.1)}
+    else if(k==='hawk'||k==='hawk2'){const n=k==='hawk2'?2:1;taBanner('⚠️ ŞAHİN PUSUSU!','Yönünü değiştir!',false);screech();setTimeout(screech,160);
+      for(let q=0;q<n;q++)setTimeout(()=>{if(state.done||!TA)return;const f=fwdV(),rx=-f[1],rz=f[0],sd=(q?-1:1)*(Math.random()<.5?-1:1),T=2.6,sp=Math.max(30,player.speed),mx=player.pos.x+f[0]*sp*T,mz=player.pos.z+f[1]*sp*T,my=player.pos.y,sx=mx+rx*sd*125+f[0]*40,sz=mz+rz*sd*125+f[1]*40,sy=my+22;
+        const g=makeEagle();g.rotation.order='YXZ';g.scale.setScalar(1.3);g.traverse(o=>{if(o.isMesh&&o.material&&o.material.color){o.material=o.material.clone();o.material.color.multiplyScalar(.42)}});if(g.userData.egg)g.userData.egg.visible=false;g.position.set(sx,sy,sz);addM(g);
+        hawks.push({g,vx:(mx-sx)/T,vy:(my-sy)/T,vz:(mz-sz)/T,t:0,hit:false});},900+q*800)}};
+  const evPlan=()=>{evq=[];if(M2)return;const T=state.limit,E=taEv(round);
+    for(const k of E){if(k==='gold')evq.push({k,at:T*(.22+.3*Math.random())});else if(k==='seq')evq.push({k,at:T*(.18+.25*Math.random())});else if(k==='rain')evq.push({k,at:T*(.35+.25*Math.random())});
+      else if(k==='hawk'||k==='hawk2'){for(let t=12+Math.random()*10;t<T-12;t+=34+Math.random()*12)evq.push({k,at:t})}}
+    if(E.includes('shy')){const c=list.filter(b=>b.typ==='air'||b.typ==='low'||b.typ==='tree').sort(()=>Math.random()-.5).slice(0,Math.min(7,Math.max(3,Math.round(list.length*.35))));
+      for(const b of c){b.shy=true;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:taEmoji('😳'),transparent:true,depthWrite:false,fog:false}));sp.scale.setScalar(2.6);sp.position.y=2.9;b.g.add(sp)}
+      setTimeout(()=>{if(TA&&!state.done&&round>0&&list.some(b=>b.shy))toast('😳 Ürkek balonlar! Yaklaşınca kaçıyorlar',2)},1400)}};
+  const shyStep=(b,dt)=>{const dx=b.c.x-player.pos.x,dz=b.c.z-player.pos.z,d=Math.hypot(dx,dz)||1;if(d>50||Math.abs(player.pos.y-b.c.y)>45)return;
+    const sp=(9+(50-d)*.16)*dt,nx=b.c.x+dx/d*sp,nz=b.c.z+dz/d*sp;if(Math.hypot(nx-b.x,nz-b.z)>36||!taFree(nx,b.c.y,nz,b.typ))return;b.c.x=nx;b.c.z=nz};
+  const evStep=dt=>{if(M2)return;const flying=state.mode==='fly',R_=RR;
+    for(const e of evq){if(!e.d&&state.time>=e.at){e.d=1;evFire(e.k)}}
+    for(let i=golds.length-1;i>=0;i--){const o=golds[i];o.t+=dt;const dx=o.x-player.pos.x,dz=o.z-player.pos.z,d=Math.hypot(dx,dz)||1;
+      if(d<120){const away=Math.atan2(dx,dz);o.h+=Math.atan2(Math.sin(away-o.h),Math.cos(away-o.h))*Math.min(1,dt*2.2)+Math.sin(o.t*2.3)*.9*dt}else o.h+=dt*.5;
+      const sp=Math.min(33,Math.max(19,player.speed*.78));let nx=o.x+Math.sin(o.h)*sp*dt,nz=o.z+Math.cos(o.h)*sp*dt;if(Math.abs(nx)>880||Math.abs(nz)>880){o.h+=Math.PI*.6}else{o.x=nx;o.z=nz}
+      const ty=Math.max(solidTop(o.x,o.z,500),ground(o.x,o.z))+16+Math.sin(o.t*1.7)*5;o.y+=(ty-o.y)*Math.min(1,dt*1.6);o.g.position.set(o.x,o.y,o.z);o.g.rotation.y+=dt;o.gl.scale.setScalar(14+Math.sin(o.t*8)*3);
+      const dd=player.pos.distanceTo(o.g.position);o.ar.position.set(o.x,o.y+8,o.z);o.ar.scale.setScalar(Math.min(14,Math.max(1,dd*.022))*1.2);o.ar.visible=dd>14;
+      if(flying&&dd<R_+1.8){burst(o.g.position.clone(),taMt(0xffd84a,'','').cf,30,1.6);burst(o.g.position.clone(),taMt(0xffffff,'','').cf,16,1.2);[1047,1319,1568,2093].forEach((f,k)=>setTimeout(()=>sfx(f,.14,'triangle',.11),k*70));
+        energy=Math.min(100,energy+10);gotF+=5;evPts(o.g.position.clone(),120,'🌟','🌟 Altın balon! +# puan · +5 🪶 · +10 enerji');taBanner('🌟 ALTIN BALON YAKALANDI!','+5 tüy · +10 enerji',true);updateHearts();scene.remove(o.g);scene.remove(o.ar);golds.splice(i,1);continue}
+      if(o.t>25){burst(o.g.position.clone(),taMt(0xffffff,'','').cf,10,1);toast('💨 Altın balon kaçtı…',1.4);scene.remove(o.g);scene.remove(o.ar);golds.splice(i,1)}}
+    if(sq){sq.t+=dt;if(sq.t>sq.lim&&sq.i<5){toast('⌛ Sıralı balonlar kayboldu',1.5);for(const o of sq.arr){scene.remove(o.g);scene.remove(o.ar);o.on=false}sq=null}}
+    for(let i=minis.length-1;i>=0;i--){const o=minis[i];if(!o.on){minis.splice(i,1);continue}o.t+=dt;
+      if(o.kind==='rain'){o.y-=o.vy*dt;o.g.position.set(o.x+Math.sin(o.t*1.3+o.ph)*3,o.y,o.z);
+        if(o.t>16||o.y<ground(o.x,o.z)+3){scene.remove(o.g);minis.splice(i,1);continue}
+        if(flying&&player.pos.distanceTo(o.g.position)<R_+.5){o.on=false;scene.remove(o.g);burst(o.g.position.clone(),taMt(0xff5ccf,'','').cf,10,.8);sfx(1500,.05,'square',.08);rainGot++;evPts(o.g.position.clone(),8,'🎈','🎈 +#');
+          if(rainGot>=10){rainGot=0;const b=Math.round(80*(1+.04*(round-1)));rpts+=b;sumPop+=b;taBanner('🌧️ YAĞMUR TAMAM!','10/10 · +'+b+' bonus',true);serFx(player.pos.clone(),true,3);obj()}}}
+      else{const cur=sq&&o.i===sq.i;o.g.position.set(o.x,o.y+Math.sin(o.t*1.8+o.ph)*.5,o.z);o.g.scale.setScalar(cur?.95:.62);o.gl.scale.setScalar(cur?9+Math.sin(o.t*7)*1.5:3.5);
+        const dd=player.pos.distanceTo(o.g.position);o.ar.visible=!!cur&&dd>14;if(cur){o.ar.position.set(o.x,o.y+6,o.z);o.ar.scale.setScalar(Math.min(14,Math.max(1,dd*.022)))}
+        if(cur&&flying&&dd<R_+.8){o.on=false;scene.remove(o.g);scene.remove(o.ar);burst(o.g.position.clone(),taMt(0x2f6bff,'','').cf,12,1);sq.i++;sfx(700+sq.i*150,.1,'triangle',.1);evPts(o.g.position.clone(),15,'🔢','🔢 '+sq.i+'/5 · +#');
+          if(sq.i>=5){const b=Math.round(150*(1+.04*(round-1)));rpts+=b;sumPop+=b;gotF+=4;taBanner('🔢 SIRA TAMAM!','5/5 · +'+b+' puan · +4 tüy',true);serFx(player.pos.clone(),true,3);sq=null;obj()}}}}
+    for(let i=hawks.length-1;i>=0;i--){const h=hawks[i];h.t+=dt;h.g.position.x+=h.vx*dt;h.g.position.y+=h.vy*dt;h.g.position.z+=h.vz*dt;h.g.rotation.y=Math.atan2(-h.vx,-h.vz);h.g.rotation.z=Math.sin(h.t*3)*.15;
+      if(!h.hit&&flying&&invuln<=0&&player.pos.distanceTo(h.g.position)<5.5){h.hit=true;energy=Math.max(0,energy-8);HITN++;lastHit=HITN;streak=0;hstreak=0;invuln=1.6;shake=Math.max(shake,.35);k1Mood('ouch',1.2);sfx(160,.25,'sawtooth',.12);updateHearts();toast('🦅 Şahin çarptı! -8 enerji',1.2);if(energy<=0){TA.end('energy');return}}
+      if(h.t>6){scene.remove(h.g);hawks.splice(i,1)}}};
+  let rainGot=0;
   /* ---- KARGA (tur 6 ve 14): son balon kalınca onu kapıp kaçar; yakalamak gerekir ---- */
   let crow=null,cwT=0;
-  const crowKill=fxo=>{if(!crow)return;const c=crow;crow=null;scene.remove(c.g);if(fxo){try{burst(c.g.position.clone(),taRes().mats[0].cf,16,1)}catch(e){}}};
+  const crowKill=fxo=>{if(!crow)return;const c=crow;crow=null;scene.remove(c.g);if(fxo){try{burst(c.g.position.clone(),taMt(taTh(round).pal[0],'','').cf,16,1)}catch(e){}}};
   const crowMake=(x,y,z)=>{const g=new THREE.Group(),dm=new THREE.MeshLambertMaterial({color:0x22232b}),bm=new THREE.MeshLambertMaterial({color:0xe0a040});
     const body=new THREE.Mesh(new THREE.SphereGeometry(.6,10,8),dm);body.scale.set(.8,.75,1.5);g.add(body);
     const head=new THREE.Mesh(new THREE.SphereGeometry(.34,10,8),dm);head.position.set(0,.22,.85);g.add(head);
@@ -10196,20 +10340,25 @@ function setupTA(){
     if(M2){cwT-=dt;if(cwT<=0){cwT=.1;mpSend({t:'cw',i:list.indexOf(lb),x:c.x,y:c.y,z:c.z,h:c.h})}}};
   const floatUp=(p,e)=>{const s=new THREE.Sprite(new THREE.SpriteMaterial({map:taEmoji(e),transparent:true,depthWrite:false,fog:false}));s.position.copy(p);s.scale.setScalar(3.2);addM(s);fx.push({s,t:0})};
   const pop=b=>{b.on=false;b.g.visible=false;b.ar.visible=false;popped++;poppedAll++;const R=taRes(),p=b.g.position.clone();
-    burst(p,R.mats[b.ci].cf,14,.9);sfx(1400,.05,'square',.1);setTimeout(()=>sfx(880,.08,'triangle',.08),40);
+    burst(p,b.mt.cf,14,.9);sfx(1400,.05,'square',.1);setTimeout(()=>sfx(880,.08,'triangle',.08),40);
     let pts=Math.round((M2?TA_PTS2:TA_PTS)[b.ci]*(1+.04*(round-1)))+(b.rad?10:0);energy=Math.min(100,energy+2);const msg=['🎈 +'+pts];let em='🎈';
-    const q=M2?(Math.random()<.35?.4:1):Math.random();let tsAdd=0;
-    if(q<.35){const n=2+((Math.random()*9)|0);energy=Math.min(100,energy+n);drinks++;msg.push('🥤 +'+n+' enerji');em='🥤'}
-    else if(q<.6){const n=1+((Math.random()*3)|0);gotF+=n;msg.push('🪶 +'+n+' altın tüy');em='🪶'}
-    else if(q<.7){state.limit+=5;tsAdd=5;msg.push('⏱ +5 sn');em='⏱️'}
-    else if(q<.8){pts+=25;msg.push('⭐ +25 bonus');em='⭐'}
-    try{achAdd('taB');if(b.ci>=3)achAdd('taH')}catch(e){}
+    const q=Math.random();let tsAdd=0;
+    if(q<.10){energy=Math.min(100,energy+10);drinks++;msg.push('🥤 +10 enerji');em='🥤'}
+    else if(q<.15){energy=Math.min(100,energy+20);drinks++;msg.push('🥤🥤 +20 enerji');em='🥤'}
+    else if(q<.25){gotF+=5;msg.push('🪶 +5 altın tüy');em='🪶'}
+    if(!M2){/* seri: hasar almadan art arda patlatma */
+      if(HITN!==lastHit){lastHit=HITN;streak=0;hstreak=0}
+      streak++;if(b.hard)hstreak++;else hstreak=0;let sb=0;
+      if(b.hard&&hstreak>=2){sb=hstreak*15;taBanner('💎 ZOR SERİ ×'+hstreak,'+'+sb+' puan · zor balonları art arda patlattın!',true);serFx(p,true,hstreak)}
+      else{const S_=SERN[streak]||(streak>12&&streak%4===0?['👑 SERİ ×'+streak,'Efsane kaz!']:null);if(S_){sb=streak*3;taBanner(S_[0],'+'+sb+' puan · '+S_[1],false);serFx(p,false,streak>=12?3:streak>=8?2:streak>=5?1:0)}}
+      if(sb){pts+=sb;msg.push('🔥 seri +'+sb)}}
+        try{achAdd('taB');if(b.ci>=3)achAdd('taH')}catch(e){}
     if(b.crow){pts+=40;gotF+=3;msg.push('🐦 Karga yakalandı! +40');crowKill(true)}
     rpts+=pts;sumPop+=pts;b.mine=true;b.gotPts=pts;updateHearts();floatUp(p,em);toast(msg.join(' · '),1.4);
     if(M2){mpSend({t:'tp',i:list.indexOf(b),p:pts,ts:tsAdd});mpSend({t:'prog',n:total+rpts})}
     obj();checkRound()};
   const checkRound=()=>{if(!list.length||popped<list.length||state.done)return;
-    const left=Math.max(0,state.limit-state.time),RB=25*round+Math.round(left);let bn=RB;
+    const left=Math.max(0,state.limit-state.time),RB=25*round+Math.round(left);let bn=RB;if(!M2&&HITN===rndHit){const cb=30+5*round;bn+=cb;taBanner('✨ TERTEMİZ TUR!','Hiç hasar almadın · +'+cb+' puan',true);serFx(player.pos.clone().add(new V3(0,3,0)),true,3)}
     if(M2){const tt=rpts+ro;bn=tt>0?Math.round(RB*rpts/tt):0}
     total+=rpts+bn;sumRB+=bn;rpts=0;ro=0;energy=Math.min(100,energy+10);updateHearts();fanfare();if(M2)mpSend({t:'prog',n:total});
     try{achSet('taR',round)}catch(e){}
@@ -10218,13 +10367,13 @@ function setupTA(){
   const popRemote=(i,pts,ts)=>{const b=list[i];if(!b)return;
     if(!b.on){if(b.mine&&!MP.host){rpts-=b.gotPts;sumPop-=b.gotPts;ro+=b.gotPts;b.mine=false;toast('Balonu arkadaşın önce patlattı',1.3);obj()}return}
     if(b.crow)crowKill(true);
-    b.on=false;b.g.visible=false;b.ar.visible=false;popped++;burst(b.g.position.clone(),taRes().mats[b.ci].cf,14,.9);sfx(1100,.05,'square',.06);
+    b.on=false;b.g.visible=false;b.ar.visible=false;popped++;burst(b.g.position.clone(),b.mt.cf,14,.9);sfx(1100,.05,'square',.06);
     ro+=pts;if(ts)state.limit+=ts;obj();checkRound()};
   if(M2&&!MP.host)MP.taCrow=d=>{const b=list[d.i];if(!b||!b.on||state.done)return;if(!crow){crow=crowMake(d.x,d.y,d.z);crow.mode='rem';crow.lb=b;b.crow=true;b.rad=0}crow.tx=d.x;crow.ty=d.y;crow.tz=d.z;crow.h=d.h};
   if(M2){MP.taPop=popRemote;MP.taEnd=k=>TA.end(k,true);MP.taFin=null;MP.taFinNm='';for(const x of MP.ps)x.fin=null;
     MP.taRound=d=>{clear();round=d.r;rpts=0;ro=0;popped=0;list=d.l.map(sp=>{const b=taMake({typ:sp.typ,x:sp.x,y:sp.y,z:sp.z,u:sp.u,om:sp.om},round);b.ph=sp.ph;b.rad=sp.rad||0;b.w=sp.w;if(sp.U){b.U=new V3(sp.U[0],sp.U[1],sp.U[2]);b.V=new V3(sp.V[0],sp.V[1],sp.V[2])}else{b.U=null;b.V=null}return b});
       state.time=0;state.limit=d.lim;obj();toast('🎈 Tur '+round+': '+list.length+' balon!',2)}}
-  TA={get list(){return list},get round(){return round},get score(){return total+rpts},end:(kind,remote)=>{
+  TA={get list(){return list},get bombs(){return bombs},get round(){return round},get score(){return total+rpts},end:(kind,remote)=>{
     if(state.done)return;if(M2&&!remote)mpSend({t:'tend',k:kind});if(crash)abortCrash();if(rig)rig.visible=true;invuln=0;state.done=true;state.mode='flyDone';state.target=null;
     const eb=M2?Math.round(Math.max(0,energy)*1.2):0,sc=total+rpts+eb,best=store.get('kz-ta-best',0),rec=!M2&&sc>best;if(rec)store.set('kz-ta-best',sc);const br=M2?round:Math.max(round,store.get('kz-ta-round',0));if(!M2)store.set('kz-ta-round',br);
     if(!M2)gotF+=Math.min(30,(round-R0+1)*3);feathers+=gotF;saveShop();const A=M2?null:addScore('ta',sc);if(rec)fanfare();else sadTone();
@@ -10240,7 +10389,7 @@ function setupTA(){
       $('#resMsg').textContent=`${rec?'🏆 Yeni rekor! · ':''}Tur ${round} · 🎈 ${poppedAll}`;setResArt({win:rec?true:sc>0?true:false,badge:rec?'🏆 Rekor!':'Tur '+round});
       setResPts(sc,A);showScreen('resultScreen')},1700)}};
   if(R0>1){round=R0-1;try{if(R0===6){const x=DZ.BX0-5;placeFlying(x,dzBY(x)+16,dzBZ(x),Math.PI/2)}else{const B=ICB.find(b=>b.id==='W')||ICB[ICB.length-1],i=4;placeFlying(B.X[i],B.Y[i]+16,B.Z[i],Math.atan2(-B.TX[i],-B.TZ[i]))}invuln=Math.max(invuln,2.5)}catch(e){console.error('tur devam',e)}}
-  setObjective('⏱ Zamana Karşı','Balonları süre bitmeden patlat! Etrafında engel ne kadar yakın ve çoksa balon o kadar değerli: mavi 10 → mor 30.');
+  setObjective('⏱ Zamana Karşı','Balonları süre bitmeden patlat! Engelli, ulaşması zor yerlerdeki balon daha değerli: üstteki renk sırası kolaydan zora (puanlar yanında). 💣 Bombalara dikkat!');
   next();
   updates=dt=>{
     for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;f.s.position.y+=dt*3.5;f.s.material.opacity=Math.max(0,1-f.t/1.3);if(f.t>1.3){scene.remove(f.s);fx.splice(i,1)}}
@@ -10248,11 +10397,17 @@ function setupTA(){
     if(M2){obT-=dt;if(obT<=0){obT=1;obj()}}
     if(!list.length)return;
     if(state.limit>0&&state.time>=state.limit){TA.end('time');return}
+    if(HITN!==lastHit){lastHit=HITN;streak=0;hstreak=0}
+    for(let i=bombs.length-1;i>=0;i--){const q=bombs[i];if(!q.on){bombs.splice(i,1);continue}const t=state.time+q.ph;q.g.position.y=q.y+Math.sin(t*1.4)*.5;q.g.rotation.y+=dt*.5;q.gl.scale.setScalar(7+Math.sin(t*9)*2);
+      const d=player.pos.distanceTo(q.g.position);if(d<48){q.tk-=dt;if(q.tk<=0){q.tk=Math.max(.25,d/60);sfx(1250,.025,'square',.03)}}
+      if(state.mode==='fly'&&d<RR*.85&&invuln<=0){bombBoom(q);bombs.splice(i,1);if(state.done||!TA)return}}
+    try{evStep(dt)}catch(e){console.error('sürpriz',e)}
+    if(state.done)return;
     try{crowStep(dt)}catch(e){console.error('karga',e)}
     const flying=state.mode==='fly';let best=null,bd=1e9,bestB=null;
-    for(const b of list){if(!b.on)continue;const t=state.time+b.ph;
+    for(const b of list){if(!b.on)continue;const t=state.time+b.ph;if(b.shy&&!b.crow)shyStep(b,dt);
       if(b.crow){}else if(b.rad){const a=t*b.w;b.g.position.copy(b.c).addScaledVector(b.U,Math.cos(a)*b.rad).addScaledVector(b.V,Math.sin(a)*b.rad)}
-      else b.g.position.y=b.c.y+Math.sin(t*1.6)*.35;
+      else{b.g.position.x=b.c.x;b.g.position.z=b.c.z;b.g.position.y=b.c.y+Math.sin(t*1.6)*.35}
       b.g.rotation.y+=dt*.6;b.gl.scale.setScalar(6+Math.sin(t*4)*1.2);
       const d=player.pos.distanceTo(b.g.position);
       b.ar.position.set(b.g.position.x,b.ay+Math.sin(t*3)*.8,b.g.position.z);b.ar.scale.setScalar(Math.min(14,Math.max(1,d*.022)));b.ar.visible=d>14;
@@ -12464,7 +12619,7 @@ function updatePointing(dt){
   sh.quaternion.copy(ab.sh).slerp(_pq,w);el.quaternion.copy(ab.el).slerp(_pqi,w)}
 
 /* ---------------- hazards: red trees & trains -> fall, roll, remount ---------------- */
-let energy=100,invuln=0,shake=0,crash=null,shieldShown=0,hpKey='',splashT=0;
+let energy=100,invuln=0,shake=0,crash=null,shieldShown=0,hpKey='',splashT=0;var HITN=0;   /* HITN: kaza sayacı (Zamana Karşı seri/tertemiz tur) */
 const GR=1.25;            // kazın gövde yarıçapı: sadece gerçekten değince çarpar
 const FALL_AT=20;         // bu hasar ve üzerinde kaz yere düşer; daha azında sadece sekmeli çarpma
 const DMG={green:2,red:20,train:30,struct:10,wall:8,ship:10};
@@ -12479,7 +12634,7 @@ function crashMul(v,ref,floor){const r=Math.max(0,v)/ref;let m=r<.1?0:r<=1?Math.
 function crashDmg(base,m){return m<=.04?0:Math.min(50,Math.max(1,Math.round(base*m)))}/* tek çarpma en fazla 50 */
 const crashRef=()=>26+player.g.speed*5;
 const TGRID=new Map();trees.forEach(t=>{const k=Math.floor(t.x/24)*1024+Math.floor(t.z/24);let a=TGRID.get(k);if(!a)TGRID.set(k,a=[]);a.push(t)});
-function treeHit(P){const cx=Math.floor(P.x/24),cz=Math.floor(P.z/24),g=GR*.85;
+function treeHit(P){const cx=Math.floor(P.x/24),cz=Math.floor(P.z/24),g=GR*.4;   /* yalnızca gövde gerçekten değince */
   for(let ix=cx-1;ix<=cx+1;ix++)for(let iz=cz-1;iz<=cz+1;iz++){const a=TGRID.get(ix*1024+iz);if(!a)continue;
     for(const t of a){if(t.hide)continue;const dx=P.x-t.x,dz=P.z-t.z,d2=dx*dx+dz*dz,s=t.s,q=6.4*s+g;if(d2>q*q)continue;const y=P.y-(t.h-.6),hd=Math.sqrt(d2);let hit=false;
       if(t.type===0){if(y>-g&&y<16.2*s+g){const r=y<3.2*s?.7*s:3.8*s*Math.max(0,1-(y-3.2*s)/(13*s));if(hd<r+g)hit=true}}
@@ -12513,8 +12668,11 @@ function iceShellHit(P){
   if(!near)ICE_MEM=0;
   return ret}
 var CASC=null;
-function propHit(P){for(const p of PROPS){const hr=p.hr||p.r*.72;if(Math.abs(P.x-p.x)>hr+GR||Math.abs(P.z-p.z)>hr+GR)continue;
-    const bot=p.bot!==undefined?p.bot:ground(p.x,p.z)-1;if(P.y<p.top+GR*.6&&P.y>bot-GR)return{p,hr}}return null}
+/* çatısı gerçek ağdan (roofSurf) okunan binalarda kutu yerine gerçek ayak izi: çatıya değmeden yaklaşınca hasar olmasın */
+function wiFoot(p,P){if(p._wf===undefined)p._wf=BLD.some(b=>b.rm&&Math.abs(p.x-b.f.x)<=(b.reach||48)&&Math.abs(p.z-b.f.z)<=(b.reach||48));if(!p._wf)return true;
+  try{const o=GR*.55;return roofSurf(P.x,P.z,1e5)!==null||roofSurf(P.x+o,P.z,1e5)!==null||roofSurf(P.x-o,P.z,1e5)!==null||roofSurf(P.x,P.z+o,1e5)!==null||roofSurf(P.x,P.z-o,1e5)!==null}catch(e){return true}}
+function propHit(P){const m=GR*.55;for(const p of PROPS){const hr=p.hr||p.r*.72,dx=P.x-p.x,dz=P.z-p.z;if(Math.abs(dx)>hr+m||Math.abs(dz)>hr+m)continue;if(dx*dx+dz*dz>(hr*1.28+m)*(hr*1.28+m))continue;
+    const bot=p.bot!==undefined?p.bot:ground(p.x,p.z)-1;if(!(P.y<p.top+GR*.3&&P.y>bot-GR*.5))continue;if(p.walkIgnore&&!wiFoot(p,P))continue;return{p,hr}}return null}
 /* düşük enerji uyarısı: <30 iken 15 sn'de bir küçük bildirim */
 let lowEnT=0;
 {const st=document.createElement('style');st.textContent=`#lowEn{position:absolute;left:50%;top:calc(var(--vh,1vh)*14);transform:translateX(-50%);z-index:11;pointer-events:none;background:rgba(190,30,30,.88);color:#fff;font-weight:800;font-size:clamp(.72rem,calc(var(--vh,1vh)*3.6),.95rem);padding:5px 12px;border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .3s}#lowEn.on{opacity:1}`;document.head.appendChild(st)}
@@ -12532,7 +12690,7 @@ function hurt(amount,away,kind){
   const baseAmt=amount,mul=crashMul(player.speed,crashRef(),kind==='train'?.4:0);amount=crashDmg(baseAmt,mul);if(amount>0)amount=Math.max(1,Math.round(amount*CM().dmg*(state.mission==='war'?.5:1)));
   if(amount<=0){/* duruyor: hasar yok, sadece cisimden hafifçe ayrıl */
     const Q=player;invuln=.35;if(!(Q.tun>=0)&&!Q.rtun&&kind!=='wall'&&away&&(away.x||away.z)){Q.pos.x+=away.x*1.2;Q.pos.z+=away.z*1.2}return}
-  energy=Math.max(state.mission==='lights'?1:0,energy-amount);updateHearts();
+  energy=Math.max(state.mission==='lights'?1:0,energy-amount);HITN++;updateHearts();
   if(baseAmt>=FALL_AT&&mul>=.35){startCrash(away,kind,amount);return}
   k1Mood('ouch',1.3);const P=player;invuln=2.5;shake=.25;sfx(kind==='green'?210:150,.18,'square',.1);
   burst(P.pos.clone(),kind==='green'?sproutMat:dustMat,12,.7);
