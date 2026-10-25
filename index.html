@@ -9963,8 +9963,8 @@ const TA_N=20,TA_PTS=[10,15,20,25,30],TA_PTS2=[10,16,22,30,40];
 const TA_COST={air:1.5,low:2.5,river:3,tree:4,bridge:5,cave:7};        // hizalanma/yavaşlama için tahmini ek saniye
 const TA_NAME={air:'gökyüzü',low:'yere yakın',river:'nehir üstü',tree:'ağaçların arası',bridge:'köprü altı',cave:'mağara içi'};
 const taTime=r=>{const t=Math.max(60,200-5*(r-1));return MP.act?Math.round(t*.7):t};   /* tur 1 = 200 sn, her tur 5 sn kısalır; kalan süre sonraki tura AKTARILMAZ */
-const TA_W=r=>r<=1?{air:1}:r===2?{air:.6,low:.4}:r===3?{air:.35,low:.3,tree:.35}:r===4?{air:.2,low:.25,tree:.3,bridge:.1,river:.15}:
-  r===5?{air:.1,low:.2,tree:.3,bridge:.12,river:.1,cave:.18}:{air:.05,low:.15,tree:.3,bridge:.15,river:.1,cave:.25};
+const TA_W=r=>r<=1?{air:.7,low:.3}:r===2?{air:.35,low:.35,tree:.3}:r===3?{air:.2,low:.25,tree:.35,bridge:.1,river:.1}:r===4?{air:.1,low:.2,tree:.3,bridge:.15,river:.1,cave:.15}:
+  {air:.05,low:.15,tree:.3,bridge:.15,river:.1,cave:.25};
 function taAvoid(x,z){if(x<-905||z<-850)return false;if(x>725||Math.abs(z)>725)return true;if(x<-725&&Math.abs(z-WF.z)>260)return true;if(Math.hypot(x-HOME.x,z-HOME.z)<40)return true;
   if(STATION&&Math.hypot(x-STATION.x,z-STATION.z)<45)return true;if(Math.hypot(x-LH.x,z-LH.z)<40)return true;{const q=raceNear(x,z);if(q&&q.d<16)return true}
   for(const f of FARMS)if(Math.hypot(x-f.x,z-f.z)<30)return true;return false}
@@ -10046,7 +10046,7 @@ function taDzObjs(C,R){const out=[],seen=new Set(),i0=Math.floor((C.x-R)/16),i1=
     for(const o of a){if(o.t!==0||seen.has(o))continue;seen.add(o);if(o.r<.5||o.r>14)continue;if(Math.hypot(o.x-C.x,o.z-C.z)>=R)continue;if(o.top<ground(o.x,o.z)+3)continue;out.push(o)}}
   return out}
 function taIslPlan(r,from,S){
-  const N=TA_N,v=26+player.g.speed*5,d=S.d,C={x:S.x,z:S.z},R=S.R,wN=.08+.42*d,wL=.2+.25*d,obs=taDzObjs(C,R*1.1),pts=[];
+  const N=TA_N,v=26+player.g.speed*5,d=S.d,C={x:S.x,z:S.z},R=S.R,wN=.18+.42*d,wL=.18+.2*d,obs=taDzObjs(C,R*1.1),pts=[];
   const far=(x,z,m)=>!pts.some(o=>Math.hypot(o.x-x,o.z-z)<m);
   for(let it=0;it<700&&pts.length<N;it++){
     const rr=Math.random(),k=rr<wN&&obs.length?'near':rr<wN+wL?'low':'air',rel=it>300?.6:1;let x,z,y,typ;
@@ -10069,7 +10069,7 @@ function taBridgePlan(r,from,S){
   for(let i=0;i<N;i++){
     const t=.025+.95*i/(N-1),s=samp(t);let ok=null;
     for(let a=0;a<8&&!ok;a++){
-      const hard=Math.random()<.25+.6*d,lat=(Math.random()*2-1)*(hard?BW*.9:BW+9+Math.random()*8),dy=(hard?3.3+Math.random()*3:6.5+Math.random()*10)+(a>3?a-3:0);
+      const hard=Math.random()<.45+.5*d,lat=(Math.random()*2-1)*(hard?BW*.9:BW+9+Math.random()*8),dy=(hard?3.3+Math.random()*3:6.5+Math.random()*10)+(a>3?a-3:0);
       const x=s.x+s.nx*lat,z=s.z+s.nz*lat,y=s.y+dy;if(y>200)continue;
       const typ=dy>7?'air':'low';if(taFree(x,y,z,'air'))ok={typ,x,y,z}}
     if(!ok)ok={typ:'air',x:s.x,y:s.y+10,z:s.z};
@@ -10201,8 +10201,8 @@ function taMake(b,r){const R=taRes(),th=taTh(r),g=new THREE.Group();
   const am=R.am.clone();am.color.setHex(col);const ar=new THREE.Group();ar.add(new THREE.Mesh(R.ag,am),new THREE.Mesh(R.sh,am));ar.children.forEach(m=>m.renderOrder=20);ar.renderOrder=20;addM(ar);
   let top=Math.max(solidTop(b.x,b.z,1e4),coneTop(b.x,b.z));if(b.typ==='tree')top=Math.max(top,ground(b.x,b.z)+19);if(b.typ==='bridge'){const q=railNear(b.x,b.z);if(q)top=Math.max(top,q.e+1)}
   Object.assign(b,{g,gl,ar,am,ci,mt:M_,hard:ci>=3,ay:Math.max(b.y+5,top+6)});
-  if(r>=6){/* 5. turdan sonra: küçük daire çizer */
-    const u=b.u?new V3(b.u[0],b.u[1],b.u[2]):new V3(1,0,0),v=b.u?new V3(0,1,0):new V3(0,0,1);let rad=b.om||(b.typ==='air'?6:b.typ==='low'?4.5:3.2);
+  if(r>=3){/* 3. turdan sonra: küçük daire çizer (tur ilerledikçe daha geniş) */
+    const u=b.u?new V3(b.u[0],b.u[1],b.u[2]):new V3(1,0,0),v=b.u?new V3(0,1,0):new V3(0,0,1);let rad=(b.om||(b.typ==='air'?6:b.typ==='low'?4.5:3.2))*(1+.035*(r-3));
     const ok=rd=>{for(let k=0;k<10;k++){const a=k/10*6.283,p=b.c.clone().addScaledVector(u,Math.cos(a)*rd).addScaledVector(v,Math.sin(a)*rd);if(!taFree(p.x,p.y,p.z,b.typ))return false}return true};
     while(rad>1.1&&!ok(rad))rad*=.7;if(rad>1.1){b.rad=rad;b.U=u;b.V=v;b.w=(.55+Math.random()*.45)*(Math.random()<.5?-1:1)*th.spd}}
   return b}
@@ -10279,7 +10279,7 @@ function setupTA(){
   const evPlan=()=>{evq=[];if(M2)return;const T=state.limit,E=taEv(round);
     for(const k of E){if(k==='gold')evq.push({k,at:T*(.22+.3*Math.random())});else if(k==='seq')evq.push({k,at:T*(.18+.25*Math.random())});else if(k==='rain')evq.push({k,at:T*(.35+.25*Math.random())});
       else if(k==='hawk'||k==='hawk2'){for(let t=12+Math.random()*10;t<T-12;t+=34+Math.random()*12)evq.push({k,at:t})}}
-    if(E.includes('shy')){const c=list.filter(b=>b.typ==='air'||b.typ==='low'||b.typ==='tree').sort(()=>Math.random()-.5).slice(0,Math.min(7,Math.max(3,Math.round(list.length*.35))));
+    if(E.includes('shy')){const c=list.filter(b=>b.typ==='air'||b.typ==='low'||b.typ==='tree').sort(()=>Math.random()-.5).slice(0,Math.min(9,Math.max(4,Math.round(list.length*.45))));
       for(const b of c){b.shy=true;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:taEmoji('😳'),transparent:true,depthWrite:false,fog:false}));sp.scale.setScalar(2.6);sp.position.y=2.9;b.g.add(sp)}
       setTimeout(()=>{if(TA&&!state.done&&round>0&&list.some(b=>b.shy))toast('😳 Ürkek balonlar! Yaklaşınca kaçıyorlar',2)},1400)}};
   const shyStep=(b,dt)=>{const dx=b.c.x-player.pos.x,dz=b.c.z-player.pos.z,d=Math.hypot(dx,dz)||1;if(d>50||Math.abs(player.pos.y-b.c.y)>45)return;
@@ -10341,16 +10341,16 @@ function setupTA(){
   const floatUp=(p,e)=>{const s=new THREE.Sprite(new THREE.SpriteMaterial({map:taEmoji(e),transparent:true,depthWrite:false,fog:false}));s.position.copy(p);s.scale.setScalar(3.2);addM(s);fx.push({s,t:0})};
   const pop=b=>{b.on=false;b.g.visible=false;b.ar.visible=false;popped++;poppedAll++;const R=taRes(),p=b.g.position.clone();
     burst(p,b.mt.cf,14,.9);sfx(1400,.05,'square',.1);setTimeout(()=>sfx(880,.08,'triangle',.08),40);
-    let pts=Math.round((M2?TA_PTS2:TA_PTS)[b.ci]*(1+.04*(round-1)))+(b.rad?10:0);energy=Math.min(100,energy+2);const msg=['🎈 +'+pts];let em='🎈';
+    let pts=Math.round((M2?TA_PTS2:TA_PTS)[b.ci]*(1+.04*(round-1)))+(b.rad?10:0);const msg=['🎈 +'+pts];let em='🎈';
     const q=Math.random();let tsAdd=0;
-    if(q<.10){energy=Math.min(100,energy+10);drinks++;msg.push('🥤 +10 enerji');em='🥤'}
-    else if(q<.15){energy=Math.min(100,energy+20);drinks++;msg.push('🥤🥤 +20 enerji');em='🥤'}
-    else if(q<.25){gotF+=5;msg.push('🪶 +5 altın tüy');em='🪶'}
+    if(q<.05){energy=Math.min(100,energy+10);drinks++;msg.push('🥤 +10 enerji');em='🥤'}
+    else if(q<.075){energy=Math.min(100,energy+20);drinks++;msg.push('🥤🥤 +20 enerji');em='🥤'}
+    else if(q<.175){gotF+=5;msg.push('🪶 +5 altın tüy');em='🪶'}
     if(!M2){/* seri: hasar almadan art arda patlatma */
       if(HITN!==lastHit){lastHit=HITN;streak=0;hstreak=0}
-      streak++;if(b.hard)hstreak++;else hstreak=0;let sb=0;
-      if(b.hard&&hstreak>=2){sb=hstreak*15;taBanner('💎 ZOR SERİ ×'+hstreak,'+'+sb+' puan · zor balonları art arda patlattın!',true);serFx(p,true,hstreak)}
-      else{const S_=SERN[streak]||(streak>12&&streak%4===0?['👑 SERİ ×'+streak,'Efsane kaz!']:null);if(S_){sb=streak*3;taBanner(S_[0],'+'+sb+' puan · '+S_[1],false);serFx(p,false,streak>=12?3:streak>=8?2:streak>=5?1:0)}}
+      let sb=0;if(b.ci>0){streak++;if(b.hard)hstreak++;else hstreak=0}else{streak=0;hstreak=0}   /* en kolay renk (listenin ilk rengi) seriyi bozar */
+      if(b.ci>0&&b.hard&&hstreak>=2){sb=hstreak*15;taBanner('💎 ZOR SERİ ×'+hstreak,'+'+sb+' puan · zor balonları art arda patlattın!',true);serFx(p,true,hstreak)}
+      else if(b.ci>0){const S_=SERN[streak]||(streak>12&&streak%4===0?['👑 SERİ ×'+streak,'Efsane kaz!']:null);if(S_){sb=streak*3;taBanner(S_[0],'+'+sb+' puan · '+S_[1],false);serFx(p,false,streak>=12?3:streak>=8?2:streak>=5?1:0)}}
       if(sb){pts+=sb;msg.push('🔥 seri +'+sb)}}
         try{achAdd('taB');if(b.ci>=3)achAdd('taH')}catch(e){}
     if(b.crow){pts+=40;gotF+=3;msg.push('🐦 Karga yakalandı! +40');crowKill(true)}
@@ -10360,10 +10360,10 @@ function setupTA(){
   const checkRound=()=>{if(!list.length||popped<list.length||state.done)return;
     const left=Math.max(0,state.limit-state.time),RB=25*round+Math.round(left);let bn=RB;if(!M2&&HITN===rndHit){const cb=30+5*round;bn+=cb;taBanner('✨ TERTEMİZ TUR!','Hiç hasar almadın · +'+cb+' puan',true);serFx(player.pos.clone().add(new V3(0,3,0)),true,3)}
     if(M2){const tt=rpts+ro;bn=tt>0?Math.round(RB*rpts/tt):0}
-    total+=rpts+bn;sumRB+=bn;rpts=0;ro=0;energy=Math.min(100,energy+10);updateHearts();fanfare();if(M2)mpSend({t:'prog',n:total});
+    total+=rpts+bn;sumRB+=bn;rpts=0;ro=0;updateHearts();fanfare();if(M2)mpSend({t:'prog',n:total});
     try{achSet('taR',round)}catch(e){}
     if(round>=TA_FIN){try{achAdd('taF')}catch(e){}total+=300;toast('🏆 FİNAL tamam! +300 bonus',2.6);TA.end('win');return}
-    setTimeout(()=>{if(TA&&!state.done)toast(`🎉 Tur ${round} tamam! +10 enerji · ⭐ +${bn}${M2?' (katkı payın)':''}`,2.4)},700);next()};
+    setTimeout(()=>{if(TA&&!state.done)toast(`🎉 Tur ${round} tamam! · ⭐ +${bn}${M2?' (katkı payın)':''}`,2.4)},700);next()};
   const popRemote=(i,pts,ts)=>{const b=list[i];if(!b)return;
     if(!b.on){if(b.mine&&!MP.host){rpts-=b.gotPts;sumPop-=b.gotPts;ro+=b.gotPts;b.mine=false;toast('Balonu arkadaşın önce patlattı',1.3);obj()}return}
     if(b.crow)crowKill(true);
