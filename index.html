@@ -10353,17 +10353,17 @@ function setupTA(){
       else if(b.ci>0){const S_=SERN[streak]||(streak>12&&streak%4===0?['👑 SERİ ×'+streak,'Efsane kaz!']:null);if(S_){sb=streak*3;taBanner(S_[0],'+'+sb+' puan · '+S_[1],false);serFx(p,false,streak>=12?3:streak>=8?2:streak>=5?1:0)}}
       if(sb){pts+=sb;msg.push('🔥 seri +'+sb)}}
         try{achAdd('taB');if(b.ci>=3)achAdd('taH')}catch(e){}
-    if(b.crow){pts+=40;gotF+=3;msg.push('🐦 Karga yakalandı! +40');crowKill(true)}
+    if(b.crow){pts+=40;gotF+=3;energy=Math.min(100,energy+30);msg.push('🐦 Karga yakalandı! +40 · +30 enerji');crowKill(true)}
     rpts+=pts;sumPop+=pts;b.mine=true;b.gotPts=pts;updateHearts();floatUp(p,em);toast(msg.join(' · '),1.4);
     if(M2){mpSend({t:'tp',i:list.indexOf(b),p:pts,ts:tsAdd});mpSend({t:'prog',n:total+rpts})}
     obj();checkRound()};
   const checkRound=()=>{if(!list.length||popped<list.length||state.done)return;
     const left=Math.max(0,state.limit-state.time),RB=25*round+Math.round(left);let bn=RB;if(!M2&&HITN===rndHit){const cb=30+5*round;bn+=cb;taBanner('✨ TERTEMİZ TUR!','Hiç hasar almadın · +'+cb+' puan',true);serFx(player.pos.clone().add(new V3(0,3,0)),true,3)}
     if(M2){const tt=rpts+ro;bn=tt>0?Math.round(RB*rpts/tt):0}
-    total+=rpts+bn;sumRB+=bn;rpts=0;ro=0;updateHearts();fanfare();if(M2)mpSend({t:'prog',n:total});
+    total+=rpts+bn;sumRB+=bn;rpts=0;ro=0;energy=Math.min(100,energy+10);updateHearts();fanfare();if(M2)mpSend({t:'prog',n:total});
     try{achSet('taR',round)}catch(e){}
     if(round>=TA_FIN){try{achAdd('taF')}catch(e){}total+=300;toast('🏆 FİNAL tamam! +300 bonus',2.6);TA.end('win');return}
-    setTimeout(()=>{if(TA&&!state.done)toast(`🎉 Tur ${round} tamam! · ⭐ +${bn}${M2?' (katkı payın)':''}`,2.4)},700);next()};
+    setTimeout(()=>{if(TA&&!state.done)toast(`🎉 Tur ${round} tamam! +10 enerji · ⭐ +${bn}${M2?' (katkı payın)':''}`,2.4)},700);next()};
   const popRemote=(i,pts,ts)=>{const b=list[i];if(!b)return;
     if(!b.on){if(b.mine&&!MP.host){rpts-=b.gotPts;sumPop-=b.gotPts;ro+=b.gotPts;b.mine=false;toast('Balonu arkadaşın önce patlattı',1.3);obj()}return}
     if(b.crow)crowKill(true);
@@ -12683,7 +12683,7 @@ setInterval(()=>{try{const live=!state.done&&state.mode!=='menu'&&energy>0&&ener
   lowEnT--}catch(e){}},1000);
 function updateHearts(){const e=Math.max(0,Math.min(100,energy)),v=Math.round(e),key=v+'|'+shieldShown;if(key===hpKey)return;hpKey=key;
   $('#hpNum').textContent=String(v)+(shieldShown>0?' 🛡️'+shieldShown:'');const f=$('#hpFill');f.style.width=e+'%';f.style.background='hsl('+Math.round(e*1.15)+',70%,46%)'}
-function drainEnergy(dt){if(state.mission==='fox'||state.mission==='war'||state.mission==='lights'||state.done)return;energy-=dt*(player.boost?.9:.45)*CM().drain;
+function drainEnergy(dt){if(state.mission==='fox'||state.mission==='war'||state.mission==='lights'||state.mission==='ta'||state.done)return;   /* Zamana Karşı: doğal enerji tüketimi yok, enerji sadece hasarla azalır */energy-=dt*(player.boost?.9:.45)*CM().drain;
   if(energy<=0){energy=0;updateHearts();finish(false,'Enerjin bitti! Uçarken enerjin azalır; haritadaki kalpleri toplayarak +25 enerji kazanabilirsin.');return}updateHearts()}
 function hurt(amount,away,kind){
   if(energy<=0||state.done)return;
